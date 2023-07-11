@@ -1,0 +1,4 @@
+name: USST
+depend: cubical
+include: src
+flags: -W noUnsupportedIndexedMatch
