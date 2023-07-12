@@ -70,7 +70,7 @@ module Lemmas (X : Type ℓ) (X-set : isSet X) where
 ```agda
   opaque
     ｛_｝ : X → ℙ X
-    ｛ x ｝ y = (x ≡ y) , transport isProp Path≡Eq (X-set _ _)
+    ｛ x ｝ y = (x ≡ y) , transportIsProp (X-set _ _)
 ```
 
 由 `_≡_` 的基本性质可以证明单集构造 `｛_｝` 具有单射性.
@@ -87,11 +87,12 @@ module Lemmas (X : Type ℓ) (X-set : isSet X) where
   is｛｝ A = Σ[ x ∈ X ] A ≡ ｛ x ｝
 ```
 
-注意这里用的是Σ类型, 所以 "是单集" 并不是一个谓词, 而是一个集合, 实际上它就是由 `X` 的所有单集所构成的集合. 不过这无关紧要, 后面也不需要用到这一结论.
+注意尽管这里用的是Σ类型, 我们仍然能证明 "是单集" 是一个谓词, 因为见证 `A` 是单集的那个 `x` 唯一. 不过后面不需要用到这一结论.
 
 ```agda
-  isSetIs｛｝ : (A : ℙ X) → isSet (is｛｝ A)
-  isSetIs｛｝ A = isSetΣ X-set λ x → isProp→isSet (transport isProp Path≡Eq $ isSetℙ A ｛ x ｝)
+  isPropIs｛｝ : (A : ℙ X) → isProp (is｛｝ A)
+  isPropIs｛｝ A (x₁ , refl) (x₂ , eq) = eqToPath $ Σ≡Prop
+    (λ _ → isPropPathToIsProp $ transportIsProp $ isSetΠ (λ _ → isSetHProp) _ _) (｛｝-inj eq)
 ```
 
 接着我们证明康托尔定理的一个变体, 说 `ℙ X` 的自嵌入一定射到了单集之外. 我们能实际构造出这个非单集, 用的还是对角线法, 证明的结构与 `Cantor-≰` 非常类似, 这里不再赘述.
@@ -112,7 +113,9 @@ module Lemmas (X : Type ℓ) (X-set : isSet X) where
 
 ```agda
   module _ (P : Type ℓ′) where
+```
 
+```agda
     Y = Σ[ A ∈ ℙ X ] (is｛｝ A ∨ Dec P)
 
     isSetY : isSet Y
@@ -153,3 +156,4 @@ CH→LEM : (∀ ℓ → CH ℓ) → (∀ ℓ → LEM ℓ)
 CH→LEM ch ℓ P = isCHType→lem _ $ ch _ _ $ isSetY _
   where open Lemmas ℕ isSetℕ
 ```
+   

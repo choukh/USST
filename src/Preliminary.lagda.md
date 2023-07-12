@@ -196,11 +196,13 @@ open import Cubical.Foundations.HLevels public
         ; isSetΠ; isSetΣ)
 ```
 
-命题宇宙 `hProp ℓ` 定义为 `Type ℓ` 配备上结构 `isProp`, 即 `hProp ℓ = Σ (Type ℓ) isProp`. 类似地, 集合宇宙 `hSet ℓ` 定义为 `Type ℓ` 配备上结构 `isSet`, 即 `hSet ℓ = Σ (Type ℓ) isSet`. 但本文中不直接使用 `hSet`. 为了方便处理, 我们会尽可能地使用它们的柯里化版本, 即说 "给定类型 `A`, 如果它是命题 (或集合), 那么怎么怎么样", 而不说 "给定命题 (或集合) `A`, 怎么怎么样".
+命题宇宙 `hProp ℓ` 定义为 `Type ℓ` 配备上结构 `isProp`, 即 `hProp ℓ = Σ (Type ℓ) isProp`. 引理 `isSetHProp` 告诉我们, 命题宇宙 `hProp ℓ` 是集合.
 
 ```agda
-open import Cubical.Foundations.HLevels public using (hProp)
+open import Cubical.Foundations.HLevels public using (hProp; isSetHProp)
 ```
+
+类似地, 集合宇宙 `hSet ℓ` 定义为 `Type ℓ` 配备上结构 `isSet`, 即 `hSet ℓ = Σ (Type ℓ) isSet`. 但本文中不直接使用 `hSet`. 为了方便处理, 我们会尽可能地使用它们的柯里化版本, 即说 "给定类型 `A`, 如果它是命题 (或集合), 那么怎么怎么样", 而不说 "给定命题 (或集合) `A`, 怎么怎么样".
 
 我们把具有某种结构的类型宇宙叫做 `TypeWithStr`, 并用 `⟨_⟩` 取得其左边的类型, 用 `str` 取得其右边的结构. 例如对于 `A : hProp ℓ`, `⟨ A ⟩` 是一个类型, `str A` 是 "`⟨ A ⟩` 是命题" 的证据.
 
@@ -233,7 +235,7 @@ open import Cubical.Data.Sigma public using (∃; ∃-syntax)
 
 ### 相等类型
 
-"相等" 在泛等基础中是一个复杂的概念. 首先上面提到的库中的概念所涉及到的相等都采用了所谓**路径类型 (path type)**. 但本文中将使用定义为**归纳类型族 (inductive type family)** 的**命题相等类型 (propositional equality)**, 也就是下面导入的 `_≡_`. 两种相等类型的定义是等价的, 但后者在非同伦论的数学中更加直观, 也更加容易使用. 我们导入了一堆它们之间的相互转化引理: `eqToPath`, `pathToEq`, `Path≡Eq`, 以灵活处理各种情况.
+"相等" 在泛等基础中是一个复杂的概念. 首先上面提到的库中的概念所涉及到的相等都采用了所谓**路径类型 (path type)**. 但本文中将使用定义为**归纳类型族 (inductive type family)** 的**命题相等类型 (propositional equality)**, 也就是下面导入的 `_≡_`. 两种相等类型的定义是等价的, 但后者在非同伦论的数学中更加直观, 也更加容易使用. 我们导入了一堆它们之间的相互转化引理: `eqToPath`, `pathToEq`, `Path≡Eq` 等, 以灵活处理各种情况. 使用 `Σ≡Prop` 可以通过证明两个依值配对的左边分别相等来证明这两个依值配对相等, 只要它们的右边是一个谓词.
 
 `_≡_` 具有自反性 `refl`, 对称性 `sym` 和 传递性 `_∙_`. 其中 `refl` 是 `_≡_` 归纳类型的唯一构造子, 可以做模式匹配和反演推理. 实际上, 包括对称性和传递性在内的 `_≡_` 的其他性质都通过 `refl` 推导而来.
 
@@ -244,8 +246,17 @@ open import Cubical.Data.Sigma public using (∃; ∃-syntax)
 ```agda
 open import Cubical.Data.Equality public
   using ( _≡_; refl; sym; _∙_; ap; happly; transport
-        ; eqToPath; pathToEq; Path≡Eq; Σ≡Prop)
+        ; eqToPath; pathToEq; Path≡Eq; isPropPathToIsProp; Σ≡Prop)
   renaming (squash₁ to squash₁Eq)
+```
+
+以下引理会经常用到, 它将 "路径类型是命题" 的证明转化成 "相等类型是命题" 的证明.
+
+```agda
+open import Agda.Builtin.Cubical.Path public renaming (_≡_ to Path)
+
+transportIsProp : {A : Type ℓ} {x y : A} → isProp (Path x y) → isProp (x ≡ y)
+transportIsProp = transport isProp Path≡Eq
 ```
 
 ### 幂集
