@@ -40,7 +40,7 @@ module Preliminary where
 
 ### 类型宇宙与宇宙层级
 
-正如 $x : A$ 是一个判断那样, "$A$ 是一个类型" 也是一个判断, 记作 `A : Type`. 其中 `Type` 就叫做**类型宇宙 (type universe)**. 它是一个层级系统, 其层级序数叫做宇宙层级 `Level`. 但要注意 `Level` 本身不在类型宇宙之中, 它独享一个单独的宇宙, 叫做层级宇宙 `LevelUniv`, 即有 `Level : LevelUniv`. (这些不同的宇宙又叫做 sort, 非形式地, 我们可以说 `Type : Sort` 和 `LevelUniv : Sort`)
+正如 $x : A$ 是一个判断那样, " $A$ 是一个类型" 也是一个判断, 记作 `A : Type`. 其中 `Type` 就叫做**类型宇宙 (type universe)**. 它是一个层级系统, 其层级序数叫做宇宙层级 `Level`. 但要注意 `Level` 本身不在类型宇宙之中, 它独享一个单独的宇宙, 叫做层级宇宙 `LevelUniv`, 即有 `Level : LevelUniv`. (这些不同的宇宙又叫做 sort, 非形式地, 我们可以说 `Type : Sort` 和 `LevelUniv : Sort`)
 
 最低的宇宙层级是 `ℓ-zero : Level`, 位于最低宇宙层级的类型记作 `Type ℓ-zero`, 简记作 `Type`. 下一个宇宙是 `Type (ℓ-suc ℓ-zero)`, 简记作 `Type₁`, 以此类推. 此外, 宇宙层级还有一个二元运算 `_⊔_`, 它的作用是取两个宇宙层级中较高的那一个, 例如 `ℓ-zero ⊔ (ℓ-suc ℓ-zero)` 等于 `ℓ-suc ℓ-zero`.
 
@@ -58,11 +58,11 @@ open import Cubical.Core.Primitives public
 variable ℓ ℓ′ : Level
 ```
 
-关于宇宙层级的作用我们在接下来的几节穿插讲解.
+关于宇宙层级的作用我们在接下来的几小节穿插讲解.
 
 ### 函数类型
 
-如质料集合论中的原始概念 $∈$ 那样, 类型论中的 $→$ 也是一个原始概念. 它是一个**类型形成子 (type former)**, 给定 `A : Type ℓ` 和 `B : Type ℓ′`, 那么 `A → B` 是一个新的类型, 它就是 $A$ 到 $B$ 的**函数类型 (function type)**. 注意 `A → B` 位于宇宙 `Type (ℓ ⊔ ℓ′)`, 因为 `A → B` 要位于 `A` 和 `B` 所位于的宇宙的较大者之中.
+如质料集合论中的原始概念 $∈$ 那样, 类型论中的 $→$ 也是一个原始概念. 它是一个**类型形成子 (type former)**, 给定 `A : Type ℓ` 和 `B : Type ℓ′`, 那么 `A → B` 是一个新的类型, 它就是 $A$ 到 $B$ 的**函数类型 (function type)**. 注意 `A → B` 位于宇宙 `Type (ℓ ⊔ ℓ′)` 之中, 因为 `A → B` 要位于 `A` 和 `B` 所位于的宇宙的较大者之中.
 
 函数类型的项具有 lambda 表达式的形式. 例如恒等函数 $f : A → A$ 定义为 $f ≔ λx.x$. 在 Agda 中定义符号 ≔ 就写作普通等号 =, 分隔绑定变量与表达式的点号 $.$ 写作 $→$, 所以上式在代码中写作 `f = λ x → x`. 我们今后只采用这一种写法. 注意不要跟作为类型形成子的 `→` 混淆.
 
@@ -187,7 +187,7 @@ open import Cubical.Data.Empty public using (isProp⊥)
 open import Cubical.Data.Nat public using (isSetℕ)
 ```
 
-对于嵌套的Π类型, 不管嵌套多少次, 只要最后的目标是命题 (或集合), 那么整个嵌套Π类型也是命题 (或类型). 如果构成Σ类型的两边都是命题 (或集合), 那么这个Σ类型也是命题 (或集合).
+对于嵌套的Π类型, 不管嵌套多少次, 只要最后的目标是命题 (或集合), 那么整个嵌套Π类型也是命题 (或集合). 如果构成Σ类型的两边都是命题 (或集合), 那么这个Σ类型也是命题 (或集合).
 
 ```agda
 open import Cubical.Foundations.HLevels public
@@ -254,7 +254,7 @@ open import Cubical.Foundations.Powerset public
   using (ℙ; _∈_; isSetℙ)
 ```
 
-不属于 `_∉_` 定义为 `_∈_` 的否定, 即 `x ∉ A = ¬ x ∈ A`.
+不属于符号 `_∉_` 定义为 `_∈_` 的否定, 即 `x ∉ A = ¬ x ∈ A`.
 
 ```agda
 _∉_ : {X : Type ℓ} → X → ℙ X → Type _
@@ -294,14 +294,14 @@ module _ ⦃ pr : PropositionalResizing ℓ ℓ′ ⦄ where
 private variable A B C : Type ℓ
 ```
 
-以下是无矛盾律在直觉主义中更容易处理的版本. 因为我们不能证明 `A` 或 `¬ A`, 所以单有 `A → ¬ A` 的证明也无法推出矛盾, 必须配合上 `¬ A → A` 的证明才行.
+以下是无矛盾律在直觉主义中更容易处理的版本. 因为我们无法证明排中律 "`A` 或 `¬ A`", 所以单有 `A → ¬ A → ⊥` 也无法推出矛盾, 必须采用下面的形式才行.
 
 ```agda
-noncontradiction : (A → ¬ A) → ¬ (¬ A → A)
+noncontradiction : (A → ¬ A) → (¬ A → A) → ⊥
 noncontradiction p q = p (q λ a → p a a) (q λ a → p a a)
 ```
 
-逻辑析取定义为**和类型 (sum type)** 的命题截断. 因为和类型的项起码有两种 (左边或右边) 不同的构造方式, 但析取不关心具体是哪种, 所以必须要做命题截断, 以确保所有的项都相等.
+逻辑析取定义为**和类型 (sum type)** 的命题截断. 因为和类型的项起码有两种 (左边或右边) 不同的构造方式, 但析取不关心具体是哪种, 所以必须要做命题截断, 以确保所有证明项都相等.
 
 ```agda
 open import Cubical.Data.Sum as ⊎ public using (_⊎_)
