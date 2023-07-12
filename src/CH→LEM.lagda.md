@@ -59,19 +59,44 @@ Cantor-≰ X (f , f-inj) = noncontradiction ∈→∉ ∉→∈
 
 ## 单集
 
+现在固定一个集合 `X`.
+
 ```agda
 module Lemmas (X : Type ℓ) (X-set : isSet X) where
+```
 
+由 `X` 的某个项 `x` 所构成的单集 `｛ x ｝ : ℙ X` 定义为谓词 `x ≡_`. `X` 的集合性保证了 `x ≡_` 是一个谓词.
+
+```agda
   opaque
     ｛_｝ : X → ℙ X
     ｛ x ｝ y = (x ≡ y) , transport isProp Path≡Eq (X-set _ _)
+```
 
+由 `_≡_` 的基本性质可以证明单集构造 `｛_｝` 具有单射性.
+
+```agda
     ｛｝-inj : {x y : X} → ｛ x ｝ ≡ ｛ y ｝ → x ≡ y
     ｛｝-inj {x} {y} H = transport (idfun _) (sym $ ap fst $ happly H y) refl
+```
 
+我们说一个 `A : ℙ X` 是单集, 当且仅当它等于某个 `｛ x ｝`.
+
+```agda
   is｛｝ : ℙ X → Type _
   is｛｝ A = Σ[ x ∈ X ] A ≡ ｛ x ｝
+```
 
+注意这里用的是Σ类型, 所以 "是单集" 并不是一个谓词, 而是一个集合, 实际上它就是由 `X` 的所有单集所构成的集合. 不过这无关紧要, 后面也不需要用到这一结论.
+
+```agda
+  isSetIs｛｝ : (A : ℙ X) → isSet (is｛｝ A)
+  isSetIs｛｝ A = isSetΣ X-set λ x → isProp→isSet (transport isProp Path≡Eq $ isSetℙ A ｛ x ｝)
+```
+
+接着我们证明康托尔定理的一个变体, 说 `ℙ X` 的自嵌入一定射到了单集之外. 我们能实际构造出这个非单集, 用的还是对角线法, 证明的结构与 `Cantor-≰` 非常类似, 这里不再赘述.
+
+```agda
   Cantor-beyond｛｝ : (f : ℙ X → ℙ X) → injective f → Σ[ A ∈ ℙ X ] ¬ is｛｝ (f A)
   Cantor-beyond｛｝ f f-inj = A , λ (x , fA≡) → noncontradiction (∈→∉ x fA≡) (∉→∈ x fA≡)
     where
