@@ -30,7 +30,7 @@ module Preliminary where
 
 ### 命题即类型
 
-正如集合论中的 $x ∈ y$ 构成了一个命题那样, 类型论中给定 $x\,y : A$, 那么 $x ∼ y$ 也构成了一个命题. 实际上, 类型论中的每个命题也都是一个类型. 如果能构造出该类型的一个项, 我们就认为证明了该类型所对应的那个命题. 注意, 尽管命题都是类型, 但并非所有类型都是命题. 关于这一点将在后面的同伦层级这一小节解释.
+正如集合论中的 $x ∈ y$ 构成了一个命题那样, 类型论中给定 $x\,y : A$, 那么 $x ∼ y$ 也构成了一个命题. 实际上, 类型论中的每个命题也都是一个类型. 如果能构造出该类型的一个项, 我们就认为证明了该类型所对应的那个命题. 注意, 尽管命题都是类型, 但并非所有类型都是命题. 关于这一点将在后面的同伦层级这一小节解释. 如果把一个类型 $A$ 看作命题, 那个 $A$ 的项 $x : A$ 也叫 $A$ 的一个证明或证据; 如果可以构造 $x : A$, 我们就说 $A$ 可证或 $A$ 成立.
 
 |         |  集合论      | 类型论
 | ----    |  ----       | ----
@@ -191,7 +191,7 @@ open import Cubical.Data.Nat public using (isSetℕ)
 
 ```agda
 open import Cubical.Foundations.HLevels public
-  using ( isPropΠ; isPropΠ2; isPropΠ3; isPropΠ4
+  using ( isPropΠ; isPropΠ2; isPropΠ3; isPropΠ4; isPropΠ5; isPropΠ6
         ; isSetΠ; isSetΣ)
 ```
 
@@ -329,36 +329,57 @@ inr x = ∣ ⊎.inr x ∣₁
 
 ## 排中律
 
+我们说一个类型 `A` 可判定, 记作 `Dec A`, 当且仅当 `A` 成立或者 `A` 的否定成立.
+
+`Dec` 与和类型有类似的结构, 它的构造子有两个, `yes` 和 `no`. `yes` 的参数是 `A` 的证明, `no` 的参数是 `¬ A` 的证明. 引理 `isPropDec` 说明 `Dec` 是一个谓词.
+
 ```agda
 open import Cubical.Relation.Nullary public
   using (NonEmpty; Dec; yes; no; isPropDec)
 ```
 
-```agda
-DecNonEmpty : (A : Type ℓ) → NonEmpty (Dec A)
-DecNonEmpty _ ¬dec = ¬dec $ no λ a → ¬dec $ yes a
-```
+排中律即是说任意命题都是可判定的.
 
 ```agda
 LEM : (ℓ : Level) → Type _
 LEM ℓ = (P : Type ℓ) → isProp P → Dec P
 ```
 
+排中律本身是一个命题, 因为可判定性是一个谓词.
+
 ```agda
 isPropLEM : (ℓ : Level) → isProp (LEM ℓ)
 isPropLEM ℓ = isPropΠ2 λ _ → isPropDec
 ```
 
-## 选择公理
+虽然我们不能证明排中律, 但我们可以证明对任意类型, 它的可判定性非空 (双重否定成立). 这在有些书上也叫做排中律不可辩驳.
 
 ```agda
-AC : (ℓ ℓ' ℓ'' : Level) → Type _
-AC ℓ ℓ' ℓ'' = (A : Type ℓ) (B : Type ℓ') (R : A → B → Type ℓ'') →
+DecNonEmpty : (A : Type ℓ) → NonEmpty (Dec A)
+DecNonEmpty _ ¬dec = ¬dec $ no λ a → ¬dec $ yes a
+```
+
+## 选择公理
+
+选择公理是说对于任意集合 `A` 和 `B` 以及它们之间的命题关系 `R`, 如果对任意 `x : A` 都存在一个 `y : B` 使得 `R x y` 成立, 那么存在一个函数 `f : A → B` 使得对任意 `x : A` 有 `R x (f x)` 成立.
+
+```agda
+AC : (ℓ ℓ′ ℓ′′ : Level) → Type _
+AC ℓ ℓ′ ℓ′′ = (A : Type ℓ) (B : Type ℓ′) (R : A → B → Type ℓ′′) →
   isSet A → isSet B → (∀ x y → isProp (R x y)) →
   (∀ x → ∃[ y ∈ B ] R x y) → ∃[ f ∈ (A → B) ] ∀ x → R x (f x)
 ```
 
+选择公理也是一个命题, 因为其表述是一个嵌套Π类型, 其目标是Σ类型的命题截断.
+
+```agda
+isPropAC : (ℓ ℓ′ ℓ′′ : Level) → isProp (AC ℓ ℓ′ ℓ′′)
+isPropAC ℓ ℓ′ ℓ′′ = isPropΠ6 λ _ _ _ _ _ _ → isPropΠ λ _ → squash₁
+```
+
 ## 势
+
+我们说类型 `A` 的势小于等于 `B`, 当且仅当有任意 `A` 到 `B` 的单射函数. 注意这里用的是Σ类型, 我们并没有做命题截断. 有时候延迟截断会更方便处理.
 
 ```agda
 injective : (A → B) → Type _
@@ -388,6 +409,8 @@ A < B = A ≤ B × B ≰ A
 
 ## 连续统假设
 
+连续统假设是说如果一个集合的势严格大于自然数集, 并且小于等于自然数集的幂集, 那么它的势就大于等于自然数集的幂集. 由于没有排中律, 我们采用了这种迂回表达.
+
 ```agda
 isCHType : Type ℓ → Type ℓ′ → Type _
 isCHType X Y = X < Y → Y ≤ ℙ X → ∥ ℙ X ≤ Y ∥₁
@@ -396,6 +419,8 @@ CH : (ℓ : Level) → Type _
 CH ℓ = (X : Type ℓ) → isSet X → isCHType ℕ X
 ```
 
+注意 `CH` 表述中嵌套Π类型的最终目标使用了命题截断, 这保证了 `CH` 是一个命题.
+
 ```agda
 isPropCH : (ℓ : Level) → isProp (CH ℓ)
 isPropCH ℓ = isPropΠ4 λ _ _ _ _ → squash₁
@@ -403,12 +428,14 @@ isPropCH ℓ = isPropΠ4 λ _ _ _ _ → squash₁
 
 ## 广义连续统假设
 
-无穷集
+无穷集定义为势大于等于自然数集的集合.
 
 ```agda
 infinite : Type ℓ → Type _
 infinite X = ℕ ≤ X
 ```
+
+广义连续统假设是说, 对任意无穷集和它的幂集, 都没有一个正好卡在它们中间的势.
 
 ```agda
 isGCHType : Type ℓ → Type ℓ′ → Type _
@@ -417,6 +444,8 @@ isGCHType X Y = infinite X → X ≤ Y → Y ≤ ℙ X → Y ≤ X ∨ ℙ X ≤
 GCH : (ℓ ℓ′ : Level) → Type _
 GCH ℓ ℓ′ = (X : Type ℓ) (Y : Type ℓ′) → isSet X → isSet Y → isGCHType X Y
 ```
+
+同样地, 广义连续统假设也是一个命题.
 
 ```agda
 isPropGCH : (ℓ ℓ′ : Level) → isProp (GCH ℓ ℓ′)
