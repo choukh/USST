@@ -1,6 +1,7 @@
 ---
 title: 泛等结构集合论 (1) 前置知识
 zhihu-tags: Agda, 数理逻辑, 集合论
+zhihu-url: https://zhuanlan.zhihu.com/p/643059692
 ---
 
 # 泛等结构集合论 (1) 前置知识
@@ -36,7 +37,7 @@ module Preliminary where
 | ----    |  ----       | ----
 | 判断     | $x$是集合    | $x : A$
 | 不能谈论  | $x$是不是集合 | $x$是不是具有某类型$A$
-| 命题     | $x ∈ y$     | $x ∼ y : Type$
+| 命题     | x ∈ y       | x ∼ y : Type
 
 ### 类型宇宙与宇宙层级
 
