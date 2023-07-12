@@ -26,7 +26,7 @@ module Preliminary where
 
 我们从比较集合论基础的异同开始讲起. 类似于在集合论中可以谈论的任意 $x$ 都是集合那样, 在类型论中可以谈论的任意 $x$ 都具有一个类型. 我们不能在集合论中谈论 $x$ 是不是集合, 我们也不能在类型论中谈论 $x$ 是不是具有某一类型 $A$. 像这种在理论中不能谈论的元命题我们叫做一个**判断 (judgement)**. 相比集合论, 在类型论中需要更常接触各种判断, 所以有必要澄清这个概念.
 
-我们将 "$x$ 具有类型 $A$" 记作 $x : A$, $x$ 又叫做 $A$ 的项. 科普介绍中经常把 $x : A$ 解释成 $x ∈ A$, 虽然在一些情况下不妨这么理解, 但它们本质上是不同层面的概念. 与 $x : A$ 同一个层面的是 "x是集合" 这一判断, 而 $∈$ 只是集合上配备的一种二元关系. 类似地, 类型 A 上也可以配备上某种二元关系 $∼$.
+我们将 " $x$ 具有类型 $A$" 记作 $x : A$, $x$ 又叫做 $A$ 的项. 科普介绍中经常把 $x : A$ 解释成 $x ∈ A$, 虽然在一些情况下不妨这么理解, 但它们本质上是不同层面的概念. 与 $x : A$ 同一个层面的是 "x是集合" 这一判断, 而 $∈$ 只是集合上配备的一种二元关系. 类似地, 类型 A 上也可以配备上某种二元关系 $∼$.
 
 ### 命题即类型
 
@@ -226,6 +226,10 @@ open import Cubical.HITs.PropositionalTruncation public
 
 Σ类型的命题截断完全对应了逻辑上的存在量化命题.
 
+```agda
+open import Cubical.Data.Sigma public using (∃; ∃-syntax)
+```
+
 ### 相等类型
 
 "相等" 在泛等基础中是一个复杂的概念. 首先上面提到的库中的概念所涉及到的相等都采用了所谓**路径类型 (path type)**. 但本文中将使用定义为**归纳类型族 (inductive type family)** 的**命题相等类型 (propositional equality)**, 也就是下面导入的 `_≡_`. 两种相等类型的定义是等价的, 但后者在非同伦论的数学中更加直观, 也更加容易使用. 我们导入了一堆它们之间的相互转化引理: `eqToPath`, `pathToEq`, `Path≡Eq`, 以灵活处理各种情况.
@@ -306,6 +310,7 @@ noncontradiction p q = p (q λ a → p a a) (q λ a → p a a)
 ```agda
 open import Cubical.Data.Sum as ⊎ public using (_⊎_)
 
+infixr 2 _∨_
 _∨_ : Type ℓ → Type ℓ′ → Type _
 A ∨ B = ∥ A ⊎ B ∥₁
 ```
@@ -342,6 +347,15 @@ LEM ℓ = (P : Type ℓ) → isProp P → Dec P
 ```agda
 isPropLEM : (ℓ : Level) → isProp (LEM ℓ)
 isPropLEM ℓ = isPropΠ2 λ _ → isPropDec
+```
+
+## 选择公理
+
+```agda
+AC : (ℓ ℓ' ℓ'' : Level) → Type _
+AC ℓ ℓ' ℓ'' = (A : Type ℓ) (B : Type ℓ') (R : A → B → Type ℓ'') →
+  isSet A → isSet B → (∀ x y → isProp (R x y)) →
+  (∀ x → ∃[ y ∈ B ] R x y) → ∃[ f ∈ (A → B) ] ∀ x → R x (f x)
 ```
 
 ## 势
@@ -385,4 +399,26 @@ CH ℓ = (X : Type ℓ) → isSet X → isCHType ℕ X
 ```agda
 isPropCH : (ℓ : Level) → isProp (CH ℓ)
 isPropCH ℓ = isPropΠ4 λ _ _ _ _ → squash₁
+```
+
+## 广义连续统假设
+
+无穷集
+
+```agda
+infinite : Type ℓ → Type _
+infinite X = ℕ ≤ X
+```
+
+```agda
+isGCHType : Type ℓ → Type ℓ′ → Type _
+isGCHType X Y = infinite X → X ≤ Y → Y ≤ ℙ X → Y ≤ X ∨ ℙ X ≤ Y
+
+GCH : (ℓ ℓ′ : Level) → Type _
+GCH ℓ ℓ′ = (X : Type ℓ) (Y : Type ℓ′) → isSet X → isSet Y → isGCHType X Y
+```
+
+```agda
+isPropGCH : (ℓ ℓ′ : Level) → isProp (GCH ℓ ℓ′)
+isPropGCH ℓ ℓ′ = isPropΠ4 λ _ _ _ _ → isPropΠ3 λ _ _ _ → squash₁
 ```
