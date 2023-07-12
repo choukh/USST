@@ -221,10 +221,11 @@ open import Cubical.HITs.PropositionalTruncation public
 ```
 
 我们有引理 `∥∥-rec`, 它说如果目标 `P` 是命题, 那么我们可以通过证明 `A → P` 来证明 `∥ A ∥₁ → P`.  
+我们有引理 `∥∥-map`, 它说可以通过证明 `A → B` 来证明 `∥ A ∥₁ → ∥ B ∥₁`.  
 我们有引理 `∥∥-map2`, 它说可以通过证明 `A → B → C` 来证明 `∥ A ∥₁ → ∥ B ∥₁ → ∥ C ∥₁`.
 
 ```agda
-  renaming (rec to ∥∥-rec; map2 to ∥∥-map2)
+  renaming (rec to ∥∥-rec; map to ∥∥-map; map2 to ∥∥-map2)
 ```
 
 Σ类型的命题截断完全对应了逻辑上的存在量化命题.
@@ -466,4 +467,14 @@ GCH ℓ ℓ′ = (X : Type ℓ) (Y : Type ℓ′) → isSet X → isSet Y → is
 ```agda
 isPropGCH : (ℓ ℓ′ : Level) → isProp (GCH ℓ ℓ′)
 isPropGCH ℓ ℓ′ = isPropΠ4 λ _ _ _ _ → isPropΠ3 λ _ _ _ → squash₁
+```
+
+广义连续统假设蕴含连续统假设.
+
+```agda
+GCH→CH : ∀ ℓ → GCH ℓ-zero ℓ → CH ℓ
+GCH→CH ℓ gch X X-set (ℕ≤X , X≰ℕ) X≤ℙℕ =
+  ∥∥-map (λ { (⊎.inl X≤ℕ)  → ⊥-rec $ X≰ℕ X≤ℕ
+            ; (⊎.inr ℙℕ≤X) → ℙℕ≤X })
+  $ gch ℕ X isSetℕ X-set ≤-refl ℕ≤X X≤ℙℕ
 ```
