@@ -41,9 +41,9 @@ module Preliminary where
 
 ### 类型宇宙与宇宙层级
 
-正如 $x : A$ 是一个判断那样, " $A$ 是一个类型" 也是一个判断, 记作 `A : Type`. 其中 `Type` 就叫做**类型宇宙 (type universe)**. 它是一个层级系统, 其层级序数叫做宇宙层级 `Level`. 但要注意 `Level` 本身不在类型宇宙之中, 它独享一个单独的宇宙, 叫做层级宇宙 `LevelUniv`, 即有 `Level : LevelUniv`. (这些不同的宇宙又叫做 sort, 非形式地, 我们可以说 `Type : Sort` 和 `LevelUniv : Sort`)
+正如 $x : A$ 是一个判断那样, " $A$ 是一个类型" 也是一个判断, 记作 `A : Type`. 其中 `Type` 就叫做**类型宇宙 (type universe)**. 它是一个层级系统, 其层级序数叫做宇宙层级 `Level`. 但要注意 `Level` 本身不在类型宇宙之中, 它独享一个单独的宇宙, 叫做层级宇宙 `LevelUniv`, 即有 `Level : LevelUniv`. (这些不同的宇宙又叫做 sort, 非形式地, 可以认为 `Type₀ : Type₁ : Type₂ : ... : Sort` 和 `LevelUniv : Sort`)
 
-最低的宇宙层级是 `ℓ-zero : Level`, 位于最低层级的类型宇宙记作 `Type ℓ-zero`, 简记作 `Type`. 下一个宇宙是 `Type (ℓ-suc ℓ-zero)`, 简记作 `Type₁`, 以此类推. 此外, 宇宙层级还有一个二元运算 `_⊔_`, 它的作用是取两个宇宙层级中较高的那一个, 例如 `ℓ-zero ⊔ (ℓ-suc ℓ-zero)` 等于 `ℓ-suc ℓ-zero`.
+最低的宇宙层级是 `ℓ-zero : Level`, 位于最低层级的类型宇宙记作 `Type ℓ-zero`, 简记作 `Type₀` 或 `Type`. 下一个宇宙是 `Type (ℓ-suc ℓ-zero)`, 简记作 `Type₁`, 以此类推. 此外, 宇宙层级还有一个二元运算 `_⊔_`, 它的作用是取两个宇宙层级中较高的那一个, 例如 `ℓ-zero ⊔ (ℓ-suc ℓ-zero)` 等于 `ℓ-suc ℓ-zero`.
 
 以上都是类型论中的原始概念, 我们从 `Cubical.Core.Primitives` 模块中通过以下代码导入了它们.
 
