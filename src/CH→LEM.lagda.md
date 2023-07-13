@@ -1,10 +1,10 @@
 ---
-title: 泛等结构集合论 (2) CH → LEM
+title: 泛等结构集合论 (2) 开胃菜:CH → LEM
 zhihu-tags: Agda, 数理逻辑, 集合论
 zhihu-url: https://zhuanlan.zhihu.com/p/643217740
 ---
 
-# 泛等结构集合论 (2) CH → LEM
+# 泛等结构集合论 (2) 开胃菜: CH → LEM
 
 > 交流Q群: 893531731  
 > 本文源码: [CH→LEM.lagda.md](https://github.com/choukh/USST/blob/main/src/CH→LEM.lagda.md)  
@@ -20,7 +20,7 @@ module CH→LEM ⦃ _ : PR ⦄ where
 
 ## 康托尔定理
 
-首先我们复刻集合论的基本结果: 康托尔定理. 它可以在直觉主义中证明.
+首先我们复刻质料集合论的基本结果: 康托尔定理. 它可以在直觉主义中证明.
 
 **定理** 任意类型都不能被自己的幂集单射.
 
