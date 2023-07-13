@@ -1,6 +1,6 @@
 ---
 title: 泛等结构集合论 (2) 开胃菜:CH → LEM
-zhihu-tags: Agda, 数理逻辑, 集合论
+zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 zhihu-url: https://zhuanlan.zhihu.com/p/643217740
 ---
 

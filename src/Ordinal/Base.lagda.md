@@ -1,20 +1,22 @@
 ---
-title: 泛等结构集合论 (3) 序数的定义
-zhihu-tags: Agda, 数理逻辑, 集合论
+title: 泛等结构集合论 (4) 序数的定义
+zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 ---
 
-# 泛等结构集合论 (3) 序数的定义
+# 泛等结构集合论 (4) 序数的定义
 
 > 交流Q群: 893531731  
 > 本文源码: [Base.lagda.md](https://github.com/choukh/USST/blob/main/src/Ordinal/Base.lagda.md)  
 > 高亮渲染: [Base.html](https://choukh.github.io/USST/Ordinal.Base.html)  
 
-我们导入前置知识, 并全局假设 `PR`. 本讲将复刻质料集合论的重要概念: 序数.
+本章将复刻质料集合论的重要概念: 序数.
 
 ```agda
 {-# OPTIONS --cubical --safe #-}
+module Ordinal.Base where
+
 open import Preliminary
-module Ordinal.Base ⦃ _ : PR ⦄ where
+open import Order
 ```
 
 ## 序关系的一些性质
@@ -25,22 +27,6 @@ module Ordinal.Base ⦃ _ : PR ⦄ where
 
 ```agda
 module _ {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
-```
-
-### 命题性
-
-我们说 `_<_` 是一个 **命题 (propositional)** 关系, 当且仅当对任意 `x y : A`, `x < y` 是一个命题.
-
-```agda
-  Propositional : Type _
-  Propositional = ∀ x y → isProp (x < y)
-```
-
-命题性本身是一个命题.
-
-```agda
-  _ : isProp Propositional
-  _ = isPropΠ2 λ _ _ → isPropIsProp
 ```
 
 ### 反自反性
@@ -74,7 +60,7 @@ module _ {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
 如果`_<_` 是一个命题关系, 那么传递性是一个命题.
 
 ```agda
-  isPropTransitive : Propositional → isProp Transitive
+  isPropTransitive : Propositional _<_ → isProp Transitive
   isPropTransitive prop = isPropΠ5 λ _ _ _ _ _ → prop _ _
 ```
 
@@ -134,21 +120,26 @@ module _ {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
   WellFounded→Irreflexive wf x = Acc→Irreflexive x (wf x)
 ```
 
-## 序数性
+## 序数的定义
+
+### 序数性
 
 我们说类型 `A` 和其上的序关系 `_<_` 构成一个 **序数 (ordinal)**, 记作 `IsOrdinal A _<_`, 当且仅当它们满足: `A` 是集合且 `_<_` 有命题性, 传递性, 外延性和良基性. 因为良基性蕴含反自反性, 所以 `_<_` 也有反自反性.
 
 ```agda
 record IsOrdinal (A : Type ℓ) (_<_ : A → A → Type ℓ′) : Type (ℓ ⊔ ℓ′) where
+  constructor mkIsOrdinal
   field
     ord-set   : isSet A
-    <-prop    : Propositional _<_
+    <-order   : IsOrder _<_
     <-trans   : Transitive _<_
     <-ext     : Extensional _<_
     <-wf      : WellFounded _<_
 
   <-irrefl : Irreflexive _<_
   <-irrefl = WellFounded→Irreflexive _<_ <-wf
+
+  open IsOrder <-order public
 ```
 
 由于序数性里面的每个条件都是命题, 所以序数性也是一个命题.
@@ -158,22 +149,27 @@ unquoteDecl IsOrdinalIsoΣ = declareRecordIsoΣ IsOrdinalIsoΣ (quote IsOrdinal)
 
 isPropIsOrdinal : (A : Type ℓ) (_<_ : A → A → Type ℓ′) → isProp (IsOrdinal A _<_)
 isPropIsOrdinal A _<_ = isOfHLevelRetractFromIso 1 IsOrdinalIsoΣ $
-  isPropΣ (isPropΠ2 λ _ _ → isPropIsProp) λ ord-set →
-  isPropΣ (isPropΠ2 λ _ _ → isPropIsProp) λ <-prop → isProp×2
-    (isPropTransitive _ <-prop)
+  isPropΣ (isPropPropositional _) λ ord-set →
+  isPropΣ isPropIsOrder λ isOrder → let open IsOrder isOrder in isProp×2
+    (isPropTransitive _ order-prop)
     (isPropExtensional _ ord-set)
     (isPropWellFounded _)
 ```
+
+### 序数结构
 
 一个类型 `A` 配备上满足序数性的序关系 `_<_` 就构成了一个序数结构 `OrdianlStr`.
 
 ```agda
 record OrdianlStr (ℓ′ : Level) (A : Type ℓ) : Type (ℓ ⊔ ℓ-suc ℓ′) where
+  constructor mkOrdianlStr
   field
     _<_ : A → A → Type ℓ′
     isOrdinal : IsOrdinal A _<_
   open IsOrdinal isOrdinal public
 ```
+
+### 序数宇宙
 
 序数宇宙 `Ordinal` 定义为类型宇宙配备上序数结构.
 
@@ -181,3 +177,5 @@ record OrdianlStr (ℓ′ : Level) (A : Type ℓ) : Type (ℓ ⊔ ℓ-suc ℓ′
 Ordinal : (ℓ ℓ′ : Level) → Type _
 Ordinal ℓ ℓ′ = TypeWithStr ℓ (OrdianlStr ℓ′)
 ```
+
+

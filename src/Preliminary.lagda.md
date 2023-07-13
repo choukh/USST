@@ -1,6 +1,6 @@
 ---
 title: 泛等结构集合论 (1) 前置知识
-zhihu-tags: Agda, 数理逻辑, 集合论
+zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 zhihu-url: https://zhuanlan.zhihu.com/p/643059692
 ---
 
@@ -53,10 +53,10 @@ open import Cubical.Core.Primitives public
   renaming (ℓ-max to _⊔_)
 ```
 
-我们约定在系列文章中都使用 `ℓ` 和 `ℓ′` 表示宇宙层级参数. 例如 `A : Type ℓ` 表示任意给定的宇宙层级 `ℓ` 的类型 `A`.
+我们约定在系列文章中都使用 `ℓ` 和 `ℓ′` 等表示宇宙层级参数. 例如 `A : Type ℓ` 表示任意给定的宇宙层级 `ℓ` 的类型 `A`.
 
 ```agda
-variable ℓ ℓ′ : Level
+variable ℓ ℓ₁ ℓ₂ ℓ′ ℓ₁′ ℓ₂′ : Level
 ```
 
 关于宇宙层级的作用我们在接下来的几小节穿插讲解.
@@ -261,6 +261,20 @@ open import Agda.Builtin.Cubical.Path public renaming (_≡_ to Path)
 
 transportIsProp : {A : Type ℓ} {x y : A} → isProp (Path x y) → isProp (x ≡ y)
 transportIsProp = transport isProp Path≡Eq
+```
+
+### 同伦等价
+
+```agda
+open import Cubical.Foundations.Equiv public
+  using (_≃_; equivFun; invEquiv)
+```
+
+```agda
+open import Cubical.Displayed.Base public
+open import Cubical.Displayed.Auto public
+open import Cubical.Displayed.Record public
+open import Cubical.Displayed.Universe public
 ```
 
 ### 幂集
