@@ -58,6 +58,17 @@ Cantor-≰ X (f , f-inj) = noncontradiction ∈→∉ ∉→∈
   ∉→∈ fA∉A = resize λ B fB≡ → transport (f A ∉_) (f-inj (sym fB≡)) fA∉A
 ```
 
+由康托尔定理我们可以知道作为 `GCH` 结论的那个和类型的两边互斥, 从而证明 `GCH` 的命题性. 今后不需要用到这一结论.
+
+```agda
+isPropGCH : (ℓ ℓ′ : Level) → isProp (GCH ℓ ℓ′)
+isPropGCH ℓ ℓ′ = isPropΠ4 λ X Y _ _ → isPropΠ3 λ _ _ _ →
+  λ { (⊎.inl _)    (⊎.inl _)    → eqToPath $ ap ⊎.inl $ squash₁Eq _ _
+    ; (⊎.inl Y≤X)  (⊎.inr ℙX≤Y) → ⊥-rec $ ∥∥-rec2 isProp⊥ (λ ℙX≤Y Y≤X → Cantor-≰ _ $ ≤-trans Y≤X ℙX≤Y) Y≤X ℙX≤Y
+    ; (⊎.inr ℙX≤Y) (⊎.inl Y≤X)  → ⊥-rec $ ∥∥-rec2 isProp⊥ (λ ℙX≤Y Y≤X → Cantor-≰ _ $ ≤-trans Y≤X ℙX≤Y) Y≤X ℙX≤Y
+    ; (⊎.inr _)    (⊎.inr _)    → eqToPath $ ap ⊎.inr $ squash₁Eq _ _ }
+```
+
 ## 单集
 
 现在固定一个集合 `X`.
@@ -167,8 +178,8 @@ module Lemmas (X : Type ℓ) (X-set : isSet X) where
     ... | (f , f-inj) with Cantor-beyond｛｝ (fst ∘ f) (f-inj ∘ (Σ≡Prop λ _ → squash₁Eq))
     ... | (A , ¬sing) with f A
     ... | (fA , sing∨dec) = ∥∥-rec (isPropDec P-prop)
-      (λ { (_⊎_.inl sing) → ⊥-rec $ ¬sing sing
-          ; (_⊎_.inr dec) → dec })
+      (λ { (⊎.inl sing) → ⊥-rec $ ¬sing sing
+         ; (⊎.inr dec)  → dec })
       sing∨dec
 ```
 

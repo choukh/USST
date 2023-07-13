@@ -221,11 +221,13 @@ open import Cubical.HITs.PropositionalTruncation public
 ```
 
 我们有引理 `∥∥-rec`, 它说如果目标 `P` 是命题, 那么我们可以通过证明 `A → P` 来证明 `∥ A ∥₁ → P`.  
+我们有引理 `∥∥-rec2`, 它说如果目标 `P` 是命题, 那么我们可以通过证明 `A → B → P` 来证明 `∥ A ∥₁ → ∥ B ∥₁ → P`.  
 我们有引理 `∥∥-map`, 它说可以通过证明 `A → B` 来证明 `∥ A ∥₁ → ∥ B ∥₁`.  
 我们有引理 `∥∥-map2`, 它说可以通过证明 `A → B → C` 来证明 `∥ A ∥₁ → ∥ B ∥₁ → ∥ C ∥₁`.
 
 ```agda
-  renaming (rec to ∥∥-rec; map to ∥∥-map; map2 to ∥∥-map2)
+  renaming ( rec to ∥∥-rec; rec2 to ∥∥-rec2
+           ; map to ∥∥-map; map2 to ∥∥-map2)
 ```
 
 Σ类型的命题截断完全对应了逻辑上的存在量化命题.
@@ -321,7 +323,9 @@ noncontradiction p q = p (q λ a → p a a) (q λ a → p a a)
 逻辑析取定义为**和类型 (sum type)** 的命题截断. 因为和类型的项起码有两种 (左边或右边) 不同的构造方式, 但析取不关心具体是哪种, 所以必须要做命题截断, 以确保所有证明项都相等.
 
 ```agda
-open import Cubical.Data.Sum as ⊎ public using (_⊎_)
+import Cubical.Data.Sum
+module ⊎ = Cubical.Data.Sum
+open ⊎ public using (_⊎_)
 
 infixr 2 _∨_
 _∨_ : Type ℓ → Type ℓ′ → Type _
@@ -456,25 +460,19 @@ infinite X = ℕ ≤ X
 
 ```agda
 isGCHType : Type ℓ → Type ℓ′ → Type _
-isGCHType X Y = infinite X → X ≤ Y → Y ≤ ℙ X → Y ≤ X ∨ ℙ X ≤ Y
+isGCHType X Y = infinite X → X ≤ Y → Y ≤ ℙ X → ∥ Y ≤ X ∥₁ ⊎ ∥ ℙ X ≤ Y ∥₁
 
 GCH : (ℓ ℓ′ : Level) → Type _
 GCH ℓ ℓ′ = (X : Type ℓ) (Y : Type ℓ′) → isSet X → isSet Y → isGCHType X Y
 ```
 
-同样地, 广义连续统假设也是一个命题.
-
-```agda
-isPropGCH : (ℓ ℓ′ : Level) → isProp (GCH ℓ ℓ′)
-isPropGCH ℓ ℓ′ = isPropΠ4 λ _ _ _ _ → isPropΠ3 λ _ _ _ → squash₁
-```
+注意 `GCH` 最终指向的和类型并没有做命题截断, 但我们仍然能证明 `GCH` 是一个命题. 实际上, 只要和类型的两边是互斥的命题, 那么这个和类型就是命题. 不难看出 `Y ≤ X` 与 `ℙ X ≤ Y` 互斥, 否则违反康托尔定理, 所以广义连续统假设也是一个命题. 我们把相关证明放在下一章.
 
 广义连续统假设蕴含连续统假设.
 
 ```agda
 GCH→CH : ∀ ℓ → GCH ℓ-zero ℓ → CH ℓ
-GCH→CH ℓ gch X X-set (ℕ≤X , X≰ℕ) X≤ℙℕ =
-  ∥∥-map (λ { (⊎.inl X≤ℕ)  → ⊥-rec $ X≰ℕ X≤ℕ
-            ; (⊎.inr ℙℕ≤X) → ℙℕ≤X })
-  $ gch ℕ X isSetℕ X-set ≤-refl ℕ≤X X≤ℙℕ
+GCH→CH ℓ gch X X-set (ℕ≤X , X≰ℕ) X≤ℙℕ with gch ℕ X isSetℕ X-set ≤-refl ℕ≤X X≤ℙℕ
+... | (⊎.inl X≤ℕ)  = ∥∥-map (⊥-rec ∘ X≰ℕ) X≤ℕ
+... | (⊎.inr ℙℕ≤X) = ℙℕ≤X
 ```
