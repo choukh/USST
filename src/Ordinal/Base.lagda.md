@@ -79,7 +79,7 @@ module _ {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
   isPropTransitive prop = isPropΠ5 λ _ _ _ _ _ → prop _ _
 ```
 
-## 外延性
+### 外延性
 
 我们说 `_<_` 是一个 **外延 (extensional)** 关系, 当且仅当对任意 `x y : A`, 如果对任意 `z : A` 都有 `z < x` 当且仅当 `z < y`, 那么 `x ≡ y`.
 
