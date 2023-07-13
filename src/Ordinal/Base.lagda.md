@@ -1,13 +1,14 @@
 ---
 title: 泛等结构集合论 (3) 序数的定义及其泛等原理
 zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
+zhihu-url: https://zhuanlan.zhihu.com/p/643453391
 ---
 
 # 泛等结构集合论 (3) 序数的定义及其泛等原理
 
 > 交流Q群: 893531731  
-> 本文源码: [Base.lagda.md](https://github.com/choukh/USST/blob/main/src/Ord/Base.lagda.md)  
-> 高亮渲染: [Base.html](https://choukh.github.io/USST/Ord.Base.html)  
+> 本文源码: [Ordinal.Base.lagda.md](https://github.com/choukh/USST/blob/main/src/Ord/Base.lagda.md)  
+> 高亮渲染: [Ordinal.Base.html](https://choukh.github.io/USST/Ord.Base.html)  
 
 本章将复刻质料集合论的重要概念: 序数.
 
