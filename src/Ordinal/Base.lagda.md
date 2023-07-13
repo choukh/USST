@@ -95,7 +95,7 @@ module _ {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
   isPropExtensional A-set = isPropΠ3 λ _ _ _ → transportIsProp $ A-set _ _
 ```
 
-**引理** 如果 `_<_` 同时具有命题性和外延性那么 `A` 是集合.
+**引理** 如果 `_<_` 同时具有命题性和外延性那么 `A` 是集合.  
 **证明梗概** 由引理 `Collapsible≡→isSet`, 只要证明 `A` 上的相等类型 `x ≡ y` 可折叠, 就证明了 `A` 是集合. 可折叠是说能构造 `x ≡ y` 的自映射 `f` 满足 `f` 是一个常函数. 只要用作为自变量的那个 `eq : x ≡ y` 替换外延性的前提 `z < x ↔ z < y` 就能得到另一个 `x ≡ y`. 由于 `_<_` 是命题, 所以 `z < x ↔ z < y` 是命题, 所以 `f` 是常函数. ∎
 
 ```agda
