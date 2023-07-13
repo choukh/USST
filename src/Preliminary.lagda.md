@@ -272,12 +272,14 @@ open import Cubical.Data.Sigma public using (ΣPathP)
 
 ### 同伦等价
 
-```agda
-open import Cubical.Foundations.Equiv public
-  using (_≃_; equivFun; invEquiv)
+同伦等价 `_≃_` 可以简单理解为是在泛等基础中更容易处理的一种"同构", 它与真正的同构 `Iso` 也是同构的, 且同伦等价的. `equivFun` 用于取得同伦等价的底层函数, 它与 `Iso.fun` 所取得的函数有相同的行为.
 
+```agda
+open import Cubical.Foundations.Equiv public using (_≃_; equivFun)
 open import Cubical.Foundations.Isomorphism public using (Iso)
 ```
+
+以下是用 Agda 反射机制定义的宏, 搭配同伦等价使用, 用于更快的证明一些数学结构的**泛等原理 (univalence principle)**. 我们不需要关心这些工具的实现细节, 只需要知道什么是结构的泛等原理, 以及如何使用这套工具得到它. 具体用法可以看 `𝒮ᴰ-Record` 定义下面的例子, 以及本系列讲义的后续文章.
 
 ```agda
 open import Cubical.Displayed.Base public using (DUARel; UARel; ∫)
