@@ -178,7 +178,7 @@ open import Cubical.Data.Nat public using (ℕ)
 
 ```agda
 open import Cubical.Foundations.Prelude public
-  using (isProp; isSet; isProp→isSet)
+  using (isProp; isSet; isPropIsProp; isProp→isSet)
 ```
 
 可以证明空类型是命题, 自然数类型是集合.
@@ -208,7 +208,7 @@ open import Cubical.Foundations.HLevels public using (hProp; isSetHProp)
 
 ```agda
 open import Cubical.Foundations.Structure public
-  using (⟨_⟩; str)
+  using (TypeWithStr; ⟨_⟩; str)
 ```
 
 ### 命题截断
@@ -344,6 +344,14 @@ inr x = ∣ ⊎.inr x ∣₁
 
 注意我们不需要对积类型做命题截断以得到合取, 因为当 `_×_` 的两边都是命题的时候, 它的项只有一种构造方式, 所以它们之间的相等是自然成立的.
 
+`A` 与 `B` 逻辑等价定义为 `A` 蕴含 `B` 且 `B` 蕴含 `A`.
+
+```agda
+infix 1 _↔_
+_↔_ : Type ℓ → Type ℓ′ → Type _
+A ↔ B = A → B × B → A
+```
+
 ## 排中律
 
 我们说一个类型 `A` 可判定, 记作 `Dec A`, 当且仅当 `A` 成立或者 `A` 的否定成立.
@@ -396,36 +404,36 @@ isPropAC ℓ ℓ′ ℓ′′ = isPropΠ6 λ _ _ _ _ _ _ → isPropΠ λ _ → s
 
 ## 势
 
-我们说类型 `A` 的势小于等于 `B`, 当且仅当有任意 `A` 到 `B` 的单射函数. 注意这里用的是Σ类型, 我们并没有做命题截断. 有时候延迟截断会更方便处理.
+我们说类型 `A` 的势小于等于 `B`, 记作 `A ≼ B`, 当且仅当有任意 `A` 到 `B` 的单射函数. 注意这里用的是Σ类型, 我们并没有做命题截断. 有时候延迟截断会更方便处理.
 
 ```agda
 injective : (A → B) → Type _
 injective f = ∀ {x y} → f x ≡ f y → x ≡ y
 
-_≤_ : Type ℓ → Type ℓ′ → Type _
-A ≤ B = Σ (A → B) injective
+_≼_ : Type ℓ → Type ℓ′ → Type _
+A ≼ B = Σ (A → B) injective
 
-_≰_ : Type ℓ → Type ℓ′ → Type _
-A ≰ B = ¬ A ≤ B
+_⋠_ : Type ℓ → Type ℓ′ → Type _
+A ⋠ B = ¬ A ≼ B
 ```
 
-`≤` 构成一个预序.
+`≼` 构成一个预序.
 
 ```agda
-≤-refl : A ≤ A
-≤-refl = idfun _ , λ refl → refl
+≼-refl : A ≼ A
+≼-refl = idfun _ , λ refl → refl
 
-≤-trans : A ≤ B → B ≤ C → A ≤ C
-≤-trans (f , f-inj) (g , g-inj) = g ∘ f , f-inj ∘ g-inj
+≼-trans : A ≼ B → B ≼ C → A ≼ C
+≼-trans (f , f-inj) (g , g-inj) = g ∘ f , f-inj ∘ g-inj
 ```
 
-`≤` 的反对称性 (即施罗德-伯恩斯坦定理) 依赖于排中律.
+`≼` 的反对称性 (即施罗德-伯恩斯坦定理) 依赖于排中律.
 
 我们说 `A` 的势严格小于 `B`, 当且仅当 `A` 的势小于等于 `B` 且 `B` 的势不小于等于 `A`.
 
 ```agda
-_<_ : Type ℓ → Type ℓ′ → Type _
-A < B = A ≤ B × B ≰ A
+_≺_ : Type ℓ → Type ℓ′ → Type _
+A ≺ B = A ≼ B × B ⋠ A
 ```
 
 ## 连续统假设
@@ -434,7 +442,7 @@ A < B = A ≤ B × B ≰ A
 
 ```agda
 isCHType : Type ℓ → Type ℓ′ → Type _
-isCHType X Y = X < Y → Y ≤ ℙ X → ∥ ℙ X ≤ Y ∥₁
+isCHType X Y = X ≺ Y → Y ≼ ℙ X → ∥ ℙ X ≼ Y ∥₁
 
 CH : (ℓ : Level) → Type _
 CH ℓ = (X : Type ℓ) → isSet X → isCHType ℕ X
@@ -453,26 +461,26 @@ isPropCH ℓ = isPropΠ4 λ _ _ _ _ → squash₁
 
 ```agda
 infinite : Type ℓ → Type _
-infinite X = ℕ ≤ X
+infinite X = ℕ ≼ X
 ```
 
 广义连续统假设是说, 对任意无穷集和它的幂集, 都没有一个正好卡在它们中间的势.
 
 ```agda
 isGCHType : Type ℓ → Type ℓ′ → Type _
-isGCHType X Y = infinite X → X ≤ Y → Y ≤ ℙ X → ∥ Y ≤ X ∥₁ ⊎ ∥ ℙ X ≤ Y ∥₁
+isGCHType X Y = infinite X → X ≼ Y → Y ≼ ℙ X → ∥ Y ≼ X ∥₁ ⊎ ∥ ℙ X ≼ Y ∥₁
 
 GCH : (ℓ ℓ′ : Level) → Type _
 GCH ℓ ℓ′ = (X : Type ℓ) (Y : Type ℓ′) → isSet X → isSet Y → isGCHType X Y
 ```
 
-注意 `GCH` 最终指向的和类型并没有做命题截断, 但我们仍然能证明 `GCH` 是一个命题. 实际上, 只要和类型的两边是互斥的命题, 那么这个和类型就是命题. 不难看出 `Y ≤ X` 与 `ℙ X ≤ Y` 互斥, 否则违反康托尔定理, 所以广义连续统假设也是一个命题. 我们把相关证明放在下一章.
+注意 `GCH` 最终指向的和类型并没有做命题截断, 但我们仍然能证明 `GCH` 是一个命题. 实际上, 只要和类型的两边是互斥的命题, 那么这个和类型就是命题. 不难看出 `Y ≼ X` 与 `ℙ X ≼ Y` 互斥, 否则违反康托尔定理, 所以广义连续统假设也是一个命题. 我们把相关证明放在下一章.
 
 广义连续统假设蕴含连续统假设.
 
 ```agda
 GCH→CH : ∀ ℓ → GCH ℓ-zero ℓ → CH ℓ
-GCH→CH ℓ gch X X-set (ℕ≤X , X≰ℕ) X≤ℙℕ with gch ℕ X isSetℕ X-set ≤-refl ℕ≤X X≤ℙℕ
-... | (⊎.inl X≤ℕ)  = ∥∥-map (⊥-rec ∘ X≰ℕ) X≤ℕ
-... | (⊎.inr ℙℕ≤X) = ℙℕ≤X
+GCH→CH ℓ gch X X-set (ℕ≼X , X⋠ℕ) X≼ℙℕ with gch ℕ X isSetℕ X-set ≼-refl ℕ≼X X≼ℙℕ
+... | (⊎.inl X≼ℕ)  = ∥∥-map (⊥-rec ∘ X⋠ℕ) X≼ℕ
+... | (⊎.inr ℙℕ≼X) = ℙℕ≼X
 ```
