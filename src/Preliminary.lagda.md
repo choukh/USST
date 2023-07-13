@@ -193,6 +193,7 @@ open import Cubical.Data.Nat public using (isSetℕ)
 ```agda
 open import Cubical.Foundations.HLevels public
   using ( isPropΠ; isPropΠ2; isPropΠ3; isPropΠ4; isPropΠ5; isPropΠ6
+        ; isProp×; isProp×2; isProp×3; isProp×4; isProp×5; isPropΣ
         ; isSetΠ; isSetΣ)
 ```
 
@@ -483,4 +484,18 @@ GCH→CH : ∀ ℓ → GCH ℓ-zero ℓ → CH ℓ
 GCH→CH ℓ gch X X-set (ℕ≼X , X⋠ℕ) X≼ℙℕ with gch ℕ X isSetℕ X-set ≼-refl ℕ≼X X≼ℙℕ
 ... | (⊎.inl X≼ℕ)  = ∥∥-map (⊥-rec ∘ X⋠ℕ) X≼ℕ
 ... | (⊎.inr ℙℕ≼X) = ℙℕ≼X
+```
+
+## 非数学
+
+我们经常需要用 Agda 的反射机制证明Σ类型与record类型同伦等价.
+
+```agda
+open import Cubical.Reflection.RecordEquiv public using (declareRecordIsoΣ)
+```
+
+再用 `isOfHLevelRetractFromIso` 将 record 类型的命题/集合性转化为证明与之同构的Σ类型的命题/集合性.
+
+```agda
+open import Cubical.Foundations.HLevels public using (isOfHLevelRetractFromIso)
 ```

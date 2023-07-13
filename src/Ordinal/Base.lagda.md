@@ -21,10 +21,10 @@ module Ordinal.Base ⦃ _ : PR ⦄ where
 
 说白了, 一个序数就是由一个集合以及该集合上的一个满足一定性质的序关系所组成的结构. 我们先定义这个序关系需要满足的性质.
 
-给定类型 `A : Type ℓ` 及其上的严格序 `_<_ : A → A → Type ℓ′`
+给定类型 `A : Type ℓ` 及其上的序关系 `_<_ : A → A → Type ℓ′`
 
 ```agda
-module BinaryRelation {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
+module _ {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
 ```
 
 ### 命题性
@@ -39,17 +39,20 @@ module BinaryRelation {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
 命题性本身是一个命题.
 
 ```agda
-  isPropPropositional : isProp Propositional
-  isPropPropositional = isPropΠ2 λ _ _ → isPropIsProp
+  _ : isProp Propositional
+  _ = isPropΠ2 λ _ _ → isPropIsProp
 ```
 
 ### 反自反性
 
-我们说 `_<_` 是一个 **反自反 (irreflexive)** 关系, 当且仅当对任意 `x : A`, `¬ x < x`.
+我们说 `_<_` 是一个 **反自反 (irreflexive)** 关系, 当且仅当对任意 `x : A`, `x ≮ x`.
 
 ```agda
+  _≮_ : A → A → Type ℓ′
+  x ≮ y = ¬ x < y
+
   Irreflexive : Type _
-  Irreflexive = ∀ x → ¬ x < x
+  Irreflexive = ∀ x → x ≮ x
 ```
 
 反自反性是一个命题.
@@ -73,6 +76,22 @@ module BinaryRelation {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
 ```agda
   isPropTransitive : Propositional → isProp Transitive
   isPropTransitive prop = isPropΠ5 λ _ _ _ _ _ → prop _ _
+```
+
+## 外延性
+
+我们说 `_<_` 是一个 **外延 (extensional)** 关系, 当且仅当对任意 `x y : A`, 如果对任意 `z : A` 都有 `z < x` 当且仅当 `z < y`, 那么 `x ≡ y`.
+
+```agda
+  Extensional : Type _
+  Extensional = ∀ x y → (∀ z → z < x ↔ z < y) → x ≡ y
+```
+
+如果 `A` 是集合, 那么外延性是命题.
+
+```agda
+  isPropExtensional : isSet A → isProp Extensional
+  isPropExtensional A-set = isPropΠ3 λ _ _ _ → transportIsProp $ A-set _ _
 ```
 
 ### 良基性
@@ -105,43 +124,60 @@ module BinaryRelation {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
   isPropWellFounded = isPropΠ λ _ → isPropAcc _
 ```
 
-## 外延性
-
-我们说 `_<_` 是一个 **外延 (extensional)** 关系, 当且仅当对任意 `x y : A`, 如果对任意 `z : A` 都有 `z < x` 当且仅当 `z < y`, 那么 `x ≡ y`.
+良基性蕴含反自反性. 只需证对任意可及的 `x` 都有 `x ≮ x`, 显然成立.
 
 ```agda
-  Extensional : Type _
-  Extensional = ∀ x y → (∀ z → z < x ↔ z < y) → x ≡ y
+  Acc→Irreflexive : ∀ x → Acc x → x ≮ x
+  Acc→Irreflexive x (acc H) x<x = Acc→Irreflexive x (H x x<x) x<x
+
+  WellFounded→Irreflexive : WellFounded → Irreflexive
+  WellFounded→Irreflexive wf x = Acc→Irreflexive x (wf x)
 ```
 
-如果 `A` 是集合, 那么外延性是命题.
+## 序数性
+
+我们说类型 `A` 和其上的序关系 `_<_` 构成一个 **序数 (ordinal)**, 记作 `IsOrdinal A _<_`, 当且仅当它们满足: `A` 是集合且 `_<_` 有命题性, 传递性, 外延性和良基性. 因为良基性蕴含反自反性, 所以 `_<_` 也有反自反性.
 
 ```agda
-  isPropExtensional : isSet A → isProp Extensional
-  isPropExtensional A-set = isPropΠ3 λ _ _ _ → transportIsProp $ A-set _ _
-```
-
-## 序数的定义
-
-```agda
-record IsOrdinalRelation {A : Type ℓ} (_<_ : A → A → Type ℓ′) : Type (ℓ ⊔ ℓ′) where
-  open BinaryRelation _<_
+record IsOrdinal (A : Type ℓ) (_<_ : A → A → Type ℓ′) : Type (ℓ ⊔ ℓ′) where
   field
-    <-prop    : Propositional
-    <-irrefl  : Irreflexive
-    <-trans   : Transitive
-    <-wf      : WellFounded
-    <-ext     : Extensional
+    ord-set   : isSet A
+    <-prop    : Propositional _<_
+    <-trans   : Transitive _<_
+    <-ext     : Extensional _<_
+    <-wf      : WellFounded _<_
+
+  <-irrefl : Irreflexive _<_
+  <-irrefl = WellFounded→Irreflexive _<_ <-wf
 ```
 
+由于序数性里面的每个条件都是命题, 所以序数性也是一个命题.
+
 ```agda
-record OrdianlStructure (ℓ′ : Level) (A : Type ℓ) : Type (ℓ ⊔ ℓ-suc ℓ′) where
+unquoteDecl IsOrdinalIsoΣ = declareRecordIsoΣ IsOrdinalIsoΣ (quote IsOrdinal)
+
+isPropIsOrdinal : (A : Type ℓ) (_<_ : A → A → Type ℓ′) → isProp (IsOrdinal A _<_)
+isPropIsOrdinal A _<_ = isOfHLevelRetractFromIso 1 IsOrdinalIsoΣ $
+  isPropΣ (isPropΠ2 λ _ _ → isPropIsProp) λ ord-set →
+  isPropΣ (isPropΠ2 λ _ _ → isPropIsProp) λ <-prop → isProp×2
+    (isPropTransitive _ <-prop)
+    (isPropExtensional _ ord-set)
+    (isPropWellFounded _)
+```
+
+一个类型 `A` 配备上满足序数性的序关系 `_<_` 就构成了一个序数结构 `OrdianlStr`.
+
+```agda
+record OrdianlStr (ℓ′ : Level) (A : Type ℓ) : Type (ℓ ⊔ ℓ-suc ℓ′) where
   field
     _<_ : A → A → Type ℓ′
-    <-ord : IsOrdinalRelation _<_
+    isOrdinal : IsOrdinal A _<_
+  open IsOrdinal isOrdinal public
 ```
+
+序数宇宙 `Ordinal` 定义为类型宇宙配备上序数结构.
 
 ```agda
 Ordinal : (ℓ ℓ′ : Level) → Type _
-Ordinal ℓ ℓ′ = TypeWithStr ℓ (OrdianlStructure ℓ′)
+Ordinal ℓ ℓ′ = TypeWithStr ℓ (OrdianlStr ℓ′)
 ```
