@@ -96,7 +96,7 @@ module _ {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
 ```
 
 **引理** 如果 `_<_` 同时具有命题性和外延性那么 `A` 是集合.  
-**证明梗概** 由引理 `Collapsible≡→isSet`, 只要证明 `A` 上的相等类型 `x ≡ y` 可折叠, 就证明了 `A` 是集合. 可折叠是说能构造 `x ≡ y` 的自映射 `f` 满足 `f` 是一个常函数. 只要用作为自变量的那个 `eq : x ≡ y` 替换外延性的前提 `z < x ↔ z < y` 就能得到另一个 `x ≡ y`. 由于 `_<_` 是命题, 所以 `z < x ↔ z < y` 是命题, 所以 `f` 是常函数. ∎
+**证明梗概** 由引理 `Collapsible≡→isSet`, 只要证明 `A` 上的相等类型 `x ≡ y` 可折叠, 就证明了 `A` 是集合. 可折叠是说能构造 `x ≡ y` 的自映射 `f` 且 `f` 是一个 2-常函数 (`∀ x y → f x ≡ f y`). 只要用作为自变量的那个 `eq : x ≡ y` 替换外延性的前提 `z < x ↔ z < y` 就能得到另一个 `x ≡ y`. 由于 `_<_` 是命题, 所以 `z < x ↔ z < y` 是命题, 所以 `f` 是 2-常函数. ∎
 
 ```agda
   open import Cubical.Foundations.Function using (2-Constant)
@@ -168,7 +168,7 @@ module _ {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
       <-wf      : WellFounded
 ```
 
-良序关系是反自反的, 且其基底类型必是集合, 我们今后称之为**底集 (underlying set)**. 经典数学里面一般是把这里的外延性换成了三歧性, 但在直觉主义中外延性更容易处理. 此外, HoTT Book 也有相应的定义, 见 Def 10.3.17, 它要求 "`A` 是集合", 但这不是必须的, Escardó 首先证明了[这一点](https://www.cs.bham.ac.uk/~mhe/TypeTopology/Ordinals.Notions.html#8277)
+良序关系是反自反的, 且其底层类型必是集合, 我们今后称之为**底集 (underlying set)**. 经典数学里面一般是把这里的外延性换成了三歧性, 但在直觉主义中外延性更容易处理. 此外, HoTT Book 也有相应的定义, 见 Def 10.3.17, 它要求 "`A` 是集合", 但这不是必须的, Escardó 首先证明了[这一点](https://www.cs.bham.ac.uk/~mhe/TypeTopology/Ordinals.Notions.html#8277)
 
 ```agda
     <-irrefl : Irreflexive
@@ -199,7 +199,7 @@ module _ {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
 
 ### 序数结构
 
-一个类型 `A` 配备上满足良序关系的 `_<_` 就构成了一个序数结构 `OrdStr`. 注意我们这里让 `_<_` 与底集 `A` 居留于同一宇宙, 这可以让形式更简单, 反正 `_<_` 是命题, 而我们有 `PR` 可以随时调整命题宇宙.
+一个类型 `A` 配备上一个良序 `_<_` 就构成了一个序数结构 `OrdStr`. 注意我们这里让 `_<_` 与底集 `A` 居留于同一宇宙, 这可以让形式更简单, 反正 `_<_` 是命题, 而我们有 `PR` 可以随时调整命题宇宙.
 
 ```agda
 record OrdStr (A : Type ℓ) : Type (ℓ-suc ℓ) where
