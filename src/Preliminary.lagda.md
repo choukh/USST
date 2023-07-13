@@ -56,7 +56,7 @@ open import Cubical.Core.Primitives public
 我们约定在系列文章中都使用 `ℓ` 和 `ℓ′` 等表示宇宙层级参数. 例如 `A : Type ℓ` 表示任意给定的宇宙层级 `ℓ` 的类型 `A`.
 
 ```agda
-variable ℓ ℓ₁ ℓ₂ ℓ′ ℓ₁′ ℓ₂′ : Level
+variable ℓ ℓ₁ ℓ₂ ℓ′ ℓ′₁ ℓ′₂ : Level
 ```
 
 关于宇宙层级的作用我们在接下来的几小节穿插讲解.

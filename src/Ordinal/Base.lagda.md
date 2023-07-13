@@ -158,11 +158,11 @@ isPropIsOrdinal A _<_ = isOfHLevelRetractFromIso 1 IsOrdinalIsoΣ $
 
 ### 序数结构
 
-一个类型 `A` 配备上满足序数性的序关系 `_<_` 就构成了一个序数结构 `OrdianlStr`.
+一个类型 `A` 配备上满足序数性的序关系 `_<_` 就构成了一个序数结构 `OrdinalStr`.
 
 ```agda
-record OrdianlStr (ℓ′ : Level) (A : Type ℓ) : Type (ℓ ⊔ ℓ-suc ℓ′) where
-  constructor mkOrdianlStr
+record OrdinalStr (ℓ′ : Level) (A : Type ℓ) : Type (ℓ ⊔ ℓ-suc ℓ′) where
+  constructor mkOrdinalStr
   field
     _<_ : A → A → Type ℓ′
     isOrdinal : IsOrdinal A _<_
@@ -175,7 +175,48 @@ record OrdianlStr (ℓ′ : Level) (A : Type ℓ) : Type (ℓ ⊔ ℓ-suc ℓ′
 
 ```agda
 Ordinal : (ℓ ℓ′ : Level) → Type _
-Ordinal ℓ ℓ′ = TypeWithStr ℓ (OrdianlStr ℓ′)
+Ordinal ℓ ℓ′ = TypeWithStr ℓ (OrdinalStr ℓ′)
 ```
 
+## 遗忘函子
 
+```agda
+private variable
+  A B : Type ℓ
+
+OrdinalStr→OrderStr : OrdinalStr ℓ′ A → OrderStr ℓ′ A
+OrdinalStr→OrderStr (mkOrdinalStr _≤_ str) = mkOrderStr _≤_ (IsOrdinal.<-order str)
+
+Ordinal→Order : Ordinal ℓ ℓ′ → Order ℓ ℓ′
+Ordinal→Order (A , str) = A , OrdinalStr→OrderStr str
+```
+
+## 序数等价
+
+```agda
+IsOrdinalEquiv : (M : OrdinalStr ℓ′₁ A) (e : A ≃ B) (N : OrdinalStr ℓ′₂ B) → Type _
+IsOrdinalEquiv M f N = IsOrderEquiv (OrdinalStr→OrderStr M) f (OrdinalStr→OrderStr N)
+
+OrdinalEquiv : (M : Ordinal ℓ₁ ℓ′₁) (M : Ordinal ℓ₂ ℓ′₂) → Type _
+OrdinalEquiv M N = Σ[ e ∈ ⟨ M ⟩ ≃ ⟨ N ⟩ ] IsOrdinalEquiv (str M) e (str N)
+```
+
+## 序数的泛等原理
+
+```agda
+𝒮ᴰ-Ordinal : DUARel (𝒮-Univ ℓ) (OrdinalStr ℓ′) (ℓ ⊔ ℓ′)
+𝒮ᴰ-Ordinal = 𝒮ᴰ-Record (𝒮-Univ _) IsOrdinalEquiv
+  (fields:
+    data[ _<_ ∣ autoDUARel _ _ ∣ pres≤ ]
+    prop[ isOrdinal ∣ (λ _ _ → isPropIsOrdinal _ _) ])
+  where
+  open OrdinalStr
+  open IsOrderEquiv
+```
+
+两个序数的等价等价于它们的相等.
+
+```agda
+OrdinalPath : (M N : Ordinal ℓ ℓ′) → OrdinalEquiv M N ≃ (Path M N)
+OrdinalPath = ∫ 𝒮ᴰ-Ordinal .UARel.ua
+```

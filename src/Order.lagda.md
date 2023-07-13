@@ -71,7 +71,7 @@ private variable
 
 ```agda
 record IsOrderEquiv {A : Type ℓ₁} {B : Type ℓ₂}
-  (M : OrderStr ℓ₁′ A) (e : A ≃ B) (N : OrderStr ℓ₂′ B) : Type (ℓ₁ ⊔ ℓ₁′ ⊔ ℓ₂′) where
+  (M : OrderStr ℓ′₁ A) (e : A ≃ B) (N : OrderStr ℓ′₂ B) : Type (ℓ₁ ⊔ ℓ′₁ ⊔ ℓ′₂) where
   constructor mkIsOrderEquiv
   private
     module ₁ = OrderStr M
@@ -80,7 +80,7 @@ record IsOrderEquiv {A : Type ℓ₁} {B : Type ℓ₂}
   field
     pres≤ : (x y : A) → x ₁.≤ y ≃ f x ₂.≤ f y
 
-OrderEquiv : Order ℓ₁ ℓ₁′ → Order ℓ₂ ℓ₂′ → Type _
+OrderEquiv : Order ℓ₁ ℓ′₁ → Order ℓ₂ ℓ′₂ → Type _
 OrderEquiv M N = Σ[ e ∈ ⟨ M ⟩ ≃ ⟨ N ⟩ ] IsOrderEquiv (str M) e (str N)
 ```
 
