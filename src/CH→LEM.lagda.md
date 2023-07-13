@@ -196,7 +196,7 @@ module Lemmas (X : Type ℓ) (X-set : isSet X) where
 
 ```agda
     Y⋠X : Y ⋠ X
-    Y⋠X Y≼X@(f , f-inj) = DecNonEmpty P λ P-dec → Cantor-⋠ X (≼-trans (dec→ℙX≼Y P-dec) Y≼X)
+    Y⋠X Y≼X@(f , f-inj) = NonEmptyDec P λ P-dec → Cantor-⋠ X (≼-trans (dec→ℙX≼Y P-dec) Y≼X)
 ```
 
 有了这个引理, 接下来的两条引理就是自明的了. 只是要注意命题截断的一些技术细节. `CH` 将给我们 `≼` 的命题截断, 由于最终目标 `Dec P` 也是命题, 可以用 `∥∥-rec` 消掉这个截断.

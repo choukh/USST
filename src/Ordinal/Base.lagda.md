@@ -1,22 +1,20 @@
 ---
-title: 泛等结构集合论 (4) 序数的定义
+title: 泛等结构集合论 (4) UA登场:序数的定义
 zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 ---
 
-# 泛等结构集合论 (4) 序数的定义
+# 泛等结构集合论 (4) UA登场: 序数的定义
 
 > 交流Q群: 893531731  
-> 本文源码: [Base.lagda.md](https://github.com/choukh/USST/blob/main/src/Ordinal/Base.lagda.md)  
-> 高亮渲染: [Base.html](https://choukh.github.io/USST/Ordinal.Base.html)  
+> 本文源码: [Base.lagda.md](https://github.com/choukh/USST/blob/main/src/Ord/Base.lagda.md)  
+> 高亮渲染: [Base.html](https://choukh.github.io/USST/Ord.Base.html)  
 
 本章将复刻质料集合论的重要概念: 序数.
 
 ```agda
 {-# OPTIONS --cubical --safe #-}
 module Ordinal.Base where
-
 open import Preliminary
-open import Order
 ```
 
 ## 序关系的一些性质
@@ -27,6 +25,22 @@ open import Order
 
 ```agda
 module _ {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
+```
+
+### 命题性
+
+我们说 `_<_` 是一个 **命题 (propositional)** 关系, 当且仅当对任意 `x y : A`, `x < y` 是一个命题.
+
+```agda
+  Propositional : Type _
+  Propositional = ∀ x y → isProp (x < y)
+```
+
+命题性本身是一个命题.
+
+```agda
+  isPropPropositional : isProp Propositional
+  isPropPropositional = isPropΠ2 λ _ _ → isPropIsProp
 ```
 
 ### 反自反性
@@ -60,7 +74,7 @@ module _ {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
 如果`_<_` 是一个命题关系, 那么传递性是一个命题.
 
 ```agda
-  isPropTransitive : Propositional _<_ → isProp Transitive
+  isPropTransitive : Propositional → isProp Transitive
   isPropTransitive prop = isPropΠ5 λ _ _ _ _ _ → prop _ _
 ```
 
@@ -78,6 +92,25 @@ module _ {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
 ```agda
   isPropExtensional : isSet A → isProp Extensional
   isPropExtensional A-set = isPropΠ3 λ _ _ _ → transportIsProp $ A-set _ _
+```
+
+**引理** 如果 `_<_` 同时具有命题性和外延性那么 `A` 是集合.
+**证明梗概** 由引理 `Collapsible≡→isSet`, 只要证明 `A` 上的相等类型 `x ≡ y` 可折叠, 就证明了 `A` 是集合. 可折叠是说能构造 `x ≡ y` 的自映射 `f` 满足 `f` 是一个常函数. 只要用作为自变量的那个 `eq : x ≡ y` 替换外延性的前提 `z < x ↔ z < y` 就能得到另一个 `x ≡ y`. 由于 `_<_` 是命题, 所以 `z < x ↔ z < y` 是命题, 所以 `f` 是常函数. ∎
+
+```agda
+  open import Cubical.Foundations.Function using (2-Constant)
+  open import Cubical.Relation.Nullary using (Collapsible; Collapsible≡→isSet)
+
+  Extensional→isSet : Propositional → Extensional → isSet A
+  Extensional→isSet prop ext = Collapsible≡→isSet λ x y →
+    transport Collapsible (sym Path≡Eq) $ collapser x y , didCollapse x y
+    where
+    collapser : ∀ x y → x ≡ y → x ≡ y
+    collapser x y eq = ext x y λ z → (transport (z <_) eq) , (transport (z <_) (sym eq))
+    didCollapse : ∀ x y → 2-Constant (collapser x y)
+    didCollapse x y p q = eqToPath $ ap (ext x y) $ funExt λ _ → Σ≡Prop
+      (λ _ _ _ → pathToEq $ isProp→ (prop _ _) _ _)
+      (funExt λ _ → pathToEq $ prop _ _ _ _)
 ```
 
 ### 良基性
@@ -120,103 +153,107 @@ module _ {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
   WellFounded→Irreflexive wf x = Acc→Irreflexive x (wf x)
 ```
 
+### 良序性
+
+我们说 `_<_` 是一个 **良序 (well-ordered)** 关系, 当且仅当: `_<_` 有命题性, 传递性, 外延性和良基性.
+
+```agda
+  record WellOrdered : Type (ℓ ⊔ ℓ′) where
+    constructor mkWellOrdered
+    field
+      <-prop    : Propositional
+      <-trans   : Transitive
+      <-ext     : Extensional
+      <-wf      : WellFounded
+```
+
+良序关系是反自反的, 且其基底类型必是集合, 我们今后称之为**底集 (underlying set)**. 经典数学里面一般是把这里的外延性换成了三歧性, 但在直觉主义中外延性更容易处理. 此外, HoTT Book 也有相应的定义, 见 Def 10.3.17, 它要求 "`A` 是集合", 但这不是必须的, Escardó 首先证明了[这一点](https://www.cs.bham.ac.uk/~mhe/TypeTopology/Ordinals.Notions.html#8277)
+
+```agda
+    <-irrefl : Irreflexive
+    <-irrefl = WellFounded→Irreflexive <-wf
+
+    underlying-set : isSet A
+    underlying-set = Extensional→isSet <-prop <-ext
+```
+
+由于良序性里面的每个条件都是命题, 所以良序性也是一个命题.
+
+```agda
+  unquoteDecl WellOrderedIsoΣ = declareRecordIsoΣ WellOrderedIsoΣ (quote WellOrdered)
+
+  isPropWellOrdered : isProp WellOrdered
+  isPropWellOrdered = isOfHLevelRetractFromIso 1 WellOrderedIsoΣ $ aux where
+    aux : ∀ x y → Path x y
+    aux x _ = ΣPathP (isPropPropositional _ _
+            , ΣPathP (isPropTransitive <-prop _ _
+            , ΣPathP (isPropExtensional underlying-set _ _
+            , isPropWellFounded _ _)))
+      where open WellOrdered (Iso.inv WellOrderedIsoΣ x)
+```
+
 ## 序数的定义
 
-### 序数性
-
-我们说类型 `A` 和其上的序关系 `_<_` 构成一个 **序数 (ordinal)**, 记作 `IsOrdinal A _<_`, 当且仅当它们满足: `A` 是集合且 `_<_` 有命题性, 传递性, 外延性和良基性. 因为良基性蕴含反自反性, 所以 `_<_` 也有反自反性.
-
-```agda
-record IsOrdinal (A : Type ℓ) (_<_ : A → A → Type ℓ′) : Type (ℓ ⊔ ℓ′) where
-  constructor mkIsOrdinal
-  field
-    ord-set   : isSet A
-    <-order   : IsOrder _<_
-    <-trans   : Transitive _<_
-    <-ext     : Extensional _<_
-    <-wf      : WellFounded _<_
-
-  <-irrefl : Irreflexive _<_
-  <-irrefl = WellFounded→Irreflexive _<_ <-wf
-
-  open IsOrder <-order public
-```
-
-由于序数性里面的每个条件都是命题, 所以序数性也是一个命题.
-
-```agda
-unquoteDecl IsOrdinalIsoΣ = declareRecordIsoΣ IsOrdinalIsoΣ (quote IsOrdinal)
-
-isPropIsOrdinal : (A : Type ℓ) (_<_ : A → A → Type ℓ′) → isProp (IsOrdinal A _<_)
-isPropIsOrdinal A _<_ = isOfHLevelRetractFromIso 1 IsOrdinalIsoΣ $
-  isPropΣ (isPropPropositional _) λ ord-set →
-  isPropΣ isPropIsOrder λ isOrder → let open IsOrder isOrder in isProp×2
-    (isPropTransitive _ order-prop)
-    (isPropExtensional _ ord-set)
-    (isPropWellFounded _)
-```
+为了方便反射工具处理, 我们遵循 cubical 库的做法, 先用 record 类型定义序数结构, 然后用Σ类型把序数定义为类型宇宙配备上序数结构.
 
 ### 序数结构
 
-一个类型 `A` 配备上满足序数性的序关系 `_<_` 就构成了一个序数结构 `OrdinalStr`.
+一个类型 `A` 配备上满足良序关系的 `_<_` 就构成了一个序数结构 `OrdStr`. 注意我们这里让 `_<_` 与底集 `A` 居留于同一宇宙, 这可以让形式更简单, 反正 `_<_` 是命题, 而我们有 `PR` 可以随时调整命题宇宙.
 
 ```agda
-record OrdinalStr (ℓ′ : Level) (A : Type ℓ) : Type (ℓ ⊔ ℓ-suc ℓ′) where
+record OrdStr (A : Type ℓ) : Type (ℓ-suc ℓ) where
   constructor mkOrdinalStr
   field
-    _<_ : A → A → Type ℓ′
-    isOrdinal : IsOrdinal A _<_
-  open IsOrdinal isOrdinal public
+    _<_ : A → A → Type ℓ
+    <-wo : WellOrdered _<_
+  open WellOrdered <-wo public
 ```
 
 ### 序数宇宙
 
-序数宇宙 `Ordinal` 定义为类型宇宙配备上序数结构.
+类型宇宙配备上序数结构就构成了序数宇宙 `Ord`. 注意 `Ord` 后面跟的 `ℓ` 指的是底集所在的宇宙, 而 `Ord` 本身位于 `ℓ-suc ℓ` 宇宙.
 
 ```agda
-Ordinal : (ℓ ℓ′ : Level) → Type _
-Ordinal ℓ ℓ′ = TypeWithStr ℓ (OrdinalStr ℓ′)
-```
-
-## 遗忘函子
-
-```agda
-private variable
-  A B : Type ℓ
-
-OrdinalStr→OrderStr : OrdinalStr ℓ′ A → OrderStr ℓ′ A
-OrdinalStr→OrderStr (mkOrdinalStr _≤_ str) = mkOrderStr _≤_ (IsOrdinal.<-order str)
-
-Ordinal→Order : Ordinal ℓ ℓ′ → Order ℓ ℓ′
-Ordinal→Order (A , str) = A , OrdinalStr→OrderStr str
+Ord : (ℓ : Level) → Type (ℓ-suc ℓ)
+Ord ℓ = TypeWithStr ℓ OrdStr
 ```
 
 ## 序数等价
 
 ```agda
-IsOrdinalEquiv : (M : OrdinalStr ℓ′₁ A) (e : A ≃ B) (N : OrdinalStr ℓ′₂ B) → Type _
-IsOrdinalEquiv M f N = IsOrderEquiv (OrdinalStr→OrderStr M) f (OrdinalStr→OrderStr N)
+record IsOrdEquiv {A : Type ℓ₁} {B : Type ℓ₂}
+  (a : OrdStr A) (e : A ≃ B) (b : OrdStr B) : Type (ℓ₁ ⊔ ℓ₂) where
+  constructor mkIsOrderEquiv
+  private
+    module ₁ = OrdStr a
+    module ₂ = OrdStr b
+    f = equivFun e
+  field
+    pres≤ : (x y : A) → x ₁.< y ≃ f x ₂.< f y
 
-OrdinalEquiv : (M : Ordinal ℓ₁ ℓ′₁) (M : Ordinal ℓ₂ ℓ′₂) → Type _
-OrdinalEquiv M N = Σ[ e ∈ ⟨ M ⟩ ≃ ⟨ N ⟩ ] IsOrdinalEquiv (str M) e (str N)
+_≃ₒ_ : Ord ℓ₁ → Ord ℓ₂ → Type _
+α ≃ₒ β = Σ[ e ∈ ⟨ α ⟩ ≃ ⟨ β ⟩ ] IsOrdEquiv (str α) e (str β)
 ```
 
 ## 序数的泛等原理
 
 ```agda
-𝒮ᴰ-Ordinal : DUARel (𝒮-Univ ℓ) (OrdinalStr ℓ′) (ℓ ⊔ ℓ′)
-𝒮ᴰ-Ordinal = 𝒮ᴰ-Record (𝒮-Univ _) IsOrdinalEquiv
+𝒮ᴰ-Ord : DUARel (𝒮-Univ ℓ) OrdStr ℓ
+𝒮ᴰ-Ord = 𝒮ᴰ-Record (𝒮-Univ _) IsOrdEquiv
   (fields:
     data[ _<_ ∣ autoDUARel _ _ ∣ pres≤ ]
-    prop[ isOrdinal ∣ (λ _ _ → isPropIsOrdinal _ _) ])
+    prop[ <-wo ∣ (λ _ _ → isPropWellOrdered _) ])
   where
-  open OrdinalStr
-  open IsOrderEquiv
+  open OrdStr
+  open IsOrdEquiv
 ```
 
 两个序数的等价等价于它们的相等.
 
 ```agda
-OrdinalPath : (M N : Ordinal ℓ ℓ′) → OrdinalEquiv M N ≃ (Path M N)
-OrdinalPath = ∫ 𝒮ᴰ-Ordinal .UARel.ua
+OrdinalPath : (α β : Ord ℓ) → (α ≃ₒ β) ≃ (Path α β)
+OrdinalPath = ∫ 𝒮ᴰ-Ord .UARel.ua
+
+OrdinalUnivalence : (α β : Ord ℓ) → (α ≃ₒ β) ≃ (α ≡ β)
+OrdinalUnivalence α β = transport (α ≃ₒ β ≃_) Path≡Eq (OrdinalPath α β)
 ```

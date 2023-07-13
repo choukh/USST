@@ -192,7 +192,7 @@ open import Cubical.Data.Nat public using (isSetℕ)
 
 ```agda
 open import Cubical.Foundations.HLevels public
-  using ( isPropΠ; isPropΠ2; isPropΠ3; isPropΠ4; isPropΠ5; isPropΠ6
+  using ( isPropΠ; isPropΠ2; isPropΠ3; isPropΠ4; isPropΠ5; isPropΠ6; isProp→
         ; isProp×; isProp×2; isProp×3; isProp×4; isProp×5; isPropΣ
         ; isSetΠ; isSetΣ)
 ```
@@ -241,15 +241,16 @@ open import Cubical.Data.Sigma public using (∃; ∃-syntax)
 
 "相等" 在泛等基础中是一个复杂的概念. 首先上面提到的库中的概念所涉及到的相等都采用了所谓**路径类型 (path type)**. 但本文中将使用定义为**归纳类型族 (inductive type family)** 的**命题相等类型 (propositional equality)**, 也就是下面导入的 `_≡_`. 两种相等类型的定义是等价的, 但后者在非同伦论的数学中更加直观, 也更加容易使用. 我们导入了一堆它们之间的相互转化引理: `eqToPath`, `pathToEq`, `Path≡Eq` 等, 以灵活处理各种情况. 使用 `Σ≡Prop` 可以通过证明两个依值配对的左边分别相等来证明这两个依值配对相等, 只要它们的右边是一个谓词.
 
-`_≡_` 具有自反性 `refl`, 对称性 `sym` 和 传递性 `_∙_`. 其中 `refl` 是 `_≡_` 归纳类型的唯一构造子, 可以做模式匹配和反演推理. 实际上, 包括对称性和传递性在内的 `_≡_` 的其他性质都通过 `refl` 推导而来.
+`_≡_` 具有自反性 `refl`, 对称性 `sym` 和 传递性 `_∙_`. 其中 `refl` 是 `_≡_` 归纳类型的唯一构造子, 可以做模式匹配和反演推理. 实际上, 包括对称性和传递性在内的 `_≡_` 的其他性质都通过 `refl` 推导而来. 下面是4个常用性质.
 
-`ap` 也叫合同性, 它说 `x ≡ y → f x ≡ f y`.  
-`happly` 也叫做同伦应用, 它说 `f ≡ g → (x : A) → f x ≡ g x`.  
-`transport` 也叫做等量替换, 它说 `x ≡ y → P x → P y`.
+`ap`, 也叫合同性, 它说 `x ≡ y → f x ≡ f y`.  
+`happly`, 也叫做同伦应用, 它说 `f ≡ g → (x : A) → f x ≡ g x`.  
+`transport`, 也叫做等量替换, 它说 `x ≡ y → P x → P y`.  
+`funExt`, 也叫做函数的外延性, 它说 `(∀ x → f x ≡ g x) → f ≡ g`.
 
 ```agda
 open import Cubical.Data.Equality public
-  using ( _≡_; refl; sym; _∙_; ap; happly; transport
+  using ( _≡_; refl; sym; _∙_; ap; happly; transport; funExt
         ; eqToPath; pathToEq; Path≡Eq; isPropPathToIsProp; Σ≡Prop)
   renaming (squash₁ to squash₁Eq)
 ```
@@ -263,18 +264,26 @@ transportIsProp : {A : Type ℓ} {x y : A} → isProp (Path x y) → isProp (x �
 transportIsProp = transport isProp Path≡Eq
 ```
 
+有时候我们需要用 `ΣPathP` 证明两个Σ类型路径相等.
+
+```agda
+open import Cubical.Data.Sigma public using (ΣPathP)
+```
+
 ### 同伦等价
 
 ```agda
 open import Cubical.Foundations.Equiv public
   using (_≃_; equivFun; invEquiv)
+
+open import Cubical.Foundations.Isomorphism public using (Iso)
 ```
 
 ```agda
-open import Cubical.Displayed.Base public
-open import Cubical.Displayed.Auto public
-open import Cubical.Displayed.Record public
-open import Cubical.Displayed.Universe public
+open import Cubical.Displayed.Base public using (DUARel; UARel; ∫)
+open import Cubical.Displayed.Auto public using (autoDUARel)
+open import Cubical.Displayed.Record public using (𝒮ᴰ-Record; fields:; _data[_∣_∣_]; _prop[_∣_])
+open import Cubical.Displayed.Universe public using (𝒮-Univ)
 ```
 
 ### 幂集
@@ -364,7 +373,7 @@ inr x = ∣ ⊎.inr x ∣₁
 ```agda
 infix 1 _↔_
 _↔_ : Type ℓ → Type ℓ′ → Type _
-A ↔ B = A → B × B → A
+A ↔ B = (A → B) × (B → A)
 ```
 
 ## 排中律
@@ -395,8 +404,8 @@ isPropLEM ℓ = isPropΠ2 λ _ → isPropDec
 虽然我们不能证明排中律, 但我们可以证明对任意类型, 它的可判定性非空 (双重否定成立). 这在有些书上也叫做排中律不可辩驳.
 
 ```agda
-DecNonEmpty : (A : Type ℓ) → NonEmpty (Dec A)
-DecNonEmpty _ ¬dec = ¬dec $ no λ a → ¬dec $ yes a
+NonEmptyDec : (A : Type ℓ) → NonEmpty (Dec A)
+NonEmptyDec _ ¬dec = ¬dec $ no λ a → ¬dec $ yes a
 ```
 
 ## 选择公理
@@ -502,13 +511,13 @@ GCH→CH ℓ gch X X-set (ℕ≼X , X⋠ℕ) X≼ℙℕ with gch ℕ X isSetℕ 
 
 ## 非数学
 
-我们经常需要用 Agda 的反射机制证明Σ类型与record类型同伦等价.
+为了编程上的方便, 我们经常需要用 Agda 的反射机制将Σ类型与 record 类型相互转化.
 
 ```agda
 open import Cubical.Reflection.RecordEquiv public using (declareRecordIsoΣ)
 ```
 
-再用 `isOfHLevelRetractFromIso` 将 record 类型的命题/集合性转化为证明与之同构的Σ类型的命题/集合性.
+再用 `isOfHLevelRetractFromIso` 将对 record 类型的命题/集合性的证明转化为对与之同构的Σ类型的命题/集合性的证明.
 
 ```agda
 open import Cubical.Foundations.HLevels public using (isOfHLevelRetractFromIso)
