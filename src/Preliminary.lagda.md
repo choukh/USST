@@ -196,7 +196,7 @@ open import Cubical.Foundations.HLevels public
         ; isSetΠ; isSetΣ)
 ```
 
-命题宇宙 `hProp ℓ` 定义为 `Type ℓ` 配备上结构 `isProp`, 即 `hProp ℓ = Σ (Type ℓ) isProp`. 引理 `isSetHProp` 告诉我们, 命题宇宙 `hProp ℓ` 是集合.
+命题宇宙 `hProp ℓ` 定义为 `Type ℓ` 配备上结构 `isProp`, 即 `hProp ℓ = Σ (Type ℓ) isProp`. 引理 `isSetHProp` 告诉我们, 命题宇宙 `hProp ℓ` 是集合. 在传统基础中所有命题不可能组成集合, 因为太大了. 但泛等基础中说的集合不关乎大小, 大小已经由宇宙层级处理了.
 
 ```agda
 open import Cubical.Foundations.HLevels public using (hProp; isSetHProp)
