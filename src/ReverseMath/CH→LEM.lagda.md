@@ -7,15 +7,15 @@ zhihu-url: https://zhuanlan.zhihu.com/p/643217740
 # 泛等结构集合论 (2) 开胃菜: CH → LEM
 
 > 交流Q群: 893531731  
-> 本文源码: [CH→LEM.lagda.md](https://github.com/choukh/USST/blob/main/src/CH→LEM.lagda.md)  
-> 高亮渲染: [CH→LEM.html](https://choukh.github.io/USST/CH→LEM.html)  
+> 本文源码: [CH→LEM.lagda.md](https://github.com/choukh/USST/blob/main/src/ReverseMath/CH→LEM.lagda.md)  
+> 高亮渲染: [CH→LEM.html](https://choukh.github.io/USST/ReverseMath.CH→LEM.html)  
 
 我们导入前置知识, 并全局假设 `PR`. 我们来证明在直觉主义中连续统假设蕴含排中律.
 
 ```agda
 {-# OPTIONS --cubical --safe #-}
 open import Preliminary
-module CH→LEM ⦃ _ : PR ⦄ where
+module ReverseMath.CH→LEM ⦃ _ : PR ⦄ where
 ```
 
 ## 康托尔定理
