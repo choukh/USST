@@ -322,13 +322,11 @@ record PropositionalResizing (ℓ ℓ′ : Level) : Type (ℓ-suc ℓ ⊔ ℓ-su
     unresize : {P : hProp ℓ} → ⟨ Resize P ⟩ → ⟨ P ⟩
 ```
 
-以下代码是 Agda 的一些小技巧, 不熟悉 Agda 可以不看. 只需知道我们只要在模块声明中以 `⦃ _ : PR ⦄` 的形式声明参数, 那么就等于假设了 PR, 就可以在该模块中尽情地使用上面的三个函数, 而不用显式说明具体是哪两个命题宇宙之间的转换.
+以下代码是 Agda 的一些小技巧, 不熟悉 Agda 可以不用管. 只需知道我们只要在模块声明中以 `⦃ _ : PR ⦄` 的形式声明参数, 那么就等于假设了 PR, 就可以在该模块中尽情地使用上面的三个函数, 而不用显式说明具体是哪两个命题宇宙之间的转换.
 
 ```agda
 PR = ∀ {ℓ ℓ′} → PropositionalResizing ℓ ℓ′
-
-module _ ⦃ pr : PropositionalResizing ℓ ℓ′ ⦄ where
-  open PropositionalResizing pr public
+open PropositionalResizing ⦃...⦄ public
 ```
 
 ## 命题逻辑
