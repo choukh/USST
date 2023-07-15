@@ -11,10 +11,29 @@ zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 
 ```agda
 {-# OPTIONS --cubical --safe #-}
-{-# OPTIONS --hidden-argument-puns #-}
+{-# OPTIONS --lossy-unification --hidden-argument-puns #-}
 module Ordinal.Order where
 open import Preliminary
 open import Ordinal.Base
+```
+
+## 底序
+
+```agda
+record Underlying {ℓ} (O : Type (ℓ-suc ℓ)) : Type (ℓ-suc ℓ) where
+  field
+    underlyingSet : O → Type ℓ
+    underlyingRel : (α : O) → underlyingSet α → underlyingSet α → Type ℓ
+  syntax underlyingRel α x y = x <⟨ α ⟩ y
+
+open Underlying ⦃...⦄ public
+```
+
+```agda
+instance
+  underlying : Underlying (Ord ℓ)
+  underlyingSet ⦃ underlying ⦄ = ⟨_⟩
+  underlyingRel ⦃ underlying ⦄ = OrdStr._<_ ∘ str
 ```
 
 ## 序数模仿
@@ -23,8 +42,6 @@ open import Ordinal.Base
 
 ```agda
 record IsSimulation {α : Ord ℓ} {β : Ord ℓ′} (f : ⟨ α ⟩ → ⟨ β ⟩) : Type (ℓ ⊔ ℓ′) where
-  module ₁ = OrdStr (str α)
-  module ₂ = OrdStr (str β)
 ```
 
 保序性 `pres<` 很简单, 它就是上一章同伦保序 `hPres<` 的弱化版. "形成前段" 即 `formsInitSeg` 这一性质的直观可以参考下图. 它说只要一个底集元素被射到, 那么比它小的元素都会被射到, 也就是映射的像能形成 `<` 的一个前段.
@@ -37,8 +54,8 @@ record IsSimulation {α : Ord ℓ} {β : Ord ℓ′} (f : ⟨ α ⟩ → ⟨ β 
 
 ```agda
   field
-    pres< : ∀ a a′ → a ₁.< a′ → f a ₂.< f a′
-    formsInitSeg : ∀ b a′ → b ₂.< f a′ → Σ[ a ∈ ⟨ α ⟩ ] a ₁.< a′ × f a ≡ b
+    pres< : ∀ a a′ → a <⟨ α ⟩ a′ → f a <⟨ β ⟩ f a′
+    formsInitSeg : ∀ b a′ → b <⟨ β ⟩ f a′ → Σ[ a ∈ ⟨ α ⟩ ] a <⟨ α ⟩ a′ × f a ≡ b
 ```
 
 **引理** 序数模仿是单射.
@@ -48,18 +65,17 @@ simulation-inj :(f : ⟨ α ⟩ → ⟨ β ⟩) → IsSimulation f → injective
 simulation-inj {α} {β} f f-sim = {!   !}
   where
   open IsSimulation f-sim
-  open OrdStr (str α) renaming (_<_ to _<₁_) using (<-ext)
-  open OrdStr (str β) renaming (_<_ to _<₂_) using ()
-  open BinaryRelation _<₁_ using (Acc; acc)
+  open OrdStr (str α) using (<-ext)
+  open BinaryRelation (underlyingRel α) using (Acc; acc)
 
   Acc→inj : ∀ x y → Acc x → Acc y → f x ≡ f y → x ≡ y
   Acc→inj x y (acc H₁) (acc H₂) fx≡fy = <-ext x y λ z → p z , q z
     where
-    p : ∀ z → z <₁ x → z <₁ y
+    p : ∀ z → z <⟨ α ⟩ x → z <⟨ α ⟩ y
     p z z<x = {!   !}
       where
-      fz<fy : f z <₂ f y
-      fz<fy = {! transport   !}
-    q : ∀ z → z <₁ y → z <₁ x
+      fz<fy : f z <⟨ β ⟩ f y
+      fz<fy = transport (λ - → f z <⟨ β ⟩ -) fx≡fy (pres< z x z<x)
+    q : ∀ z → z <⟨ α ⟩ y → z <⟨ α ⟩ x
     q z z<y = {!   !}
 ```

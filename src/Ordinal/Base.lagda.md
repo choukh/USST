@@ -226,26 +226,6 @@ Ord ℓ = TypeWithStr ℓ OrdStr
 variable α β γ : Ord ℓ
 ```
 
-### 底序
-
-```agda
-record Underlying {ℓ} (O : Type (ℓ-suc ℓ)) : Type (ℓ-suc ℓ) where
-  field
-    ⟨_⟩↓ : O → Type ℓ
-    underlyingRel : (α : O) → ⟨ α ⟩↓ → ⟨ α ⟩↓ → Type ℓ
-
-  syntax underlyingRel α x y = x ≺⟨ α ⟩ y
-
-open Underlying ⦃...⦄ public
-```
-
-```agda
-instance
-  underlyingOfOrd : Underlying (Ord ℓ)
-  ⟨_⟩↓ ⦃ underlyingOfOrd ⦄ = ⟨_⟩
-  underlyingRel ⦃ underlyingOfOrd ⦄ = OrdStr._<_ ∘ str
-```
-
 ## 序数等价
 
 序数间的同伦等价 `α ≃ₒ β` 定义为保持序关系的底集间同伦等价 `A ≃ B`. 注意"保持序关系"也必须用同伦等价来表达, 记作 `hPres<`, 定义为对任意 `x y : A` 有 `x <₁ y` 与 `f x <₂ f y` 同伦等价, 其中 `<₁` 和 `<₂` 分别是 `A` 和 `B` 上的序关系, `f` 是 `A ≃ B` 的底层函数.
@@ -255,8 +235,8 @@ record IsOrdEquiv {A : Type ℓ₁} {B : Type ℓ₂}
   (a : OrdStr A) (e : A ≃ B) (b : OrdStr B) : Type (ℓ₁ ⊔ ℓ₂) where
   constructor mkIsOrderEquiv
   private
-    open OrdStr a using () renaming (_<_ to _<₁_)
-    open OrdStr b using () renaming (_<_ to _<₂_)
+    open OrdStr a renaming (_<_ to _<₁_)
+    open OrdStr b renaming (_<_ to _<₂_)
     f = equivFun e
   field
     hPres< : (x y : A) → x <₁ y ≃ f x <₂ f y
@@ -296,4 +276,3 @@ OrdinalUnivalence α β = transport (α ≃ₒ β ≃_) Path≡Eq (OrdinalPath �
 ```
 
 有了序数的泛等原理之后, 就可以通过找到两个序数间保持 `_<_` 关系的同伦等价来证明它们相等. 这体现了泛等基础的好处, 我们不需要商掉某个等价关系, 也不用像质料集合论那样用超限归纳证明两个同构的序数外延相等.
- 
