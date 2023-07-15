@@ -25,7 +25,7 @@ open import Preliminary
 给定类型 `A : Type ℓ` 及其上的序关系 `_<_ : A → A → Type ℓ′`
 
 ```agda
-module _ {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
+module BinaryRelation {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
 ```
 
 ### 命题性
@@ -204,6 +204,7 @@ module _ {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
 ```agda
 record OrdStr (A : Type ℓ) : Type (ℓ-suc ℓ) where
   constructor mkOrdinalStr
+  open BinaryRelation
   field
     _<_ : A → A → Type ℓ
     <-wo : WellOrdered _<_
@@ -219,6 +220,32 @@ Ord : (ℓ : Level) → Type (ℓ-suc ℓ)
 Ord ℓ = TypeWithStr ℓ OrdStr
 ```
 
+我们今后都用 α β γ 等符号表示序数.
+
+```agda
+variable α β γ : Ord ℓ
+```
+
+### 底序
+
+```agda
+record Underlying {ℓ} (O : Type (ℓ-suc ℓ)) : Type (ℓ-suc ℓ) where
+  field
+    ⟨_⟩↓ : O → Type ℓ
+    underlyingRel : (α : O) → ⟨ α ⟩↓ → ⟨ α ⟩↓ → Type ℓ
+
+  syntax underlyingRel α x y = x ≺⟨ α ⟩ y
+
+open Underlying ⦃...⦄ public
+```
+
+```agda
+instance
+  underlyingOfOrd : Underlying (Ord ℓ)
+  ⟨_⟩↓ ⦃ underlyingOfOrd ⦄ = ⟨_⟩
+  underlyingRel ⦃ underlyingOfOrd ⦄ = OrdStr._<_ ∘ str
+```
+
 ## 序数等价
 
 序数间的同伦等价 `α ≃ₒ β` 定义为保持序关系的底集间同伦等价 `A ≃ B`. 注意"保持序关系"也必须用同伦等价来表达, 记作 `hPres<`, 定义为对任意 `x y : A` 有 `x <₁ y` 与 `f x <₂ f y` 同伦等价, 其中 `<₁` 和 `<₂` 分别是 `A` 和 `B` 上的序关系, `f` 是 `A ≃ B` 的底层函数.
@@ -228,11 +255,11 @@ record IsOrdEquiv {A : Type ℓ₁} {B : Type ℓ₂}
   (a : OrdStr A) (e : A ≃ B) (b : OrdStr B) : Type (ℓ₁ ⊔ ℓ₂) where
   constructor mkIsOrderEquiv
   private
-    module ₁ = OrdStr a
-    module ₂ = OrdStr b
+    open OrdStr a using () renaming (_<_ to _<₁_)
+    open OrdStr b using () renaming (_<_ to _<₂_)
     f = equivFun e
   field
-    hPres< : (x y : A) → x ₁.< y ≃ f x ₂.< f y
+    hPres< : (x y : A) → x <₁ y ≃ f x <₂ f y
 
 _≃ₒ_ : Ord ℓ₁ → Ord ℓ₂ → Type _
 α ≃ₒ β = Σ[ e ∈ ⟨ α ⟩ ≃ ⟨ β ⟩ ] IsOrdEquiv (str α) e (str β)
@@ -251,6 +278,7 @@ _≃ₒ_ : Ord ℓ₁ → Ord ℓ₂ → Type _
   where
   open OrdStr
   open IsOrdEquiv
+  open BinaryRelation
 ```
 
 然后就可以用 `∫` 从 `𝒮ᴰ-Ord` 中取出序数的泛等原理: 两个序数的等价等价于它们的相等.
@@ -268,3 +296,4 @@ OrdinalUnivalence α β = transport (α ≃ₒ β ≃_) Path≡Eq (OrdinalPath �
 ```
 
 有了序数的泛等原理之后, 就可以通过找到两个序数间保持 `_<_` 关系的同伦等价来证明它们相等. 这体现了泛等基础的好处, 我们不需要商掉某个等价关系, 也不用像质料集合论那样用超限归纳证明两个同构的序数外延相等.
+ 
