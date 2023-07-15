@@ -41,7 +41,7 @@ Cantor-⋠ X (f , f-inj) = noncontradiction ∈→∉ ∉→∈
 
 ```agda
   A : ℙ X
-  A x = Resize $ (∀ B → f B ≡ x → x ∉ B) , isPropΠ3 λ _ _ _ → isProp⊥
+  A x = Resize $ (∀ B → f B ＝ x → x ∉ B) , isPropΠ3 λ _ _ _ → isProp⊥
 ```
 
 一旦对角线集 `A` 构造完成, 由定义立即有 `f A ∈ A` 蕴含 `f A ∉ A`.
@@ -51,11 +51,11 @@ Cantor-⋠ X (f , f-inj) = noncontradiction ∈→∉ ∉→∈
   ∈→∉ fA∈A = unresize fA∈A A refl
 ```
 
-另一方面, 假设 `f A ∉ A`, 要证 `f A ∈ A`. 即假设有一个 `B` 满足 `f B ≡ f A`, 要证 `f A ∉ B`. 由 `f` 的单射性可知 `A ≡ B`, 用它改写前提 `f A ∉ A` 右边的 `A` 即证. ∎
+另一方面, 假设 `f A ∉ A`, 要证 `f A ∈ A`. 即假设有一个 `B` 满足 `f B ＝ f A`, 要证 `f A ∉ B`. 由 `f` 的单射性可知 `A ＝ B`, 用它改写前提 `f A ∉ A` 右边的 `A` 即证. ∎
 
 ```agda
   ∉→∈ : f A ∉ A → f A ∈ A
-  ∉→∈ fA∉A = resize λ B fB≡ → transport (f A ∉_) (f-inj (sym fB≡)) fA∉A
+  ∉→∈ fA∉A = resize λ B fB＝ → transport (f A ∉_) (f-inj (sym fB＝)) fA∉A
 ```
 
 由康托尔定理我们可以知道作为 `GCH` 结论的那个和类型的两边互斥, 从而证明 `GCH` 的命题性. 今后不需要用到这一结论.
@@ -77,15 +77,15 @@ isPropGCH ℓ ℓ′ = isPropΠ4 λ X Y _ _ → isPropΠ3 λ _ _ _ →
 module Lemmas (X : Type ℓ) (X-set : isSet X) where
 ```
 
-由 `X` 的某个项 `x` 所构成的单集 `｛ x ｝ : ℙ X` 定义为谓词 `x ≡_`. `X` 的集合性保证了 `x ≡_` 是一个谓词.
+由 `X` 的某个项 `x` 所构成的单集 `｛ x ｝ : ℙ X` 定义为谓词 `x ＝_`. `X` 的集合性保证了 `x ＝_` 是一个谓词.
 
 ```agda
   opaque
     ｛_｝ : X → ℙ X
-    ｛ x ｝ y = (x ≡ y) , transportIsProp (X-set _ _)
+    ｛ x ｝ y = (x ＝ y) , transportIsProp (X-set _ _)
 ```
 
-由 `_≡_` 的基本性质可以证明单集构造 `｛_｝` 具有单射性.
+由 `_＝_` 的基本性质可以证明单集构造 `｛_｝` 具有单射性.
 
 ```agda
     ｛｝-inj : injective ｛_｝
@@ -96,7 +96,7 @@ module Lemmas (X : Type ℓ) (X-set : isSet X) where
 
 ```agda
   is｛｝ : ℙ X → Type _
-  is｛｝ A = Σ x ∶ X , A ≡ ｛ x ｝
+  is｛｝ A = Σ x ∶ X , A ＝ ｛ x ｝
 ```
 
 注意尽管这里用的是Σ类型, 我们仍然能证明 "是单集" 是一个谓词, 因为见证 `A` 是单集的那个 `x` 唯一. 不过后面不需要用到这一结论.
@@ -111,14 +111,14 @@ module Lemmas (X : Type ℓ) (X-set : isSet X) where
 
 ```agda
   Cantor-beyond｛｝ : (f : ℙ X → ℙ X) → injective f → Σ A ∶ ℙ X , ¬ is｛｝ (f A)
-  Cantor-beyond｛｝ f f-inj = A , λ (x , fA≡) → noncontradiction (∈→∉ x fA≡) (∉→∈ x fA≡)
+  Cantor-beyond｛｝ f f-inj = A , λ (x , fA＝) → noncontradiction (∈→∉ x fA＝) (∉→∈ x fA＝)
     where
     A : ℙ X
-    A x = Resize $ (∀ B → f B ≡ ｛ x ｝ → x ∉ B) , isPropΠ3 λ _ _ _ → isProp⊥
-    ∈→∉ : ∀ x → (f A ≡ ｛ x ｝) → x ∈ A → x ∉ A
-    ∈→∉ x fA≡ x∈A = unresize x∈A A fA≡
-    ∉→∈ : ∀ x → (f A ≡ ｛ x ｝) → x ∉ A → x ∈ A
-    ∉→∈ x fA≡ x∉A = resize λ B fB≡ → transport (x ∉_) (f-inj (fA≡ ∙ sym fB≡)) x∉A
+    A x = Resize $ (∀ B → f B ＝ ｛ x ｝ → x ∉ B) , isPropΠ3 λ _ _ _ → isProp⊥
+    ∈→∉ : ∀ x → (f A ＝ ｛ x ｝) → x ∈ A → x ∉ A
+    ∈→∉ x fA＝ x∈A = unresize x∈A A fA＝
+    ∉→∈ : ∀ x → (f A ＝ ｛ x ｝) → x ∉ A → x ∈ A
+    ∉→∈ x fA＝ x∉A = resize λ B fB＝ → transport (x ∉_) (f-inj (fA＝ ∙ sym fB＝)) x∉A
 ```
 
 ## 关键构造

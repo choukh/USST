@@ -251,35 +251,49 @@ syntax ∃-syntax A (λ x → B) = ∃ x ∶ A , B
 
 ### 相等类型
 
-"相等" 在泛等基础中是一个复杂的概念. 首先上面提到的库中的概念所涉及到的相等都采用了所谓**路径类型 (path type)**. 但本文中将使用定义为**归纳类型族 (inductive type family)** 的**命题相等类型 (propositional equality)**, 也就是下面导入的 `_≡_`. 两种相等类型的定义是等价的, 但后者在非同伦论的数学中更加直观, 也更加容易使用. 我们导入了一堆它们之间的相互转化引理: `eqToPath`, `pathToEq`, `Path≡Eq` 等, 以灵活处理各种情况. 使用 `Σ≡Prop` 可以通过证明两个依值配对的左边分别相等来证明这两个依值配对相等, 只要它们的右边是一个谓词.
+"相等" 在泛等基础中是一个复杂的概念. 首先上面提到的库中的概念所涉及到的相等都采用了所谓**路径类型 (path type)** `_≡_`.
 
-`_≡_` 具有自反性 `refl`, 对称性 `sym` 和 传递性 `_∙_`. 其中 `refl` 是 `_≡_` 归纳类型的唯一构造子, 可以做模式匹配和反演推理. 实际上, 包括对称性和传递性在内的 `_≡_` 的其他性质都通过 `refl` 推导而来. 下面是4个常用性质.
+```agda
+open import Cubical.Foundations.Prelude public using (_≡_)
+```
 
-`ap`, 也叫合同性, 它说 `x ≡ y → f x ≡ f y`.  
-`happly`, 也叫做同伦应用, 它说 `f ≡ g → (x : A) → f x ≡ g x`.  
-`transport`, 也叫做等量替换, 它说 `x ≡ y → P x → P y`.  
-`funExt`, 也叫做函数的外延性, 它说 `(∀ x → f x ≡ g x) → f ≡ g`.
+但本文中将更常使用定义为**归纳类型族 (inductive type family)** 的**命题相等类型 (propositional equality)** `_＝_`.
+
+```agda
+open import Cubical.Data.Equality public using () renaming (_≡_ to _＝_)
+```
+
+两种相等类型的定义是等价的, 但后者在非同伦论的数学中更加直观, 也更加容易使用. 我们导入了一堆它们之间的相互转化引理: `eqToPath`, `pathToEq`, `Path≡Eq` 等, 以灵活处理各种情况. 使用 `Σ≡Prop` 可以通过证明两个依值配对的左边分别相等来证明这两个依值配对相等, 只要它们的右边是一个谓词.
 
 ```agda
 open import Cubical.Data.Equality public
-  using ( _≡_; refl; sym; _∙_; ap; happly; transport; funExt
-        ; eqToPath; pathToEq; Path≡Eq; isPropPathToIsProp; Σ≡Prop)
+  using (eqToPath; pathToEq; Path≡Eq; isPropPathToIsProp; Σ≡Prop)
   renaming (squash₁ to squash₁Eq)
+```
+
+虽然大部分情况下 `Σ≡Prop` 就够用了, 但有时候我们不得不用 `ΣPathP` 证明两个Σ类型路径相等.
+
+```agda
+open import Cubical.Data.Sigma public using (ΣPathP)
+```
+
+`_＝_` 具有自反性 `refl`, 对称性 `sym` 和 传递性 `_∙_`. 其中 `refl` 是 `_＝_` 归纳类型的唯一构造子, 可以做模式匹配和反演推理. 实际上, 包括对称性和传递性在内的 `_＝_` 的其他性质都通过 `refl` 推导而来. 下面是4个常用性质.
+
+`ap`, 也叫合同性, 它说 `x ＝ y → f x ＝ f y`.  
+`happly`, 也叫做同伦应用, 它说 `f ＝ g → (x : A) → f x ＝ g x`.  
+`transport`, 也叫做等量替换, 它说 `x ＝ y → P x → P y`.  
+`funExt`, 也叫做函数的外延性, 它说 `(∀ x → f x ＝ g x) → f ＝ g`.
+
+```agda
+open import Cubical.Data.Equality public
+  using (refl; sym; _∙_; ap; happly; transport; funExt)
 ```
 
 以下引理会经常用到, 它将 "路径类型是命题" 的证明转化成 "相等类型是命题" 的证明.
 
 ```agda
-open import Agda.Builtin.Cubical.Path public renaming (_≡_ to Path)
-
-transportIsProp : {A : Type ℓ} {x y : A} → isProp (Path x y) → isProp (x ≡ y)
+transportIsProp : {A : Type ℓ} {x y : A} → isProp (x ≡ y) → isProp (x ＝ y)
 transportIsProp = transport isProp Path≡Eq
-```
-
-有时候我们需要用 `ΣPathP` 证明两个Σ类型路径相等.
-
-```agda
-open import Cubical.Data.Sigma public using (ΣPathP)
 ```
 
 ### 单射性
@@ -290,11 +304,11 @@ open import Cubical.Data.Sigma public using (ΣPathP)
 private variable A B C : Type ℓ
 ```
 
-cubical 库里面对单射的定义是为高阶同伦类型改编过的版本, 且相等是用 `Path` 表述的. 对于集合层面的数学我们用传统的单射性定义就够了, 并且相等用 `_≡_` 表述.
+cubical 库里面对单射的定义是为高阶同伦类型改编过的版本, 且相等是用 `Path` 表述的. 对于集合层面的数学我们用传统的单射性定义就够了, 并且相等用 `_＝_` 表述.
 
 ```agda
 injective : (A → B) → Type _
-injective f = ∀ {x y} → f x ≡ f y → x ≡ y
+injective f = ∀ {x y} → f x ＝ f y → x ＝ y
 ```
 
 ### 同伦等价

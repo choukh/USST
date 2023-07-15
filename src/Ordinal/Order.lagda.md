@@ -19,6 +19,8 @@ open import Ordinal.Base
 
 ## 底序
 
+以下一大块代码都仅仅是为了定义出 `x <⟨ α ⟩ y` 的写法. 其中 `<⟨ α ⟩` 叫做 `α` 的底序, 与底集相对应, 它们共同组成了一个序数的底层结构.
+
 ```agda
 record Underlying {ℓ} (O : Type (ℓ-suc ℓ)) : Type (ℓ-suc ℓ) where
   field
@@ -53,11 +55,11 @@ record IsSimulation {α : Ord ℓ} {β : Ord ℓ′} (f : ⟨ α ⟩ → ⟨ β 
 ```agda
   field
     pres< : ∀ a a′ → a <⟨ α ⟩ a′ → f a <⟨ β ⟩ f a′
-    formsInitSeg : ∀ b a′ → b <⟨ β ⟩ f a′ → Σ a ∶ ⟨ α ⟩ , a <⟨ α ⟩ a′ × f a ≡ b
+    formsInitSeg : ∀ b a′ → b <⟨ β ⟩ f a′ → Σ a ∶ ⟨ α ⟩ , a <⟨ α ⟩ a′ × f a ＝ b
 ```
 
-**引理** 序数模仿是单射.
-
+**引理** 序数模仿是单射.  
+**证明梗概** TODO ∎
 
 simulation-inj :(f : ⟨ α ⟩ → ⟨ β ⟩) → IsSimulation f → injective f
 simulation-inj {α} {β} f f-sim = {!   !}
@@ -66,16 +68,15 @@ simulation-inj {α} {β} f f-sim = {!   !}
   open OrdStr (str α) using (<-ext)
   open BinaryRelation (underlyingRel α) using (Acc; acc)
 
-  Acc→inj : ∀ x y → Acc x → Acc y → f x ≡ f y → x ≡ y
-  Acc→inj x y (acc H₁) (acc H₂) fx≡fy = <-ext x y λ z → p z , q z
+  Acc→inj : ∀ x y → Acc x → Acc y → f x ＝ f y → x ＝ y
+  Acc→inj x y (acc H₁) (acc H₂) fx＝fy = <-ext x y λ z → p z , q z
     where
     p : ∀ z → z <⟨ α ⟩ x → z <⟨ α ⟩ y
     p z z<x = {!   !}
       where
       fz<fy : f z <⟨ β ⟩ f y
-      fz<fy = transport (λ - → f z <⟨ β ⟩ -) fx≡fy (pres< z x z<x)
-      --b : Σ v ∶ ⟨ α ⟩ , (v ≺⟨ α ⟩ y) × (f v ＝ f u)
-      --b = 
+      fz<fy = transport (λ - → f z <⟨ β ⟩ -) fx＝fy (pres< z x z<x)
+      --b : Σ v ∶ ⟨ α ⟩ , v <⟨ α ⟩ y × f v ＝ f z
+      --b = ?
     q : ∀ z → z <⟨ α ⟩ y → z <⟨ α ⟩ x
     q z z<y = {!   !}
-

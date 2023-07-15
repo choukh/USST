@@ -81,11 +81,11 @@ module BinaryRelation {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
 
 ### 外延性
 
-我们说 `_<_` 是一个 **外延 (extensional)** 关系, 当且仅当对任意 `x y : A`, 如果对任意 `z : A` 都有 `z < x` 当且仅当 `z < y`, 那么 `x ≡ y`.
+我们说 `_<_` 是一个 **外延 (extensional)** 关系, 当且仅当对任意 `x y : A`, 如果对任意 `z : A` 都有 `z < x` 当且仅当 `z < y`, 那么 `x ＝ y`.
 
 ```agda
   Extensional : Type _
-  Extensional = ∀ x y → (∀ z → z < x ↔ z < y) → x ≡ y
+  Extensional = ∀ x y → (∀ z → z < x ↔ z < y) → x ＝ y
 ```
 
 如果 `A` 是集合, 那么外延性是命题.
@@ -96,7 +96,7 @@ module BinaryRelation {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
 ```
 
 **引理** 如果 `_<_` 同时具有命题性和外延性那么 `A` 是集合.  
-**证明梗概** 由引理 `Collapsible≡→isSet`, 只要证明 `A` 上的相等类型 `x ≡ y` 可折叠, 就证明了 `A` 是集合. 可折叠是说能构造 `x ≡ y` 的自映射 `f` 且 `f` 是一个 2-常函数 (`∀ x y → f x ≡ f y`). 只要用作为自变量的那个 `eq : x ≡ y` 替换外延性的前提 `z < x ↔ z < y` 就能得到另一个 `x ≡ y`. 由于 `_<_` 是命题, 所以 `z < x ↔ z < y` 是命题, 所以 `f` 是 2-常函数. ∎
+**证明梗概** 由引理 `Collapsible＝→isSet`, 只要证明 `A` 上的相等类型 `x ＝ y` 可折叠, 就证明了 `A` 是集合. 可折叠是说能构造 `x ＝ y` 的自映射 `f` 且 `f` 是一个 2-常函数 (`∀ x y → f x ＝ f y`). 只要用作为自变量的那个 `eq : x ＝ y` 替换外延性的前提 `z < x ↔ z < y` 就能得到另一个 `x ＝ y`. 由于 `_<_` 是命题, 所以 `z < x ↔ z < y` 是命题, 所以 `f` 是 2-常函数. ∎
 
 ```agda
   open import Cubical.Foundations.Function using (2-Constant)
@@ -106,7 +106,7 @@ module BinaryRelation {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
   Extensional→isSet prop ext = Collapsible≡→isSet λ x y →
     transport Collapsible (sym Path≡Eq) $ collapser x y , didCollapse x y
     where
-    collapser : ∀ x y → x ≡ y → x ≡ y
+    collapser : ∀ x y → x ＝ y → x ＝ y
     collapser x y eq = ext x y λ z → (transport (z <_) eq) , (transport (z <_) (sym eq))
     didCollapse : ∀ x y → 2-Constant (collapser x y)
     didCollapse x y p q = eqToPath $ ap (ext x y) $ funExt λ _ → Σ≡Prop
@@ -185,7 +185,7 @@ module BinaryRelation {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
 
   isPropWellOrdered : isProp WellOrdered
   isPropWellOrdered = isOfHLevelRetractFromIso 1 WellOrderedIsoΣ $ aux where
-    aux : ∀ x y → Path x y
+    aux : ∀ x y → x ≡ y
     aux x _ = ΣPathP (isPropPropositional _ _
             , ΣPathP (isPropTransitive <-prop _ _
             , ΣPathP (isPropExtensional underlying-set _ _
@@ -264,14 +264,14 @@ _≃ₒ_ : Ord ℓ₁ → Ord ℓ₂ → Type _
 然后就可以用 `∫` 从 `𝒮ᴰ-Ord` 中取出序数的泛等原理: 两个序数的等价等价于它们的相等.
 
 ```agda
-OrdinalPath : (α β : Ord ℓ) → (α ≃ₒ β) ≃ (Path α β)
+OrdinalPath : (α β : Ord ℓ) → (α ≃ₒ β) ≃ (α ≡ β)
 OrdinalPath = ∫ 𝒮ᴰ-Ord .UARel.ua
 ```
 
-上面的泛等原理使用 `Path` 表述的, 也可以转换成归纳类型族 `_≡_` 表述.
+上面的泛等原理使用路径 `_≡_` 表述, 也可以转换成使用归纳类型族 `_＝_` 表述.
 
 ```
-OrdinalUnivalence : (α β : Ord ℓ) → (α ≃ₒ β) ≃ (α ≡ β)
+OrdinalUnivalence : (α β : Ord ℓ) → (α ≃ₒ β) ≃ (α ＝ β)
 OrdinalUnivalence α β = transport (α ≃ₒ β ≃_) Path≡Eq (OrdinalPath α β)
 ```
 
