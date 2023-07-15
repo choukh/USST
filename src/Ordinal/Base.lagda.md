@@ -22,19 +22,19 @@ open import Preliminary
 
 说白了, 一个序数就是由一个集合以及该集合上的一个满足一定性质的序关系所组成的结构. 我们先定义这个序关系需要满足的性质.
 
-给定类型 `A : Type ℓ` 及其上的序关系 `_<_ : A → A → Type ℓ′`
+给定类型 `A : Type ℓ` 及其上的序关系 `_≺_ : A → A → Type ℓ′`
 
 ```agda
-module BinaryRelation {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
+module BinaryRelation {A : Type ℓ} (_≺_ : A → A → Type ℓ′) where
 ```
 
 ### 命题性
 
-我们说 `_<_` 是一个 **命题 (propositional)** 关系, 当且仅当对任意 `x y : A`, `x < y` 是一个命题.
+我们说 `_≺_` 是一个 **命题 (propositional)** 关系, 当且仅当对任意 `x y : A`, `x ≺ y` 是一个命题.
 
 ```agda
   Propositional : Type _
-  Propositional = ∀ x y → isProp (x < y)
+  Propositional = ∀ x y → isProp (x ≺ y)
 ```
 
 命题性本身是一个命题.
@@ -46,14 +46,14 @@ module BinaryRelation {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
 
 ### 反自反性
 
-我们说 `_<_` 是一个 **反自反 (irreflexive)** 关系, 当且仅当对任意 `x : A`, `x ≮ x`.
+我们说 `_≺_` 是一个 **反自反 (irreflexive)** 关系, 当且仅当对任意 `x : A`, `x ⊀ x`.
 
 ```agda
-  _≮_ : A → A → Type ℓ′
-  x ≮ y = ¬ x < y
+  _⊀_ : A → A → Type ℓ′
+  x ⊀ y = ¬ x ≺ y
 
   Irreflexive : Type _
-  Irreflexive = ∀ x → x ≮ x
+  Irreflexive = ∀ x → x ⊀ x
 ```
 
 反自反性是一个命题.
@@ -65,14 +65,14 @@ module BinaryRelation {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
 
 ### 传递性
 
-我们说 `_<_` 是一个 **传递 (transitive)** 关系, 当且仅当对任意 `x y z : A`, `x < y` 与 `y < z` 蕴含 `x < z`.
+我们说 `_≺_` 是一个 **传递 (transitive)** 关系, 当且仅当对任意 `x y z : A`, `x ≺ y` 与 `y ≺ z` 蕴含 `x ≺ z`.
 
 ```agda
   Transitive : Type _
-  Transitive = ∀ x y z → x < y → y < z → x < z
+  Transitive = ∀ x y z → x ≺ y → y ≺ z → x ≺ z
 ```
 
-如果`_<_` 是一个命题关系, 那么传递性是一个命题.
+如果`_≺_` 是一个命题关系, 那么传递性是一个命题.
 
 ```agda
   isPropTransitive : Propositional → isProp Transitive
@@ -81,11 +81,11 @@ module BinaryRelation {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
 
 ### 外延性
 
-我们说 `_<_` 是一个 **外延 (extensional)** 关系, 当且仅当对任意 `x y : A`, 如果对任意 `z : A` 都有 `z < x` 当且仅当 `z < y`, 那么 `x ＝ y`.
+我们说 `_≺_` 是一个 **外延 (extensional)** 关系, 当且仅当对任意 `x y : A`, 如果对任意 `z : A` 都有 `z ≺ x` 当且仅当 `z ≺ y`, 那么 `x ＝ y`.
 
 ```agda
   Extensional : Type _
-  Extensional = ∀ x y → (∀ z → z < x ↔ z < y) → x ＝ y
+  Extensional = ∀ x y → (∀ z → z ≺ x ↔ z ≺ y) → x ＝ y
 ```
 
 如果 `A` 是集合, 那么外延性是命题.
@@ -95,8 +95,8 @@ module BinaryRelation {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
   isPropExtensional A-set = isPropΠ3 λ _ _ _ → transportIsProp $ A-set _ _
 ```
 
-**引理** 如果 `_<_` 同时具有命题性和外延性那么 `A` 是集合.  
-**证明梗概** 由引理 `Collapsible＝→isSet`, 只要证明 `A` 上的相等类型 `x ＝ y` 可折叠, 就证明了 `A` 是集合. 可折叠是说能构造 `x ＝ y` 的自映射 `f` 且 `f` 是一个 2-常函数 (`∀ x y → f x ＝ f y`). 只要用作为自变量的那个 `eq : x ＝ y` 替换外延性的前提 `z < x ↔ z < y` 就能得到另一个 `x ＝ y`. 由于 `_<_` 是命题, 所以 `z < x ↔ z < y` 是命题, 所以 `f` 是 2-常函数. ∎
+**引理** 如果 `_≺_` 同时具有命题性和外延性那么 `A` 是集合.  
+**证明梗概** 由引理 `Collapsible＝→isSet`, 只要证明 `A` 上的相等类型 `x ＝ y` 可折叠, 就证明了 `A` 是集合. 可折叠是说能构造 `x ＝ y` 的自映射 `f` 且 `f` 是一个 2-常函数 (`∀ x y → f x ＝ f y`). 只要用作为自变量的那个 `eq : x ＝ y` 替换外延性的前提 `z ≺ x ↔ z ≺ y` 就能得到另一个 `x ＝ y`. 由于 `_≺_` 是命题, 所以 `z ≺ x ↔ z ≺ y` 是命题, 所以 `f` 是 2-常函数. ∎
 
 ```agda
   open import Cubical.Foundations.Function using (2-Constant)
@@ -107,7 +107,7 @@ module BinaryRelation {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
     transport Collapsible (sym Path≡Eq) $ collapser x y , didCollapse x y
     where
     collapser : ∀ x y → x ＝ y → x ＝ y
-    collapser x y eq = ext x y λ z → (transport (z <_) eq) , (transport (z <_) (sym eq))
+    collapser x y eq = ext x y λ z → (transport (z ≺_) eq) , (transport (z ≺_) (sym eq))
     didCollapse : ∀ x y → 2-Constant (collapser x y)
     didCollapse x y p q = eqToPath $ ap (ext x y) $ funExt λ _ → Σ≡Prop
       (λ _ _ _ → pathToEq $ isProp→ (prop _ _) _ _)
@@ -116,25 +116,25 @@ module BinaryRelation {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
 
 ### 良基性
 
-我们说在 `_<_` 关系下, 一个 `x : A` **可及 (accessible)**, 当且仅当对任意 `y < x`, `y` 也可及.
+我们说在 `_≺_` 关系下, 一个 `x : A` **可及 (accessible)**, 当且仅当对任意 `y ≺ x`, `y` 也可及.
 
 ```agda
   data Acc (x : A) : Type (ℓ ⊔ ℓ′) where
-    acc : (∀ y → y < x → Acc y) → Acc x
+    acc : (∀ y → y ≺ x → Acc y) → Acc x
 ```
 
-我们说 `_<_` 是一个 **良基 (well-founded)** 关系, 当且仅当任意 `x : A` 都可及.
+我们说 `_≺_` 是一个 **良基 (well-founded)** 关系, 当且仅当任意 `x : A` 都可及.
 
 ```agda
   WellFounded : Type _
   WellFounded = ∀ x → Acc x
 ```
 
-可及性是一个命题. 下面的证明中暴露了 cubical 的底层机制, 就是那个间点 `i`, 以使证明更简洁. 也可以不暴露, 只需证 `H₁` 等于 `H₂`, 它们都具有 `∀ y → y < x → Acc y` 类型. 由归纳假设, `Acc y` 是命题, 所以这个Π类型也是命题, 所以它的两个项 `H₁` 与 `H₂` 相等.
+可及性是一个命题. 下面的证明中暴露了 cubical 的底层机制, 就是那个间点 `i`, 以使证明更简洁. 也可以不暴露, 只需证 `H₁` 等于 `H₂`, 它们都具有 `∀ y → y ≺ x → Acc y` 类型. 由归纳假设, `Acc y` 是命题, 所以这个Π类型也是命题, 所以它的两个项 `H₁` 与 `H₂` 相等.
 
 ```agda
   isPropAcc : ∀ x → isProp (Acc x)
-  isPropAcc x (acc H₁) (acc H₂) i = acc λ y y<x → isPropAcc y (H₁ y y<x) (H₂ y y<x) i
+  isPropAcc x (acc H₁) (acc H₂) i = acc λ y y≺x → isPropAcc y (H₁ y y≺x) (H₂ y y≺x) i
 ```
 
 良基性也是一个命题.
@@ -144,11 +144,11 @@ module BinaryRelation {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
   isPropWellFounded = isPropΠ λ _ → isPropAcc _
 ```
 
-良基性蕴含反自反性. 只需证对任意可及的 `x` 都有 `x ≮ x`, 显然成立.
+良基性蕴含反自反性. 只需证对任意可及的 `x` 都有 `x ⊀ x`, 显然成立.
 
 ```agda
-  Acc→Irreflexive : ∀ x → Acc x → x ≮ x
-  Acc→Irreflexive x (acc H) x<x = Acc→Irreflexive x (H x x<x) x<x
+  Acc→Irreflexive : ∀ x → Acc x → x ⊀ x
+  Acc→Irreflexive x (acc H) x≺x = Acc→Irreflexive x (H x x≺x) x≺x
 
   WellFounded→Irreflexive : WellFounded → Irreflexive
   WellFounded→Irreflexive wf x = Acc→Irreflexive x (wf x)
@@ -156,26 +156,26 @@ module BinaryRelation {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
 
 ### 良序性
 
-我们说 `_<_` 是一个 **良序 (well-ordered)** 关系, 当且仅当: `_<_` 有命题性, 传递性, 外延性和良基性.
+我们说 `_≺_` 是一个 **良序 (well-ordered)** 关系, 当且仅当: `_≺_` 有命题性, 传递性, 外延性和良基性.
 
 ```agda
   record WellOrdered : Type (ℓ ⊔ ℓ′) where
     constructor mkWellOrdered
     field
-      <-prop    : Propositional
-      <-trans   : Transitive
-      <-ext     : Extensional
-      <-wf      : WellFounded
+      ≺-prop    : Propositional
+      ≺-trans   : Transitive
+      ≺-ext     : Extensional
+      ≺-wf      : WellFounded
 ```
 
 良序关系是反自反的, 且其底层类型必是集合, 我们今后称之为**底集 (underlying set)**. 经典数学里面一般是把这里的外延性换成了三歧性, 但在直觉主义中外延性更容易处理. 此外, HoTT Book 也有相应的定义, 见 Def 10.3.17, 它要求 "`A` 是集合", 但这不是必须的, Escardó 首先证明了[这一点](https://www.cs.bham.ac.uk/~mhe/TypeTopology/Ordinals.Notions.html#8277)
 
 ```agda
-    <-irrefl : Irreflexive
-    <-irrefl = WellFounded→Irreflexive <-wf
+    ≺-irrefl : Irreflexive
+    ≺-irrefl = WellFounded→Irreflexive ≺-wf
 
     underlying-set : isSet A
-    underlying-set = Extensional→isSet <-prop <-ext
+    underlying-set = Extensional→isSet ≺-prop ≺-ext
 ```
 
 由于良序性里面的每个条件都是命题, 所以良序性也是一个命题.
@@ -187,7 +187,7 @@ module BinaryRelation {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
   isPropWellOrdered = isOfHLevelRetractFromIso 1 WellOrderedIsoΣ $ aux where
     aux : ∀ x y → x ≡ y
     aux x _ = ΣPathP (isPropPropositional _ _
-            , ΣPathP (isPropTransitive <-prop _ _
+            , ΣPathP (isPropTransitive ≺-prop _ _
             , ΣPathP (isPropExtensional underlying-set _ _
             , isPropWellFounded _ _)))
       where open WellOrdered (Iso.inv WellOrderedIsoΣ x)
@@ -199,16 +199,16 @@ module BinaryRelation {A : Type ℓ} (_<_ : A → A → Type ℓ′) where
 
 ### 序数结构
 
-一个类型 `A` 配备上一个良序 `_<_` 就构成了一个序数结构 `OrdStr`. 注意我们这里让 `_<_` 与底集 `A` 居留于同一宇宙, 这可以让形式更简单, 反正 `_<_` 是命题, 而我们有 `PR` 可以随时调整命题宇宙.
+一个类型 `A` 配备上一个良序 `_≺_` 就构成了一个序数结构 `OrdStr`. 注意我们这里让 `_≺_` 与底集 `A` 居留于同一宇宙, 这可以让形式更简单, 反正 `_≺_` 是命题, 而我们有 `PR` 可以随时调整命题宇宙.
 
 ```agda
 record OrdStr (A : Type ℓ) : Type (ℓ-suc ℓ) where
   constructor mkOrdinalStr
   open BinaryRelation
   field
-    _<_ : A → A → Type ℓ
-    <-wo : WellOrdered _<_
-  open WellOrdered <-wo public
+    _≺_ : A → A → Type ℓ
+    ≺-wo : WellOrdered _≺_
+  open WellOrdered ≺-wo public
 ```
 
 ### 序数宇宙
@@ -228,18 +228,18 @@ variable α β γ : Ord ℓ
 
 ## 序数等价
 
-序数间的同伦等价 `α ≃ₒ β` 定义为保持序关系的底集间同伦等价 `A ≃ B`. 注意"保持序关系"也必须用同伦等价来表达, 记作 `hPres<`, 定义为对任意 `x y : A` 有 `x <₁ y` 与 `f x <₂ f y` 同伦等价, 其中 `<₁` 和 `<₂` 分别是 `A` 和 `B` 上的序关系, `f` 是 `A ≃ B` 的底层函数.
+序数间的同伦等价 `α ≃ₒ β` 定义为保持序关系的底集间同伦等价 `A ≃ B`. 注意"保持序关系"也必须用同伦等价来表达, 记作 `hPres≺`, 定义为对任意 `x y : A` 有 `x ≺₁ y` 与 `f x ≺₂ f y` 同伦等价, 其中 `≺₁` 和 `≺₂` 分别是 `A` 和 `B` 上的序关系, `f` 是 `A ≃ B` 的底层函数.
 
 ```agda
 record IsOrdEquiv {A : Type ℓ₁} {B : Type ℓ₂}
   (a : OrdStr A) (e : A ≃ B) (b : OrdStr B) : Type (ℓ₁ ⊔ ℓ₂) where
   constructor mkIsOrderEquiv
   private
-    open OrdStr a renaming (_<_ to _<₁_)
-    open OrdStr b renaming (_<_ to _<₂_)
+    open OrdStr a renaming (_≺_ to _≺₁_)
+    open OrdStr b renaming (_≺_ to _≺₂_)
     f = equivFun e
   field
-    hPres< : (x y : A) → x <₁ y ≃ f x <₂ f y
+    hPres≺ : (x y : A) → x ≺₁ y ≃ f x ≺₂ f y
 
 _≃ₒ_ : Ord ℓ₁ → Ord ℓ₂ → Type _
 α ≃ₒ β = Σ e ∶ ⟨ α ⟩ ≃ ⟨ β ⟩ , IsOrdEquiv (str α) e (str β)
@@ -247,14 +247,14 @@ _≃ₒ_ : Ord ℓ₁ → Ord ℓ₂ → Type _
 
 ## 序数的泛等原理
 
-接下来就是使用 `𝒮ᴰ-Record` 得到序数的泛等原理. 不需要深究其语法, 只需认为它是一种 boilerplate (样板代码), 在 cubical 的代数模块里面也被大量使用. 简而言之, 这段代码说, 序数包括两个"字段", 一个是 `_<_`, 它被同伦等价保持了, 再一个是 `<-wo`, 它是个命题, 不影响结构. 这样就可以用 `𝒮ᴰ-Record` 拿到 `𝒮ᴰ-Ord : DUARel ...` 这一串东西.
+接下来就是使用 `𝒮ᴰ-Record` 得到序数的泛等原理. 不需要深究其语法, 只需认为它是一种 boilerplate (样板代码), 在 cubical 的代数模块里面也被大量使用. 简而言之, 这段代码说, 序数包括两个"字段", 一个是 `_≺_`, 它被同伦等价保持了, 再一个是 `≺-wo`, 它是个命题, 不影响结构. 这样就可以用 `𝒮ᴰ-Record` 拿到 `𝒮ᴰ-Ord : DUARel ...` 这一串东西.
 
 ```agda
 𝒮ᴰ-Ord : DUARel (𝒮-Univ ℓ) OrdStr ℓ
 𝒮ᴰ-Ord = 𝒮ᴰ-Record (𝒮-Univ _) IsOrdEquiv
   (fields:
-    data[ _<_ ∣ autoDUARel _ _ ∣ hPres< ]
-    prop[ <-wo ∣ (λ _ _ → isPropWellOrdered _) ])
+    data[ _≺_ ∣ autoDUARel _ _ ∣ hPres≺ ]
+    prop[ ≺-wo ∣ (λ _ _ → isPropWellOrdered _) ])
   where
   open OrdStr
   open IsOrdEquiv
@@ -275,4 +275,4 @@ OrdinalUnivalence : (α β : Ord ℓ) → (α ≃ₒ β) ≃ (α ＝ β)
 OrdinalUnivalence α β = transport (α ≃ₒ β ≃_) Path≡Eq (OrdinalPath α β)
 ```
 
-有了序数的泛等原理之后, 就可以通过找到两个序数间保持 `_<_` 关系的同伦等价来证明它们相等. 这体现了泛等基础的好处, 我们不需要商掉某个等价关系, 也不用像质料集合论那样用超限归纳证明两个同构的序数外延相等.
+有了序数的泛等原理之后, 就可以通过找到两个序数间保持 `_≺_` 关系的同伦等价来证明它们相等. 这体现了泛等基础的好处, 我们不需要商掉某个等价关系, 也不用像质料集合论那样用超限归纳证明两个同构的序数外延相等.
