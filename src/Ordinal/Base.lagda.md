@@ -221,7 +221,7 @@ Ord ℓ = TypeWithStr ℓ OrdStr
 
 ## 序数等价
 
-序数间的同伦等价 `α ≃ₒ β` 定义为保持序关系的底集间同伦等价 `A ≃ B`. 注意"保持序关系"也必须用同伦等价来表达, 即对任意 `x y : A` 有 `x <₁ y` 与 `f x <₂ f y` 同伦等价, 其中 `<₁` 和 `<₂` 分别是 `A` 和 `B` 上的序关系, `f` 是 `A ≃ B` 的底层函数.
+序数间的同伦等价 `α ≃ₒ β` 定义为保持序关系的底集间同伦等价 `A ≃ B`. 注意"保持序关系"也必须用同伦等价来表达, 记作 `hPres<`, 定义为对任意 `x y : A` 有 `x <₁ y` 与 `f x <₂ f y` 同伦等价, 其中 `<₁` 和 `<₂` 分别是 `A` 和 `B` 上的序关系, `f` 是 `A ≃ B` 的底层函数.
 
 ```agda
 record IsOrdEquiv {A : Type ℓ₁} {B : Type ℓ₂}
@@ -232,7 +232,7 @@ record IsOrdEquiv {A : Type ℓ₁} {B : Type ℓ₂}
     module ₂ = OrdStr b
     f = equivFun e
   field
-    pres< : (x y : A) → x ₁.< y ≃ f x ₂.< f y
+    hPres< : (x y : A) → x ₁.< y ≃ f x ₂.< f y
 
 _≃ₒ_ : Ord ℓ₁ → Ord ℓ₂ → Type _
 α ≃ₒ β = Σ[ e ∈ ⟨ α ⟩ ≃ ⟨ β ⟩ ] IsOrdEquiv (str α) e (str β)
@@ -246,7 +246,7 @@ _≃ₒ_ : Ord ℓ₁ → Ord ℓ₂ → Type _
 𝒮ᴰ-Ord : DUARel (𝒮-Univ ℓ) OrdStr ℓ
 𝒮ᴰ-Ord = 𝒮ᴰ-Record (𝒮-Univ _) IsOrdEquiv
   (fields:
-    data[ _<_ ∣ autoDUARel _ _ ∣ pres< ]
+    data[ _<_ ∣ autoDUARel _ _ ∣ hPres< ]
     prop[ <-wo ∣ (λ _ _ → isPropWellOrdered _) ])
   where
   open OrdStr

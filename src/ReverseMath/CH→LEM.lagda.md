@@ -88,8 +88,8 @@ module Lemmas (X : Type ℓ) (X-set : isSet X) where
 由 `_≡_` 的基本性质可以证明单集构造 `｛_｝` 具有单射性.
 
 ```agda
-    ｛｝-inj : {x y : X} → ｛ x ｝ ≡ ｛ y ｝ → x ≡ y
-    ｛｝-inj {x} {y} H = transport (idfun _) (sym $ ap fst $ happly H y) refl
+    ｛｝-inj : injective ｛_｝
+    ｛｝-inj H = transport (idfun _) (sym $ ap fst $ happly H _) refl
 ```
 
 我们说一个 `A : ℙ X` 是单集, 当且仅当它等于某个 `｛ x ｝`.

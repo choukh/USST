@@ -124,7 +124,7 @@ open import Cubical.Foundations.Function public
 
 ```agda
 open import Cubical.Data.Sigma public
-  using (Σ; Σ-syntax; _×_; _,_; fst; snd)
+  using (Σ; Σ-syntax; _,_; fst; snd) renaming (_×_ to infixr 2 _×_)
 ```
 
 Σ类型 `Σ A B` 位于类型宇宙 `Type (ℓ ⊔ ℓ′)` 之中, 这与Π类型的情况是一样的.
@@ -270,6 +270,21 @@ transportIsProp = transport isProp Path≡Eq
 open import Cubical.Data.Sigma public using (ΣPathP)
 ```
 
+### 单射性
+
+我们约定仅在本文剩下的篇幅中使用 `A` `B` `C` 表示任意层级的类型.
+
+```agda
+private variable A B C : Type ℓ
+```
+
+cubical 库里面对单射的定义是为高阶同伦类型改编过的版本, 且相等是用 `Path` 表述的. 对于集合层面的数学我们用传统的单射性定义就够了, 并且相等用 `_≡_` 表述.
+
+```agda
+injective : (A → B) → Type _
+injective f = ∀ {x y} → f x ≡ f y → x ≡ y
+```
+
 ### 同伦等价
 
 同伦等价 `_≃_` 可以简单理解为是在泛等基础中更容易处理的一种"同构", 它与真正的同构 `Iso` 也是同构的, 且同伦等价的. `equivFun` 用于取得同伦等价的底层函数, 它与 `Iso.fun` 所取得的函数有相同的行为.
@@ -331,13 +346,7 @@ open PropositionalResizing ⦃...⦄ public
 
 ## 命题逻辑
 
-本小节我们来补齐泛等基础中对应于直觉主义命题逻辑的相关概念. 我们约定仅在本文剩下的篇幅中使用 `A` `B` `C` 表示任意层级的类型.
-
-```agda
-private variable A B C : Type ℓ
-```
-
-以下是无矛盾律在直觉主义中更容易处理的版本. 因为我们无法证明排中律 "`A` 或 `¬ A`", 所以单有 `A → ¬ A → ⊥` 也无法推出矛盾, 必须采用下面的形式才行.
+本小节我们来补齐泛等基础中对应于直觉主义命题逻辑的相关概念. 以下是无矛盾律在直觉主义中更容易处理的版本. 因为我们无法证明排中律 "`A` 或 `¬ A`", 所以单有 `A → ¬ A → ⊥` 也无法推出矛盾, 必须采用下面的形式才行.
 
 ```agda
 noncontradiction : (A → ¬ A) → (¬ A → A) → ⊥
@@ -431,9 +440,6 @@ isPropAC ℓ ℓ′ ℓ′′ = isPropΠ6 λ _ _ _ _ _ _ → isPropΠ λ _ → s
 我们说类型 `A` 的势小于等于 `B`, 记作 `A ≼ B`, 当且仅当有任意 `A` 到 `B` 的单射函数. 注意这里用的是Σ类型, 我们并没有做命题截断. 有时候延迟截断会更方便处理.
 
 ```agda
-injective : (A → B) → Type _
-injective f = ∀ {x y} → f x ≡ f y → x ≡ y
-
 _≼_ : Type ℓ → Type ℓ′ → Type _
 A ≼ B = Σ (A → B) injective
 
