@@ -242,7 +242,7 @@ record IsOrdEquiv {A : Type ℓ₁} {B : Type ℓ₂}
     hPres< : (x y : A) → x <₁ y ≃ f x <₂ f y
 
 _≃ₒ_ : Ord ℓ₁ → Ord ℓ₂ → Type _
-α ≃ₒ β = Σ[ e ∈ ⟨ α ⟩ ≃ ⟨ β ⟩ ] IsOrdEquiv (str α) e (str β)
+α ≃ₒ β = Σ e ∶ ⟨ α ⟩ ≃ ⟨ β ⟩ , IsOrdEquiv (str α) e (str β)
 ```
 
 ## 序数的泛等原理

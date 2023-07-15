@@ -96,7 +96,7 @@ module Lemmas (X : Type ℓ) (X-set : isSet X) where
 
 ```agda
   is｛｝ : ℙ X → Type _
-  is｛｝ A = Σ[ x ∈ X ] A ≡ ｛ x ｝
+  is｛｝ A = Σ x ∶ X , A ≡ ｛ x ｝
 ```
 
 注意尽管这里用的是Σ类型, 我们仍然能证明 "是单集" 是一个谓词, 因为见证 `A` 是单集的那个 `x` 唯一. 不过后面不需要用到这一结论.
@@ -110,7 +110,7 @@ module Lemmas (X : Type ℓ) (X-set : isSet X) where
 接着我们证明康托尔定理的一个变体, 说 `ℙ X` 的自嵌入一定射到了单集之外. 我们能实际构造出这个非单集, 用的还是对角线法, 证明的结构与 `Cantor-⋠` 非常类似, 这里不再赘述.
 
 ```agda
-  Cantor-beyond｛｝ : (f : ℙ X → ℙ X) → injective f → Σ[ A ∈ ℙ X ] ¬ is｛｝ (f A)
+  Cantor-beyond｛｝ : (f : ℙ X → ℙ X) → injective f → Σ A ∶ ℙ X , ¬ is｛｝ (f A)
   Cantor-beyond｛｝ f f-inj = A , λ (x , fA≡) → noncontradiction (∈→∉ x fA≡) (∉→∈ x fA≡)
     where
     A : ℙ X
@@ -136,7 +136,7 @@ module Lemmas (X : Type ℓ) (X-set : isSet X) where
 
 ```agda
     Y : Type (ℓ-suc ℓ ⊔ ℓ′)
-    Y = Σ[ A ∈ ℙ X ] (is｛｝ A ∨ Dec P)
+    Y = Σ A ∶ ℙ X , (is｛｝ A ∨ Dec P)
 ```
 
 首先, 不难证明, `Y` 是一个集合. 因为它作为一个Σ类型, 左边是 `A` 的子集, 右边是一个谓词.

@@ -27,9 +27,7 @@ record Underlying {ℓ} (O : Type (ℓ-suc ℓ)) : Type (ℓ-suc ℓ) where
   syntax underlyingRel α x y = x <⟨ α ⟩ y
 
 open Underlying ⦃...⦄ public
-```
 
-```agda
 instance
   underlying : Underlying (Ord ℓ)
   underlyingSet ⦃ underlying ⦄ = ⟨_⟩
@@ -44,7 +42,7 @@ instance
 record IsSimulation {α : Ord ℓ} {β : Ord ℓ′} (f : ⟨ α ⟩ → ⟨ β ⟩) : Type (ℓ ⊔ ℓ′) where
 ```
 
-保序性 `pres<` 很简单, 它就是上一章同伦保序 `hPres<` 的弱化版. "形成前段" 即 `formsInitSeg` 这一性质的直观可以参考下图. 它说只要一个底集元素被射到, 那么比它小的元素都会被射到, 也就是映射的像能形成 `<` 的一个前段.
+保序性 `pres<` 很简单, 它就是上一章同伦保序 `hPres<` 的弱化版. "形成前段" 即 `formsInitSeg`, 这一性质的直观可以参考下图. 它说只要一个底集元素被射到, 那么比它小的元素都会被射到, 也就是映射的像能形成 `<` 的一个前段.
 
 ... a   ... <₁ ... a′  ...
     |              |
@@ -55,12 +53,12 @@ record IsSimulation {α : Ord ℓ} {β : Ord ℓ′} (f : ⟨ α ⟩ → ⟨ β 
 ```agda
   field
     pres< : ∀ a a′ → a <⟨ α ⟩ a′ → f a <⟨ β ⟩ f a′
-    formsInitSeg : ∀ b a′ → b <⟨ β ⟩ f a′ → Σ[ a ∈ ⟨ α ⟩ ] a <⟨ α ⟩ a′ × f a ≡ b
+    formsInitSeg : ∀ b a′ → b <⟨ β ⟩ f a′ → Σ a ∶ ⟨ α ⟩ , a <⟨ α ⟩ a′ × f a ≡ b
 ```
 
 **引理** 序数模仿是单射.
 
-```agda
+
 simulation-inj :(f : ⟨ α ⟩ → ⟨ β ⟩) → IsSimulation f → injective f
 simulation-inj {α} {β} f f-sim = {!   !}
   where
@@ -76,6 +74,8 @@ simulation-inj {α} {β} f f-sim = {!   !}
       where
       fz<fy : f z <⟨ β ⟩ f y
       fz<fy = transport (λ - → f z <⟨ β ⟩ -) fx≡fy (pres< z x z<x)
+      --b : Σ v ∶ ⟨ α ⟩ , (v ≺⟨ α ⟩ y) × (f v ＝ f u)
+      --b = 
     q : ∀ z → z <⟨ α ⟩ y → z <⟨ α ⟩ x
     q z z<y = {!   !}
-```
+

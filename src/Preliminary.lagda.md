@@ -120,11 +120,19 @@ open import Cubical.Foundations.Function public
 
 逻辑上可以解读为, "对任意 `x`, 如果 `B x` 成立, 那么 `C` 成立" 等价于 "如果存在 `x`, 使得 `B x` 成立,那么 `C` 成立". 但要注意我们后面会对逻辑上的存在量词有更加精确的刻画, 它并不完全对应于Σ类型. 我们有时会把 `Σ A B` 读作 "`A` 配备上结构 `B`".
 
-库中的 `Σ-syntax` 提供了Σ类型 `Σ A B` 另一种写法 `Σ[ x ∈ A ] B x`, 方便做变量绑定. **积类型 (product type)** `A × B` 定义为 `Σ A (λ _ → B)`, 这是Σ类型的非依值版本, 对应于笛卡尔积. 不论是依值配对还是非依值配对, 我们都可以用 `fst` 取得配对的左边, `snd` 取得配对的右边.
+**积类型 (product type)** `A × B` 定义为 `Σ A (λ _ → B)`, 这是Σ类型的非依值版本, 对应于笛卡尔积. 不论是依值配对还是非依值配对, 我们都可以用 `fst` 取得配对的左边, `snd` 取得配对的右边.
 
 ```agda
 open import Cubical.Data.Sigma public
-  using (Σ; Σ-syntax; _,_; fst; snd) renaming (_×_ to infixr 2 _×_)
+  using (Σ; _,_; fst; snd) renaming (_×_ to infixr 3 _×_)
+```
+
+我们定义Σ类型 `Σ A B` 另一种写法 `Σ x ∶ A , B x`, 方便做变量绑定.
+
+```agda
+Σ-syntax = Σ
+infix 2 Σ-syntax
+syntax Σ-syntax A (λ x → B) = Σ x ∶ A , B
 ```
 
 Σ类型 `Σ A B` 位于类型宇宙 `Type (ℓ ⊔ ℓ′)` 之中, 这与Π类型的情况是一样的.
@@ -234,7 +242,11 @@ open import Cubical.HITs.PropositionalTruncation public
 Σ类型的命题截断完全对应了逻辑上的存在量化命题.
 
 ```agda
-open import Cubical.Data.Sigma public using (∃; ∃-syntax)
+open import Cubical.Data.Sigma public using (∃)
+
+∃-syntax = ∃
+infix 2 ∃-syntax
+syntax ∃-syntax A (λ x → B) = ∃ x ∶ A , B
 ```
 
 ### 相等类型
@@ -425,7 +437,7 @@ NonEmptyDec _ ¬dec = ¬dec $ no λ a → ¬dec $ yes a
 AC : (ℓ ℓ′ ℓ′′ : Level) → Type _
 AC ℓ ℓ′ ℓ′′ = (A : Type ℓ) (B : Type ℓ′) (R : A → B → Type ℓ′′) →
   isSet A → isSet B → (∀ x y → isProp (R x y)) →
-  (∀ x → ∃[ y ∈ B ] R x y) → ∃[ f ∈ (A → B) ] ∀ x → R x (f x)
+  (∀ x → ∃ y ∶ B , R x y) → ∃ f ∶ (A → B) , ∀ x → R x (f x)
 ```
 
 选择公理也是一个命题, 因为其表述是一个嵌套Π类型, 其目标是Σ类型的命题截断.
