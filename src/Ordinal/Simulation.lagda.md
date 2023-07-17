@@ -1,18 +1,18 @@
 ---
-title: 泛等结构集合论 (4) 序数的序
+title: 泛等结构集合论 (4) 序数模仿
 zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 ---
 
-# 泛等结构集合论 (4) 序数的序
+# 泛等结构集合论 (4) 序数模仿
 
 > 交流Q群: 893531731  
-> 本文源码: [Ordinal.Order.lagda.md](https://github.com/choukh/USST/blob/main/src/Ord/Order.lagda.md)  
-> 高亮渲染: [Ordinal.Order.html](https://choukh.github.io/USST/Ord.Order.html)  
+> 本文源码: [Simulation.Order.lagda.md](https://github.com/choukh/USST/blob/main/src/Ordinal/Simulation.lagda.md)  
+> 高亮渲染: [Simulation.Order.html](https://choukh.github.io/USST/Ordinal.Simulation.html)  
 
 ```agda
 {-# OPTIONS --cubical --safe #-}
 {-# OPTIONS --lossy-unification --hidden-argument-puns #-}
-module Ordinal.Order where
+module Ordinal.Simulation where
 open import Preliminary
 open import Ordinal.Base
 ```
@@ -128,4 +128,19 @@ prophood {α} {β} f = isOfHLevelRetractFromIso 1 IsSimulationIsoΣ $ aux where
   aux : ∀ x y → x ≡ y
   aux x _ = ΣPathP (isPropΠ3 isPropPres≺ _ _ , isPropΠ3 isPropFormsInitSeg _ _)
     where open IsSimulation {α = α} {β} (Iso.inv IsSimulationIsoΣ x)
+```
+
+```agda
+Simulation : Ord 𝓊 → Ord 𝓋 → Type (𝓊 ⊔ 𝓋)
+Simulation α β = Σ (⟨ α ⟩ → ⟨ β ⟩) IsSimulation
+```
+
+## 唯一性
+
+**引理** 给定两个序数, 它们之间的模仿是唯一的.  
+**证明** TODO ∎
+
+```agda
+isPropSimulation : ∀ α β → isProp (Simulation {𝓊} {𝓋} α β)
+isPropSimulation α β = {!   !}
 ```

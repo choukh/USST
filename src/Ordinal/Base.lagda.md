@@ -7,8 +7,8 @@ zhihu-url: https://zhuanlan.zhihu.com/p/643453391
 # 泛等结构集合论 (3) 序数的定义及其泛等原理
 
 > 交流Q群: 893531731  
-> 本文源码: [Ordinal.Base.lagda.md](https://github.com/choukh/USST/blob/main/src/Ord/Base.lagda.md)  
-> 高亮渲染: [Ordinal.Base.html](https://choukh.github.io/USST/Ord.Base.html)  
+> 本文源码: [Ordinal.Base.lagda.md](https://github.com/choukh/USST/blob/main/src/Ordinal/Base.lagda.md)  
+> 高亮渲染: [Ordinal.Base.html](https://choukh.github.io/USST/Ordinal.Base.html)  
 
 本章将复刻质料集合论的重要概念: 序数.
 
@@ -297,4 +297,3 @@ OrdinalUnivalence α β = transport (α ≃ₒ β ≃_) Path≡Eq (OrdinalPath �
 ```
 
 有了序数的泛等原理之后, 就可以通过找到两个序数间保持 `_≺_` 关系的同伦等价来证明它们相等. 这体现了泛等基础的好处, 我们不需要商掉某个等价关系, 也不用像质料集合论那样用超限归纳证明两个同构的序数外延相等.
- 
