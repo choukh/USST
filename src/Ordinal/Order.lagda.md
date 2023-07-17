@@ -59,13 +59,13 @@ record IsSimulation {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β �
 ```
 
 **引理** 序数模仿是单射.  
-**证明梗概** TODO ∎
+**证明梗概** 用双参数形式的良基归纳法 `wf-elim2`, 拿到归纳假设 `IH : ∀ u v → u ≺ x → v ≺ y → f u ＝ f v → u ＝ v`, 要证 `f x ＝ f y → x ＝ y`. 用 `≺` 的外延性, 要证两种对称的情况 `p` 和 `q`, 我们只证 `p : ∀ z → z ≺ x → z ≺ y`. 由 `z ≺ x` 及模仿的保序性有 `f z ≺ f x ≡ f y`. 由于模仿能形成前段, 必有一个 `w` 满足 `w ≺ y` 且 `f w ＝ f z`. 再结合归纳假设有 `w ＝ z`, 改写目标即证 `w ≺ y`, 此乃前提. ∎
 
 ```agda
 simulation-inj :(f : ⟨ α ⟩ → ⟨ β ⟩) → IsSimulation f → injective f
 simulation-inj {α} {β} f f-sim = wf-elim2 ≺-wf aux _ _
   where
-  open BinaryRelation (underlyingRel α) using (Acc; acc; wf-elim2)
+  open BinaryRelation (underlyingRel α) using (wf-elim2)
   open OrdStr (str α) using (≺-ext; ≺-wf)
   open IsSimulation f-sim using (pres≺; formsInitSeg)
 
