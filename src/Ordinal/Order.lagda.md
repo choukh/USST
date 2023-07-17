@@ -63,10 +63,10 @@ record IsSimulation {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β �
 
 ```agda
 simulation-inj :(f : ⟨ α ⟩ → ⟨ β ⟩) → IsSimulation f → injective f
-simulation-inj {α} {β} f f-sim = {!   !}
+simulation-inj {α} {β} f f-sim = Acc→inj _ _ (≺-wf _) (≺-wf _)
   where
-  open IsSimulation f-sim
-  open OrdStr (str α) using (≺-ext)
+  open IsSimulation f-sim using (pres≺; formsInitSeg)
+  open OrdStr (str α) using (≺-ext; ≺-wf)
   open BinaryRelation (underlyingRel α) using (Acc; acc)
 
   Acc→inj : ∀ x y → Acc x → Acc y → f x ＝ f y → x ＝ y
@@ -85,5 +85,15 @@ simulation-inj {α} {β} f f-sim = {!   !}
       w≡z : w ＝ z
       w≡z = Acc→inj w z (H₂ w w≺y) (H₁ z z≺x) fw＝fz
     q : ∀ z → z ≺⟨ α ⟩ y → z ≺⟨ α ⟩ x
-    q z z≺y = {!   !}
+    q z z≺y = transport (λ - → - ≺⟨ α ⟩ x) w≡z w≺x
+      where
+      fz≺fx : f z ≺⟨ β ⟩ f x
+      fz≺fx = transport (λ - → f z ≺⟨ β ⟩ -) (sym fx＝fy) (pres≺ z y z≺y)
+      Σw : Σ w ∶ ⟨ α ⟩ , (w ≺⟨ α ⟩ x × f w ＝ f z)
+      Σw = formsInitSeg (f z) x fz≺fx
+      w = fst Σw
+      w≺x = fst $ snd Σw
+      fw＝fz = snd $ snd Σw
+      w≡z : w ＝ z
+      w≡z = Acc→inj w z (H₁ w w≺x) (H₂ z z≺y) fw＝fz
 ```

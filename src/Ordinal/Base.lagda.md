@@ -134,7 +134,7 @@ module BinaryRelation {A : Type 𝓊} (_≺_ : A → A → Type 𝓋) where
 
 ```agda
   isPropAcc : ∀ x → isProp (Acc x)
-  isPropAcc x (acc H₁) (acc H₂) i = acc λ y y≺x → isPropAcc y (H₁ y y≺x) (H₂ y y≺x) i
+  isPropAcc x (acc IH₁) (acc IH₂) i = acc λ y y≺x → isPropAcc y (IH₁ y y≺x) (IH₂ y y≺x) i
 ```
 
 良基性也是一个命题.
@@ -144,14 +144,24 @@ module BinaryRelation {A : Type 𝓊} (_≺_ : A → A → Type 𝓋) where
   isPropWellFounded = isPropΠ λ _ → isPropAcc _
 ```
 
-良基性蕴含反自反性. 只需证对任意可及的 `x` 都有 `x ⊀ x`, 显然成立.
+### 良基归纳法
+
+良基归纳法是自然数归纳法的更一般形式, 它说如果对任意 `x` 我们都能通过证明任意 `y ≺ x` 有 `P y` 来证明 `P x`, 那么任意 `x` 都有 `P x`.
 
 ```agda
-  Acc→Irreflexive : ∀ x → Acc x → x ⊀ x
-  Acc→Irreflexive x (acc H) x≺x = Acc→Irreflexive x (H x x≺x) x≺x
+  wf-ind : {P : A → Type 𝓌} → WellFounded →
+    (∀ x → (∀ y → y ≺ x → P y) → P x) → ∀ x → P x
+  wf-ind {_} {P} wf H x = aux x (wf x)
+    where
+    aux : ∀ x → (wf : Acc x) → P x
+    aux x (acc IH) = H x λ y y≺x → aux y (IH y y≺x)
+```
 
+由良基归纳法可以立即证明良基性蕴含反自反性.
+
+```agda
   WellFounded→Irreflexive : WellFounded → Irreflexive
-  WellFounded→Irreflexive wf x = Acc→Irreflexive x (wf x)
+  WellFounded→Irreflexive wf = wf-ind wf λ x IH x≺x → IH x x≺x x≺x
 ```
 
 ### 良序性
@@ -276,3 +286,4 @@ OrdinalUnivalence α β = transport (α ≃ₒ β ≃_) Path≡Eq (OrdinalPath �
 ```
 
 有了序数的泛等原理之后, 就可以通过找到两个序数间保持 `_≺_` 关系的同伦等价来证明它们相等. 这体现了泛等基础的好处, 我们不需要商掉某个等价关系, 也不用像质料集合论那样用超限归纳证明两个同构的序数外延相等.
+ 
