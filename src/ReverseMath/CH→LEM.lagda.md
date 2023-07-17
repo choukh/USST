@@ -25,7 +25,7 @@ module ReverseMath.CH→LEM ⦃ _ : PR ⦄ where
 **定理** 任意类型都不能被自己的幂集单射.
 
 ```agda
-Cantor-≴ : (X : Type ℓ) → ℙ X ≴ X
+Cantor-≴ : (X : Type 𝓊) → ℙ X ≴ X
 ```
 
 **证明** 用归谬法, 假设有 `ℙ X` 到 `X` 的单射函数 `f`, 要推出矛盾. 证明思路跟集合论中的一样. 我们用对角线法构造一个集合 `A : ℙ X`, 使得 `f A ∈ A` 当且仅当 `f A ∉ A`, 从而违反无矛盾律.
@@ -61,8 +61,8 @@ Cantor-≴ X (f , f-inj) = noncontradiction ∈→∉ ∉→∈
 由康托尔定理我们可以知道作为 `GCH` 结论的那个和类型的两边互斥, 从而证明 `GCH` 的命题性. 今后不需要用到这一结论.
 
 ```agda
-isPropGCH : (ℓ ℓ′ : Level) → isProp (GCH ℓ ℓ′)
-isPropGCH ℓ ℓ′ = isPropΠ4 λ X Y _ _ → isPropΠ3 λ _ _ _ →
+isPropGCH : (𝓊 𝓋 : Level) → isProp (GCH 𝓊 𝓋)
+isPropGCH 𝓊 𝓋 = isPropΠ4 λ X Y _ _ → isPropΠ3 λ _ _ _ →
   λ { (⊎.inl _)    (⊎.inl _)    → eqToPath $ ap ⊎.inl $ squash₁Eq _ _
     ; (⊎.inl Y≲X)  (⊎.inr ℙX≲Y) → ⊥-rec $ ∥∥-rec2 isProp⊥ (λ ℙX≲Y Y≲X → Cantor-≴ _ $ ≲-trans Y≲X ℙX≲Y) Y≲X ℙX≲Y
     ; (⊎.inr ℙX≲Y) (⊎.inl Y≲X)  → ⊥-rec $ ∥∥-rec2 isProp⊥ (λ ℙX≲Y Y≲X → Cantor-≴ _ $ ≲-trans Y≲X ℙX≲Y) Y≲X ℙX≲Y
@@ -74,7 +74,7 @@ isPropGCH ℓ ℓ′ = isPropΠ4 λ X Y _ _ → isPropΠ3 λ _ _ _ →
 现在固定一个集合 `X`.
 
 ```agda
-module Lemmas (X : Type ℓ) (X-set : isSet X) where
+module Lemmas (X : Type 𝓊) (X-set : isSet X) where
 ```
 
 由 `X` 的某个项 `x` 所构成的单集 `｛ x ｝ : ℙ X` 定义为谓词 `x ＝_`. `X` 的集合性保证了 `x ＝_` 是一个谓词.
@@ -126,7 +126,7 @@ module Lemmas (X : Type ℓ) (X-set : isSet X) where
 现在, 在之前固定的集合 `X` 的基础上再固定一个类型 `P`. 这个 `P` 将对应于排中律所谈论的那个 `P`.
 
 ```agda
-  module _ (P : Type ℓ′) where
+  module _ (P : Type 𝓋) where
 ```
 
 接下来是一个关键构造. 我们构造类型 `Y`, 使得其项是 `X` 的满足以下**任一**条件的子集.
@@ -135,7 +135,7 @@ module Lemmas (X : Type ℓ) (X-set : isSet X) where
 - `P` 可判定
 
 ```agda
-    Y : Type (ℓ-suc ℓ ⊔ ℓ′)
+    Y : Type (𝓊 ⁺ ⊔ 𝓋)
     Y = Σ A ∶ ℙ X , (is｛｝ A ∨ Dec P)
 ```
 
@@ -220,7 +220,7 @@ module Lemmas (X : Type ℓ) (X-set : isSet X) where
 由前几小节的讨论可知 `Y` 满足 `CH` 的前提 `ℕ ⋨ Y ≲ ℙ ℕ`, 于是可以得到 `CH` 所承诺的 `ℙ ℕ` 到 `Y` 的单射. 但是由康托尔定理的一个变体, `ℙ ℕ` 必然要单射到非单集的子集, 所以 `Y` 并不只有单集, 所以只能有 `P` 可判定. ∎
 
 ```agda
-CH→LEM : (∀ ℓ → CH ℓ) → (∀ ℓ → LEM ℓ)
-CH→LEM ch ℓ P = isCHType→lem _ $ ch _ _ $ isSetY _
+CH→LEM : (∀ 𝓊 → CH 𝓊) → (∀ 𝓊 → LEM 𝓊)
+CH→LEM ch 𝓊 P = isCHType→lem _ $ ch _ _ $ isSetY _
   where open Lemmas ℕ isSetℕ
 ```

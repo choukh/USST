@@ -22,16 +22,16 @@ open import Ordinal.Base
 以下一大块代码都仅仅是为了定义出 `x ≺⟨ α ⟩ y` 的写法. 其中 `≺⟨ α ⟩` 叫做 `α` 的底序, 与底集相对应, 它们共同组成了一个序数的底层结构.
 
 ```agda
-record Underlying {ℓ} (O : Type (ℓ-suc ℓ)) : Type (ℓ-suc ℓ) where
+record Underlying {𝓊} (O : Type (𝓊 ⁺)) : Type (𝓊 ⁺) where
   field
-    underlyingSet : O → Type ℓ
-    underlyingRel : (α : O) → underlyingSet α → underlyingSet α → Type ℓ
+    underlyingSet : O → Type 𝓊
+    underlyingRel : (α : O) → underlyingSet α → underlyingSet α → Type 𝓊
   syntax underlyingRel α x y = x ≺⟨ α ⟩ y
 
 open Underlying ⦃...⦄ public
 
 instance
-  underlying : Underlying (Ord ℓ)
+  underlying : Underlying (Ord 𝓊)
   underlyingSet ⦃ underlying ⦄ = ⟨_⟩
   underlyingRel ⦃ underlying ⦄ = OrdStr._≺_ ∘ str
 ```
@@ -41,7 +41,7 @@ instance
 我们说序数底集间的一个映射是序数间的一个模仿 (简称序数模仿), 当且仅当它保序, 且它的像能形成一个前段.
 
 ```agda
-record IsSimulation {α : Ord ℓ} {β : Ord ℓ′} (f : ⟨ α ⟩ → ⟨ β ⟩) : Type (ℓ ⊔ ℓ′) where
+record IsSimulation {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β ⟩) : Type (𝓊 ⊔ 𝓋) where
 ```
 
 保序性 `pres≺` 很简单, 它就是上一章同伦保序 `hPres≺` 的弱化版. "形成前段" 即 `formsInitSeg`, 这一性质的直观可以参考下图. 它说只要一个底集元素被射到, 那么比它小的元素都会被射到, 也就是映射的像能形成 `≺` 的一个前段.
@@ -61,7 +61,7 @@ record IsSimulation {α : Ord ℓ} {β : Ord ℓ′} (f : ⟨ α ⟩ → ⟨ β 
 **引理** 序数模仿是单射.  
 **证明梗概** TODO ∎
 
-```agda
+
 simulation-inj :(f : ⟨ α ⟩ → ⟨ β ⟩) → IsSimulation f → injective f
 simulation-inj {α} {β} f f-sim = {!   !}
   where
@@ -86,4 +86,4 @@ simulation-inj {α} {β} f f-sim = {!   !}
       w≡z = Acc→inj w z (H₂ w w≺y) (H₁ z z≺x) fw＝fz
     q : ∀ z → z ≺⟨ α ⟩ y → z ≺⟨ α ⟩ x
     q z z≺y = {!   !}
-```
+
