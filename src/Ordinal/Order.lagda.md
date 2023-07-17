@@ -106,11 +106,16 @@ record IsSimulation {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β �
 ```
 
 **引理** "形成前段"是命题, 尽管没有截断.
-**证明** TODO ∎
+**证明** 由于前段性是命题, 只需证 `b` 对应的 `α` 前段唯一. 假设有两个这样的前段, 分别有端点 `x` 和 `y` 被 `f` 射到 `b`, 由模仿的单射性 `x ＝ y`. ∎
 
 ```agda
   isPropFormsInitSeg : ∀ b a′ → b ≺⟨ β ⟩ f a′ → isProp (Σ a ∶ ⟨ α ⟩ , (a ≺⟨ α ⟩ a′) × (f a ＝ b))
-  isPropFormsInitSeg b a′ b≺fa′ (x , x≺a′ , fx＝b) (y , y≺a′ , fy＝b) = {!   !}
+  isPropFormsInitSeg b a′ b≺fa′ (x , x≺a′ , fx＝b) (y , y≺a′ , fy＝b) = eqToPath $ Σ≡Prop
+    (λ a → isPropPathToIsProp $ isProp× (≺-prop _ _) (transportIsProp $ underlying-set _ _))
+    (inj (fx＝b ∙ sym fy＝b))
+    where
+    open OrdStr (str α) using (≺-prop)
+    open OrdStr (str β) using (underlying-set)
 ```
 
 于是模仿性是命题.
