@@ -63,14 +63,14 @@ record IsSimulation {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β �
 
 ```agda
 simulation-inj :(f : ⟨ α ⟩ → ⟨ β ⟩) → IsSimulation f → injective f
-simulation-inj {α} {β} f f-sim = Acc→inj _ _ (≺-wf _) (≺-wf _)
+simulation-inj {α} {β} f f-sim = wf-elim2 ≺-wf aux _ _
   where
-  open IsSimulation f-sim using (pres≺; formsInitSeg)
+  open BinaryRelation (underlyingRel α) using (Acc; acc; wf-elim2)
   open OrdStr (str α) using (≺-ext; ≺-wf)
-  open BinaryRelation (underlyingRel α) using (Acc; acc)
+  open IsSimulation f-sim using (pres≺; formsInitSeg)
 
-  Acc→inj : ∀ x y → Acc x → Acc y → f x ＝ f y → x ＝ y
-  Acc→inj x y (acc H₁) (acc H₂) fx＝fy = ≺-ext x y λ z → p z , q z
+  aux : ∀ x y → (∀ u v → u ≺⟨ α ⟩ x → v ≺⟨ α ⟩ y → f u ＝ f v → u ＝ v) → f x ＝ f y → x ＝ y
+  aux x y IH fx＝fy = ≺-ext x y λ z → p z , q z
     where
     p : ∀ z → z ≺⟨ α ⟩ x → z ≺⟨ α ⟩ y
     p z z≺x = transport (λ - → - ≺⟨ α ⟩ y) w≡z w≺y
@@ -83,7 +83,7 @@ simulation-inj {α} {β} f f-sim = Acc→inj _ _ (≺-wf _) (≺-wf _)
       w≺y = fst $ snd Σw
       fw＝fz = snd $ snd Σw
       w≡z : w ＝ z
-      w≡z = Acc→inj w z (H₂ w w≺y) (H₁ z z≺x) fw＝fz
+      w≡z = sym $ IH z w z≺x w≺y (sym fw＝fz)
     q : ∀ z → z ≺⟨ α ⟩ y → z ≺⟨ α ⟩ x
     q z z≺y = transport (λ - → - ≺⟨ α ⟩ x) w≡z w≺x
       where
@@ -95,5 +95,5 @@ simulation-inj {α} {β} f f-sim = Acc→inj _ _ (≺-wf _) (≺-wf _)
       w≺x = fst $ snd Σw
       fw＝fz = snd $ snd Σw
       w≡z : w ＝ z
-      w≡z = Acc→inj w z (H₁ w w≺x) (H₂ z z≺y) fw＝fz
+      w≡z = IH w z w≺x z≺y fw＝fz
 ```
