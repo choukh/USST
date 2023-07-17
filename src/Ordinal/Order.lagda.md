@@ -61,7 +61,7 @@ record IsSimulation {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β �
 **引理** 序数模仿是单射.  
 **证明梗概** TODO ∎
 
-
+```agda
 simulation-inj :(f : ⟨ α ⟩ → ⟨ β ⟩) → IsSimulation f → injective f
 simulation-inj {α} {β} f f-sim = {!   !}
   where
@@ -86,4 +86,4 @@ simulation-inj {α} {β} f f-sim = {!   !}
       w≡z = Acc→inj w z (H₂ w w≺y) (H₁ z z≺x) fw＝fz
     q : ∀ z → z ≺⟨ α ⟩ y → z ≺⟨ α ⟩ x
     q z z≺y = {!   !}
-
+```
