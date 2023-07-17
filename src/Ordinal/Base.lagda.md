@@ -149,19 +149,30 @@ module BinaryRelation {A : Type 𝓊} (_≺_ : A → A → Type 𝓋) where
 良基归纳法是自然数归纳法的更一般形式, 它说如果对任意 `x` 我们都能通过证明任意 `y ≺ x` 有 `P y` 来证明 `P x`, 那么任意 `x` 都有 `P x`.
 
 ```agda
-  wf-ind : {P : A → Type 𝓌} → WellFounded →
+  wf-elim : {P : A → Type 𝓌} → WellFounded →
     (∀ x → (∀ y → y ≺ x → P y) → P x) → ∀ x → P x
-  wf-ind {_} {P} wf H x = aux x (wf x)
+  wf-elim {_} {P} wf H x = aux x (wf x)
     where
-    aux : ∀ x → (wf : Acc x) → P x
+    aux : ∀ x → Acc x → P x
     aux x (acc IH) = H x λ y y≺x → aux y (IH y y≺x)
+```
+
+下一章还要用到双参数形式的良基归纳法.
+
+```agda
+  wf-elim2 : {R : A → A → Type 𝓌} → WellFounded →
+    (∀ x y → (∀ u v → u ≺ x → v ≺ y → R u v) → R x y) → ∀ x y → R x y
+  wf-elim2 {_} {R} wf H x y = aux x y (wf x) (wf y)
+    where
+    aux : ∀ x y → Acc x → Acc y → R x y
+    aux x y (acc IHx) (acc IHy) = H x y λ u v u≺x v≺y → aux u v (IHx u u≺x) (IHy v v≺y)
 ```
 
 由良基归纳法可以立即证明良基性蕴含反自反性.
 
 ```agda
   WellFounded→Irreflexive : WellFounded → Irreflexive
-  WellFounded→Irreflexive wf = wf-ind wf λ x IH x≺x → IH x x≺x x≺x
+  WellFounded→Irreflexive wf = wf-elim wf λ x IH x≺x → IH x x≺x x≺x
 ```
 
 ### 良序性
