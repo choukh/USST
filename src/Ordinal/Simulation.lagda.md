@@ -58,15 +58,16 @@ record IsSimulation {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β �
     formsInitSeg : ∀ b a′ → b ≺⟨ β ⟩ f a′ → Σ a ∶ ⟨ α ⟩ , a ≺⟨ α ⟩ a′ × f a ＝ b
 ```
 
+### 单射性
+
 **引理** 序数模仿是单射.  
-**证明** 用双参数形式的良基归纳法 `wf-elim2`, 拿到归纳假设 `IH : ∀ u v → u ≺ x → v ≺ y → f u ＝ f v → u ＝ v`, 要证 `f x ＝ f y → x ＝ y`. 用 `≺` 的外延性, 要证两种对称的情况 `p` 和 `q`, 我们只证 `p : ∀ z → z ≺ x → z ≺ y`. 由 `z ≺ x` 及模仿的保序性有 `f z ≺ f x ≡ f y`. 由于模仿能形成前段, 必有一个 `w` 满足 `w ≺ y` 且 `f w ＝ f z`. 再结合归纳假设有 `w ＝ z`, 改写目标即证 `w ≺ y`, 此乃前提. ∎
+**证明** 用双参数形式的良基归纳法 `elim2`, 拿到归纳假设 `IH : ∀ u v → u ≺ x → v ≺ y → f u ＝ f v → u ＝ v`, 要证 `f x ＝ f y → x ＝ y`. 用 `≺` 的外延性, 要证两种对称的情况 `p` 和 `q`, 我们只证 `p : ∀ z → z ≺ x → z ≺ y`. 由 `z ≺ x` 及模仿的保序性有 `f z ≺ f x ≡ f y`. 由于模仿能形成前段, 必有一个 `w` 满足 `w ≺ y` 且 `f w ＝ f z`. 再结合归纳假设有 `w ＝ z`, 改写目标即证 `w ≺ y`, 此乃前提. ∎
 
 ```agda
   inj : injective f
-  inj = wf-elim2 ≺-wf aux _ _
+  inj = elim2 aux _ _
     where
-    open BinaryRelation (underlyingRel α) using (wf-elim2)
-    open OrdStr (str α) using (≺-ext; ≺-wf)
+    open OrdStr (str α) using (≺-ext; elim2)
 
     aux : ∀ x y → (∀ u v → u ≺⟨ α ⟩ x → v ≺⟨ α ⟩ y → f u ＝ f v → u ＝ v) → f x ＝ f y → x ＝ y
     aux x y IH fx＝fy = ≺-ext x y λ z → p z , q z
@@ -97,6 +98,8 @@ record IsSimulation {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β �
         w≡z = IH w z w≺x z≺y fw＝fz
 ```
 
+### 命题性
+
 易证保序性是命题.
 
 ```agda
@@ -123,8 +126,8 @@ record IsSimulation {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β �
 ```agda
 unquoteDecl IsSimulationIsoΣ = declareRecordIsoΣ IsSimulationIsoΣ (quote IsSimulation)
 
-prophood : {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β ⟩) → isProp (IsSimulation f)
-prophood {α} {β} f = isOfHLevelRetractFromIso 1 IsSimulationIsoΣ $ aux where
+isPropIsSimulation : {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β ⟩) → isProp (IsSimulation f)
+isPropIsSimulation {α} {β} f = isOfHLevelRetractFromIso 1 IsSimulationIsoΣ $ aux where
   aux : ∀ x y → x ≡ y
   aux x _ = ΣPathP (isPropΠ3 isPropPres≺ _ _ , isPropΠ3 isPropFormsInitSeg _ _)
     where open IsSimulation {α = α} {β} (Iso.inv IsSimulationIsoΣ x)
@@ -135,12 +138,21 @@ Simulation : Ord 𝓊 → Ord 𝓋 → Type (𝓊 ⊔ 𝓋)
 Simulation α β = Σ (⟨ α ⟩ → ⟨ β ⟩) IsSimulation
 ```
 
-## 唯一性
+### 唯一性
 
 **引理** 给定两个序数, 它们之间的模仿是唯一的.  
 **证明** TODO ∎
 
 ```agda
 isPropSimulation : ∀ α β → isProp (Simulation {𝓊} {𝓋} α β)
-isPropSimulation α β = {!   !}
+isPropSimulation α β (f , f-sim) (g , g-sim) = eqToPath $ Σ≡Prop
+  (isPropPathToIsProp ∘ isPropIsSimulation)
+  (funExt $ elim λ x IH → ≺-ext (f x) (g x) λ z →
+    (λ z≺fx → let (a , a≺x , fa＝z) = formsInitSeg f-sim z x z≺fx in
+      transport (_≺ g x) (sym (IH a a≺x) ∙ fa＝z) (pres≺ g-sim a x a≺x))
+  , (λ z≺gx → let (a , a≺x , ga＝z) = formsInitSeg g-sim z x z≺gx in
+      transport (_≺ f x) (IH a a≺x ∙ ga＝z) (pres≺ f-sim a x a≺x)))
+  where open IsSimulation
+        open OrdStr (str α) using (elim)
+        open OrdStr (str β) using (≺-ext; _≺_)
 ```
