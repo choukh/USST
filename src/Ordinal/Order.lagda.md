@@ -1,18 +1,18 @@
 ---
-title: 泛等结构集合论 (4) 序数模仿
+title: 泛等结构集合论 (4) 序数的序
 zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 ---
 
-# 泛等结构集合论 (4) 序数模仿
+# 泛等结构集合论 (4) 序数的序
 
 > 交流Q群: 893531731  
-> 本文源码: [Simulation.Order.lagda.md](https://github.com/choukh/USST/blob/main/src/Ordinal/Simulation.lagda.md)  
-> 高亮渲染: [Simulation.Order.html](https://choukh.github.io/USST/Ordinal.Simulation.html)  
+> 本文源码: [Ordinal.Order.lagda.md](https://github.com/choukh/USST/blob/main/src/Ordinal/Order.lagda.md)  
+> 高亮渲染: [Ordinal.Order.html](https://choukh.github.io/USST/Ordinal.Order.html)  
 
 ```agda
 {-# OPTIONS --cubical --safe #-}
 {-# OPTIONS --lossy-unification --hidden-argument-puns #-}
-module Ordinal.Simulation where
+module Ordinal.Order where
 open import Preliminary
 open import Ordinal.Base
 ```
@@ -42,6 +42,7 @@ instance
 
 ```agda
 record IsSimulation {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β ⟩) : Type (𝓊 ⊔ 𝓋) where
+  constructor mkIsSimulation
 ```
 
 保序性 `pres≺` 很简单, 它就是上一章同伦保序 `hPres≺` 的弱化版. "形成前段" `formsInitSeg` 这一性质的直观可以参考下图. 它说只要一个底集元素被射到, 那么比它小的元素都会被射到, 也就是映射的像能形成 `≺` 的一个前段.
@@ -108,13 +109,13 @@ record IsSimulation {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β �
     where open OrdStr (str β) using (≺-prop)
 ```
 
-**引理** "形成前段"是命题, 尽管没有截断.
+**引理** "形成前段"是命题, 尽管没有截断.  
 **证明** 由于前段性是命题, 只需证 `b` 对应的 `α` 前段唯一. 假设有两个这样的前段, 分别有端点 `x` 和 `y` 被 `f` 射到 `b`, 由模仿的单射性 `x ＝ y`. ∎
 
 ```agda
   isPropFormsInitSeg : ∀ b a′ → b ≺⟨ β ⟩ f a′ → isProp (Σ a ∶ ⟨ α ⟩ , (a ≺⟨ α ⟩ a′) × (f a ＝ b))
   isPropFormsInitSeg b a′ b≺fa′ (x , x≺a′ , fx＝b) (y , y≺a′ , fy＝b) = eqToPath $ Σ≡Prop
-    (λ a → isPropPathToIsProp $ isProp× (≺-prop _ _) (transportIsProp $ underlying-set _ _))
+    (λ _ → isPropPathToIsProp $ isProp× (≺-prop _ _) (transportIsProp $ underlying-set _ _))
     (inj (fx＝b ∙ sym fy＝b))
     where
     open OrdStr (str α) using (≺-prop)
@@ -124,24 +125,81 @@ record IsSimulation {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β �
 于是模仿性是命题.
 
 ```agda
-unquoteDecl IsSimulationIsoΣ = declareRecordIsoΣ IsSimulationIsoΣ (quote IsSimulation)
-
 isPropIsSimulation : {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β ⟩) → isProp (IsSimulation f)
-isPropIsSimulation {α} {β} f = isOfHLevelRetractFromIso 1 IsSimulationIsoΣ $ aux where
+isPropIsSimulation {α} {β} f = isOfHLevelRetractFromIso 1 IsSimulationIsoΣ $ aux
+  where
+  unquoteDecl IsSimulationIsoΣ = declareRecordIsoΣ IsSimulationIsoΣ (quote IsSimulation)
   aux : ∀ x y → x ≡ y
   aux x _ = ΣPathP (isPropΠ3 isPropPres≺ _ _ , isPropΠ3 isPropFormsInitSeg _ _)
     where open IsSimulation {α = α} {β} (Iso.inv IsSimulationIsoΣ x)
 ```
 
+### 唯一性
+
+**引理** 给定两个序数, 它们之间的模仿唯一.  
+**证明** TODO ∎
+
+```
+simulation-unique : {α : Ord 𝓊} {β : Ord 𝓊′}
+  (f g : ⟨ α ⟩ → ⟨ β ⟩) → IsSimulation f → IsSimulation g → f ＝ g
+simulation-unique {α} {β} f g f-sim g-sim =
+  funExt $ elim λ x IH → ≺-ext (f x) (g x) λ z →
+    (λ z≺fx → let (a , a≺x , fa＝z) = formsInitSeg f-sim z x z≺fx in
+      transport (_≺ g x) (sym (IH a a≺x) ∙ fa＝z) (pres≺ g-sim a x a≺x))
+  , (λ z≺gx → let (a , a≺x , ga＝z) = formsInitSeg g-sim z x z≺gx in
+      transport (_≺ f x) (IH a a≺x ∙ ga＝z) (pres≺ f-sim a x a≺x))
+  where open IsSimulation
+        open OrdStr (str α) using (elim)
+        open OrdStr (str β) using (≺-ext; _≺_)
+```
+
+**引理** 序数等价也是一个序数模仿.  
+**证明** TODO ∎
+
+```agda
+open import Cubical.Foundations.Equiv using (equiv-proof)
+open import Cubical.Data.Sigma using (PathPΣ)
+
+ordEquiv-sim : (e : α ≃ₒ β) → IsSimulation (equivFun (e .fst))
+ordEquiv-sim {β} (f , f-equiv) = mkIsSimulation
+  (λ a a′ → equivFun $ hPres≺ a a′)
+  (λ b a′ b≺fa′ → equivFun (invEquiv f) b
+    , (equivFun $ invEquiv $ hPres≺ _ a′) (transport (λ - → - ≺⟨ β ⟩ _) (sym $ eq b) b≺fa′)
+    , eq b)
+  where
+  open IsOrdEquiv f-equiv
+  eq : ∀ b → equivFun f (equivFun (invEquiv f) b) ＝ b
+  eq b = pathToEq $ {!   !}
+  --fst f (snd f .equiv-proof b .fst .fst) ≡ b
+```
+
+**引理** 给定两个序数, 它们之间的序数等价唯一.  
+**证明** 由于"是序数等价"是命题, 只需证该等价的底层函数唯一. 又序数等价也是序数模仿, 由序数模仿的唯一性得证. ∎
+
+```agda
+isPropOrdEquiv : (α : Ord 𝓊) (β : Ord 𝓊′) → isProp (α ≃ₒ β)
+isPropOrdEquiv α β e₁@(f , f-equiv) e₂@(g , g-equiv) = eqToPath $ Σ≡Prop
+  (λ _ → isPropPathToIsProp $ isPropIsOrdEquiv _ _ _)
+  (equivEq $ simulation-unique (equivFun f) (equivFun g) (ordEquiv-sim e₁) (ordEquiv-sim e₂))
+```
+
+**定理** 序数宇宙是集合.  
+**证明** 即证两个序数的相等是命题, 这等价于证两个序数间的等价唯一. ∎
+
+```agda
+isSetOrd : isSet (Ord 𝓊)
+isSetOrd α β = equivFun equiv $ isOfHLevelLift 1 (isPropOrdEquiv α β)
+  where
+  equiv : isProp (Lift (α ≃ₒ β)) ≃ isProp (α ≡ β)
+  equiv = cong≃ isProp $ compEquiv (invEquiv LiftEquiv) (OrdinalPath α β)
+```
+
+## 非严格序
+
 ```agda
 Simulation : Ord 𝓊 → Ord 𝓋 → Type (𝓊 ⊔ 𝓋)
 Simulation α β = Σ (⟨ α ⟩ → ⟨ β ⟩) IsSimulation
 ```
-
-### 唯一性
-
-**引理** 给定两个序数, 它们之间的模仿是唯一的.  
-**证明** TODO ∎
 
 ```agda
 isPropSimulation : ∀ α β → isProp (Simulation {𝓊} {𝓋} α β)
@@ -156,3 +214,5 @@ isPropSimulation α β (f , f-sim) (g , g-sim) = eqToPath $ Σ≡Prop
         open OrdStr (str α) using (elim)
         open OrdStr (str β) using (≺-ext; _≺_)
 ```
+
+## 严格序

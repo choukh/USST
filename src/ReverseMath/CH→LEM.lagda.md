@@ -104,7 +104,8 @@ module Lemmas (X : Type 𝓊) (X-set : isSet X) where
 ```agda
   isPropIs｛｝ : (A : ℙ X) → isProp (is｛｝ A)
   isPropIs｛｝ A (x₁ , refl) (x₂ , eq) = eqToPath $ Σ≡Prop
-    (λ _ → isPropPathToIsProp $ transportIsProp $ isSetΠ (λ _ → isSetHProp) _ _) (｛｝-inj eq)
+    (λ _ → isPropPathToIsProp $ transportIsProp $ isSetΠ (λ _ → isSetHProp) _ _)
+    (｛｝-inj eq)
 ```
 
 接着我们证明康托尔定理的一个变体, 说 `ℙ X` 的自嵌入一定射到了单集之外. 我们能实际构造出这个非单集, 用的还是对角线法, 证明的结构与 `Cantor-≴` 非常类似, 这里不再赘述.

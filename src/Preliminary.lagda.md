@@ -43,13 +43,13 @@ module Preliminary where
 
 正如 $x : A$ 是一个判断那样, " $A$ 是一个类型" 也是一个判断, 记作 `A : Type`. 其中 `Type` 就叫做**类型宇宙 (type universe)**. 它是一个层级系统, 其层级序数叫做宇宙层级 `Level`. 但要注意 `Level` 本身不在类型宇宙之中, 它独享一个单独的宇宙, 叫做层级宇宙 `LevelUniv`, 即有 `Level : LevelUniv`. (这些不同的宇宙又叫做 sort, 非形式地, 可以认为 `Type₀ : Type₁ : Type₂ : ... : Sort` 和 `LevelUniv : Sort`)
 
-最低的宇宙层级是 `𝓊₀ : Level`, 位于最低层级的类型宇宙记作 `Type 𝓊₀`, 简记作 `Type₀` 或 `Type`. 下一个宇宙是 `Type (𝓊₀ ⁺)`, 简记作 `Type 𝓊₁`, 或 `Type₁`, 以此类推. 此外, 宇宙层级还有一个二元运算 `_⊔_`, 它的作用是取两个宇宙层级中较高的那一个, 例如 `𝓊₀ ⊔ 𝓊₁` 等于 `𝓊₁`.
+最低的宇宙层级是 `𝓊₀ : Level`, 位于最低层级的类型宇宙记作 `Type 𝓊₀`, 简记作 `Type₀` 或 `Type`. 下一个宇宙是 `Type (𝓊₀ ⁺)`, 简记作 `Type 𝓊₁`, 或 `Type₁`, 以此类推. 此外, 宇宙层级还有一个二元运算 `_⊔_`, 它的作用是取两个宇宙层级中较高的那一个, 例如 `𝓊₀ ⊔ 𝓊₁` 等于 `𝓊₁`. 较低层级的类型可以被 `Lift` 提升到较高层级.
 
 以上都是类型论中的原始概念, 我们从 `Cubical.Core.Primitives` 模块中通过以下代码导入了它们.
 
 ```agda
-open import Cubical.Core.Primitives public
-  using (Type; Level) renaming (ℓ-zero to 𝓊₀; ℓ-suc to _⁺; ℓ-max to _⊔_)
+open import Cubical.Foundations.Prelude public
+  using (Type; Level; Lift) renaming (ℓ-zero to 𝓊₀; ℓ-suc to _⁺; ℓ-max to _⊔_)
 𝓊₁ = 𝓊₀ ⁺
 𝓊₂ = 𝓊₁ ⁺
 ```
@@ -197,13 +197,13 @@ open import Cubical.Data.Empty public using (isProp⊥)
 open import Cubical.Data.Nat public using (isSetℕ)
 ```
 
-对于嵌套的Π类型, 不管嵌套多少次, 只要最后的目标是命题 (或集合), 那么整个嵌套Π类型也是命题 (或集合). 如果构成Σ类型的两边都是命题 (或集合), 那么这个Σ类型也是命题 (或集合).
+对于嵌套的Π类型, 不管嵌套多少次, 只要最后的目标是命题 (或集合), 那么整个嵌套Π类型也是命题 (或集合). 如果构成Σ类型的两边都是命题 (或集合), 那么这个Σ类型也是命题 (或集合). 引理 `isOfHLevelLift` 是说宇宙层级的提升不影响同伦层级.
 
 ```agda
 open import Cubical.Foundations.HLevels public
   using ( isPropΠ; isPropΠ2; isPropΠ3; isPropΠ4; isPropΠ5; isPropΠ6; isProp→
         ; isProp×; isProp×2; isProp×3; isProp×4; isProp×5; isPropΣ
-        ; isSetΠ; isSetΣ)
+        ; isSetΠ; isSetΣ; isOfHLevelLift)
 ```
 
 命题宇宙 `hProp 𝓊` 定义为 `Type 𝓊` 配备上结构 `isProp`, 即 `hProp 𝓊 = Σ (Type 𝓊) isProp`. 出乎意料的是, 命题宇宙 `hProp 𝓊` 也是一个集合. 在传统基础中所有命题不可能组成集合, 因为太大了. 但泛等基础中说的集合不关乎大小, 大小已经由宇宙层级处理了.
@@ -252,7 +252,7 @@ syntax ∃-syntax A (λ x → B) = ∃ x ∶ A , B
 
 ### 相等类型
 
-"相等" 在泛等基础中是一个复杂的概念. 首先上面提到的库中的概念所涉及到的相等都采用了所谓**路径类型 (path type)** `_≡_`.
+"相等" 在泛等基础中是一个复杂的概念. 首先上面提到的库中的概念所涉及到的相等都采用了所谓**道路类型 (path type)** `_≡_`.
 
 ```agda
 open import Cubical.Foundations.Prelude public using (_≡_)
@@ -290,7 +290,7 @@ open import Cubical.Data.Equality public
   using (refl; sym; _∙_; ap; happly; transport; funExt)
 ```
 
-以下引理会经常用到, 它将 "路径类型是命题" 的证明转化成 "相等类型是命题" 的证明.
+以下引理会经常用到, 它将 "道路类型是命题" 的证明转化成 "相等类型是命题" 的证明.
 
 ```agda
 transportIsProp : {A : Type 𝓊} {x y : A} → isProp (x ≡ y) → isProp (x ＝ y)
@@ -314,11 +314,23 @@ injective f = ∀ {x y} → f x ＝ f y → x ＝ y
 
 ### 同伦等价
 
-同伦等价 `_≃_` 可以简单理解为是在泛等基础中更容易处理的一种"同构", 它与真正的同构 `Iso` 也是同构的, 且同伦等价的. `equivFun` 用于取得同伦等价的底层函数, 它与 `Iso.fun` 所取得的函数有相同的行为.
+同伦等价 `_≃_` 可以简单理解为是在泛等基础中更容易处理的一种"同构", 它与真正的同构 `Iso` 也是同构的, 且同伦等价的. `equivFun` 用于取得同伦等价的底层函数, 它与 `Iso.fun` 所取得的函数有相同的行为. 同伦等价相比于同构的好处之一是"一个函数是一个同伦等价"一定是一个命题 (`isPropIsEquiv`), 而同构则不一定有这种性质. 由此性质我们有 `equivPath`, 它说如果底层函数道路相等, 那么同伦等价也道路相等.
+
+此外, `invEquiv` 是同伦等价的对称性; `compEquiv` 是同伦等价的传递性; `cong≃` 是同伦等价的合同性; `LiftEquiv` 说明宇宙层级的提升不影响同伦等价.
 
 ```agda
-open import Cubical.Foundations.Equiv public using (_≃_; equivFun)
+open import Cubical.Foundations.Equiv public
+  using (_≃_; equivFun; isPropIsEquiv; invEquiv; compEquiv; LiftEquiv)
+  renaming (equivEq to equivPath)
+open import Cubical.Foundations.Equiv.Properties public using (cong≃)
 open import Cubical.Foundations.Isomorphism public using (Iso)
+```
+
+以下是 `equivPath` 的 `＝` 版.
+
+```agda
+equivEq : {e f : A ≃ B} → e .fst ＝ f .fst → e ＝ f
+equivEq = pathToEq ∘ equivPath ∘ eqToPath
 ```
 
 以下是用 Agda 反射机制定义的宏, 搭配同伦等价使用, 用于更快地证明一些数学结构的**泛等原理 (univalence principle)**. 我们不需要关心这些工具的实现细节, 只需要知道什么是结构的泛等原理, 以及如何使用这套工具得到它. 具体可以看 `𝒮ᴰ-Record` 定义下面的例子, 以及本系列讲义的后续文章.

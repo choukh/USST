@@ -202,10 +202,10 @@ module BinaryRelation {A : Type 𝓊} (_≺_ : A → A → Type 𝓋) where
 由于良序性里面的每个条件都是命题, 所以良序性也是一个命题.
 
 ```agda
-  unquoteDecl WellOrderedIsoΣ = declareRecordIsoΣ WellOrderedIsoΣ (quote WellOrdered)
-
   isPropWellOrdered : isProp WellOrdered
-  isPropWellOrdered = isOfHLevelRetractFromIso 1 WellOrderedIsoΣ $ aux where
+  isPropWellOrdered = isOfHLevelRetractFromIso 1 WellOrderedIsoΣ $ aux
+    where
+    unquoteDecl WellOrderedIsoΣ = declareRecordIsoΣ WellOrderedIsoΣ (quote WellOrdered)
     aux : ∀ x y → x ≡ y
     aux x _ = ΣPathP (isPropPropositional _ _
             , ΣPathP (isPropTransitive ≺-prop _ _
@@ -259,20 +259,37 @@ variable α β γ : Ord 𝓊
 
 ## 序数等价
 
-序数间的同伦等价 `α ≃ₒ β` 定义为保持序关系的底集间同伦等价 `A ≃ B`. 注意"保持序关系"也必须用同伦等价来表达, 记作 `hPres≺`, 定义为对任意 `x y : A` 有 `x ≺₁ y` 与 `f x ≺₂ f y` 同伦等价, 其中 `≺₁` 和 `≺₂` 分别是 `A` 和 `B` 上的序关系, `f` 是 `A ≃ B` 的底层函数.
+我们说两个序数的底集间的同伦等价 `e : A ≃ B` 是一个序数等价, 当且仅当 `e` 保持序关系. 注意这里的"保持序关系"也必须用同伦等价来表达, 记作 `hPres≺`, 定义为对任意 `x y : A` 有 `x ≺₁ y` 与 `f x ≺₂ f y` 同伦等价, 其中 `≺₁` 和 `≺₂` 分别是 `A` 和 `B` 上的序关系, `f` 是 `A ≃ B` 的底层函数.
 
 ```agda
-record IsOrdEquiv {A : Type 𝓊} {B : Type 𝓊′}
-  (a : OrdStr A) (e : A ≃ B) (b : OrdStr B) : Type (𝓊 ⊔ 𝓊′) where
-  constructor mkIsOrderEquiv
-  private
-    open OrdStr a renaming (_≺_ to _≺₁_)
-    open OrdStr b renaming (_≺_ to _≺₂_)
-    f = equivFun e
-  field
-    hPres≺ : (x y : A) → x ≺₁ y ≃ f x ≺₂ f y
+module _ {A : Type 𝓊} {B : Type 𝓊′} (a : OrdStr A) (e : A ≃ B) (b : OrdStr B) where
 
-_≃ₒ_ : Ord 𝓊 → Ord 𝓊′ → Type _
+  record IsOrdEquiv : Type (𝓊 ⊔ 𝓊′) where
+    constructor mkIsOrderEquiv
+    private
+      open OrdStr a renaming (_≺_ to _≺₁_)
+      open OrdStr b renaming (_≺_ to _≺₂_)
+      f = equivFun e
+    field
+      hPres≺ : (x y : A) → x ≺₁ y ≃ f x ≺₂ f y
+```
+
+由同伦等价的命题性, "是序数等价"也是一个命题. 这是很有用的性质, 会在下一章用到.
+
+```agda
+  isPropIsOrdEquiv : isProp IsOrdEquiv
+  isPropIsOrdEquiv = isOfHLevelRetractFromIso 1 IsOrdEquivIsoΣ $ aux
+    where
+    unquoteDecl IsOrdEquivIsoΣ = declareRecordIsoΣ IsOrdEquivIsoΣ (quote IsOrdEquiv)
+    aux : ∀ x y → x ≡ y
+    aux = isPropΠ2 λ _ _ → isPropΣ (isProp→ $ ≺-prop _ _) (λ _ → isPropIsEquiv _)
+      where open OrdStr b
+```
+
+序数间的同伦等价 `α ≃ₒ β` 定义为保持序关系的底集间同伦等价 `A ≃ B`.
+
+```agda
+_≃ₒ_ : Ord 𝓊 → Ord 𝓊′ → Type (𝓊 ⊔ 𝓊′)
 α ≃ₒ β = Σ e ∶ ⟨ α ⟩ ≃ ⟨ β ⟩ , IsOrdEquiv (str α) e (str β)
 ```
 
