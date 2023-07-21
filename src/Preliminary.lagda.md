@@ -108,12 +108,12 @@ _ = λ A B → ∀ x → B x
 
 ```agda
 open import Cubical.Foundations.Function public
-  using (_$_; _∘_; idfun)
+  using (_$_; _∘_; idfun; uncurry)
 ```
 
 ### 依值配对类型 (Σ类型)
 
-**依值配对类型 (dependent pair type)**, 也叫做**Σ类型 (Sigma type)**, 可以看作是Π类型的反柯里化. 也就是说, 以下两个类型是等价的.
+**依值配对类型 (dependent pair type)**, 也叫做**Σ类型 (Sigma type)**, 可以看作是Π类型的反柯里化 `uncurry`. 也就是说, 以下两个类型是等价的.
 
 `∀ x → B x → C`
 
