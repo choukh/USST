@@ -262,16 +262,14 @@ variable α β γ : Ord 𝓊
 我们说两个序数的底集间的同伦等价 `e : A ≃ B` 是一个序数等价, 当且仅当 `e` 保持序关系. 注意这里的"保持序关系"也必须用同伦等价来表达, 记作 `hPres≺`, 定义为对任意 `x y : A` 有 `x ≺₁ y` 与 `f x ≺₂ f y` 同伦等价, 其中 `≺₁` 和 `≺₂` 分别是 `A` 和 `B` 上的序关系, `f` 是 `A ≃ B` 的底层函数.
 
 ```agda
-module _ {A : Type 𝓊} {B : Type 𝓊′} (a : OrdStr A) (e : A ≃ B) (b : OrdStr B) where
+module _ {A : Type 𝓊} {B : Type 𝓊′} (a : OrdStr A) (f : A ≃ B) (b : OrdStr B) where
 
   record IsOrdEquiv : Type (𝓊 ⊔ 𝓊′) where
     constructor mkIsOrderEquiv
-    private
-      open OrdStr a renaming (_≺_ to _≺₁_)
-      open OrdStr b renaming (_≺_ to _≺₂_)
-      f = equivFun e
+    open OrdStr a renaming (_≺_ to _≺₁_)
+    open OrdStr b renaming (_≺_ to _≺₂_)
     field
-      hPres≺ : (x y : A) → x ≺₁ y ≃ f x ≺₂ f y
+      hPres≺ : (x y : A) → x ≺₁ y ≃ (f ⁺¹) x ≺₂ (f ⁺¹) y
 ```
 
 由同伦等价的命题性, "是序数等价"也是一个命题. 这是很有用的性质, 会在下一章用到.
@@ -290,7 +288,7 @@ module _ {A : Type 𝓊} {B : Type 𝓊′} (a : OrdStr A) (e : A ≃ B) (b : Or
 
 ```agda
 _≃ₒ_ : Ord 𝓊 → Ord 𝓊′ → Type (𝓊 ⊔ 𝓊′)
-α ≃ₒ β = Σ e ∶ ⟨ α ⟩ ≃ ⟨ β ⟩ , IsOrdEquiv (str α) e (str β)
+α ≃ₒ β = Σ f ∶ ⟨ α ⟩ ≃ ⟨ β ⟩ , IsOrdEquiv (str α) f (str β)
 ```
 
 ## 序数的泛等原理

@@ -36,13 +36,13 @@ instance
   underlyingRel ⦃ underlying ⦄ = OrdStr._≺_ ∘ str
 ```
 
-## 序数模仿
+## 序数嵌入
 
-我们说序数底集间的一个映射是序数间的一个模仿 (简称序数模仿), 当且仅当它保序, 且它的像能形成一个前段.
+我们说序数底集间的一个映射是序数嵌入, 当且仅当它保序, 且它的像能形成一个前段.
 
 ```agda
-record IsSimulation {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β ⟩) : Type (𝓊 ⊔ 𝓋) where
-  constructor mkIsSimulation
+record IsOrdEmbed {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β ⟩) : Type (𝓊 ⊔ 𝓋) where
+  constructor mkIsOrdEmbed
 ```
 
 保序性 `pres≺` 很简单, 它就是上一章同伦保序 `hPres≺` 的弱化版. "形成前段" `formsInitSeg` 这一性质的直观可以参考下图. 它说只要一个底集元素被射到, 那么比它小的元素都会被射到, 也就是映射的像能形成 `≺` 的一个前段.
@@ -61,8 +61,8 @@ record IsSimulation {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β �
 
 ### 单射性
 
-**引理** 序数模仿是单射.  
-**证明** 用双参数形式的良基归纳法 `elim2`, 拿到归纳假设 `IH : ∀ u v → u ≺ x → v ≺ y → f u ＝ f v → u ＝ v`, 要证 `f x ＝ f y → x ＝ y`. 用 `≺` 的外延性, 要证两种对称的情况 `p` 和 `q`, 我们只证 `p : ∀ z → z ≺ x → z ≺ y`. 由 `z ≺ x` 及模仿的保序性有 `f z ≺ f x ≡ f y`. 由于模仿能形成前段, 必有一个 `w` 满足 `w ≺ y` 且 `f w ＝ f z`. 再结合归纳假设有 `w ＝ z`, 改写目标即证 `w ≺ y`, 此乃前提. ∎
+**引理** 序数嵌入是单射.  
+**证明** 用双参数形式的良基归纳法 `elim2`, 拿到归纳假设 `IH : ∀ u v → u ≺ x → v ≺ y → f u ＝ f v → u ＝ v`, 要证 `f x ＝ f y → x ＝ y`. 用 `≺` 的外延性, 要证两种对称的情况 `p` 和 `q`, 我们只证 `p : ∀ z → z ≺ x → z ≺ y`. 由 `z ≺ x` 及嵌入的保序性有 `f z ≺ f x ≡ f y`. 由于嵌入能形成前段, 必有一个 `w` 满足 `w ≺ y` 且 `f w ＝ f z`. 再结合归纳假设有 `w ＝ z`, 改写目标即证 `w ≺ y`, 此乃前提. ∎
 
 ```agda
   inj : injective f
@@ -110,7 +110,7 @@ record IsSimulation {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β �
 ```
 
 **引理** "形成前段"是命题, 尽管没有截断.  
-**证明** 由于前段性是命题, 只需证 `b` 对应的 `α` 前段唯一. 假设有两个这样的前段, 分别有端点 `x` 和 `y` 被 `f` 射到 `b`, 由模仿的单射性 `x ＝ y`. ∎
+**证明** 由于前段性是命题, 只需证 `b` 对应的 `α` 前段唯一. 假设有两个这样的前段, 分别有端点 `x` 和 `y` 被 `f` 射到 `b`, 由嵌入的单射性 `x ＝ y`. ∎
 
 ```agda
   isPropFormsInitSeg : ∀ b a′ → b ≺⟨ β ⟩ f a′ → isProp (Σ a ∶ ⟨ α ⟩ , (a ≺⟨ α ⟩ a′) × (f a ＝ b))
@@ -122,66 +122,60 @@ record IsSimulation {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β �
     open OrdStr (str β) using (underlying-set)
 ```
 
-于是模仿性是命题.
+于是嵌入性是命题.
 
 ```agda
-isPropIsSimulation : {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β ⟩) → isProp (IsSimulation f)
-isPropIsSimulation {α} {β} f = isOfHLevelRetractFromIso 1 IsSimulationIsoΣ $ aux
+isPropIsOrdEmbed : {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β ⟩) → isProp (IsOrdEmbed f)
+isPropIsOrdEmbed {α} {β} f = isOfHLevelRetractFromIso 1 IsOrdEmbedIsoΣ $ aux
   where
-  unquoteDecl IsSimulationIsoΣ = declareRecordIsoΣ IsSimulationIsoΣ (quote IsSimulation)
+  unquoteDecl IsOrdEmbedIsoΣ = declareRecordIsoΣ IsOrdEmbedIsoΣ (quote IsOrdEmbed)
   aux : ∀ x y → x ≡ y
   aux x _ = ΣPathP (isPropΠ3 isPropPres≺ _ _ , isPropΠ3 isPropFormsInitSeg _ _)
-    where open IsSimulation {α = α} {β} (Iso.inv IsSimulationIsoΣ x)
+    where open IsOrdEmbed {α = α} {β} (Iso.inv IsOrdEmbedIsoΣ x)
 ```
 
 ### 唯一性
 
-**引理** 给定两个序数, 它们之间的模仿唯一.  
-**证明** TODO ∎
+**引理** 给定两个序数, 它们之间的嵌入唯一.  
+**证明** 用函数的外延性以及底序的外延性, 使用与嵌入的单射性的证明类似的改写即证. ∎
 
 ```
-simulation-unique : {α : Ord 𝓊} {β : Ord 𝓊′}
-  (f g : ⟨ α ⟩ → ⟨ β ⟩) → IsSimulation f → IsSimulation g → f ＝ g
-simulation-unique {α} {β} f g f-sim g-sim =
+ordEmbed-unique : {α : Ord 𝓊} {β : Ord 𝓊′}
+  (f g : ⟨ α ⟩ → ⟨ β ⟩) → IsOrdEmbed f → IsOrdEmbed g → f ＝ g
+ordEmbed-unique {α} {β} f g f-ordEmb g-ordEmb =
   funExt $ elim λ x IH → ≺-ext (f x) (g x) λ z →
-    (λ z≺fx → let (a , a≺x , fa＝z) = formsInitSeg f-sim z x z≺fx in
-      transport (_≺ g x) (sym (IH a a≺x) ∙ fa＝z) (pres≺ g-sim a x a≺x))
-  , (λ z≺gx → let (a , a≺x , ga＝z) = formsInitSeg g-sim z x z≺gx in
-      transport (_≺ f x) (IH a a≺x ∙ ga＝z) (pres≺ f-sim a x a≺x))
-  where open IsSimulation
+    (λ z≺fx → let (a , a≺x , fa＝z) = formsInitSeg f-ordEmb z x z≺fx in
+      transport (_≺ g x) (sym (IH a a≺x) ∙ fa＝z) (pres≺ g-ordEmb a x a≺x))
+  , (λ z≺gx → let (a , a≺x , ga＝z) = formsInitSeg g-ordEmb z x z≺gx in
+      transport (_≺ f x) (IH a a≺x ∙ ga＝z) (pres≺ f-ordEmb a x a≺x))
+  where open IsOrdEmbed
         open OrdStr (str α) using (elim)
         open OrdStr (str β) using (≺-ext; _≺_)
 ```
 
-**引理** 序数等价也是一个序数模仿.  
-**证明** TODO ∎
+**引理** 序数等价也是一个序数嵌入.  
+**证明** 要证序数等价的底层函数 `f` 保序且形成前段. 保序性即 `hPres≺` 的底层函数. 对任意 `b ≺ f a′`, 有 `f (f⁻¹ b) ＝ b`, 改写可得 `f (f⁻¹ b) ≺ f a′`, 再用 `hPres≺⁻¹` 即得 `(f⁻¹ b) ≺ a′`. 于是 `f⁻¹ b` 就是"形成前段"条件所要求的 `a`. ∎
 
 ```agda
-ordEquiv-sim : (e : α ≃ₒ β) → IsSimulation (equivFun (e .fst))
-ordEquiv-sim {β} ((f , f-equiv) , f-ordEquiv) =
-  let
-    f⁻¹ = invIsEq f-equiv
-    sec : ∀ b → f (f⁻¹ b) ＝ b
-    sec b = pathToEq $ secIsEq f-equiv b
-  in
-  mkIsSimulation
-    (λ a a′ → equivFun $ hPres≺ a a′)
-    (λ b a′ b≺fa′ → f⁻¹ b
-      , (equivFun $ invEquiv $ hPres≺ _ a′) (transport (λ - → - ≺⟨ β ⟩ _) (sym $ sec b) b≺fa′)
-      , sec b)
-  where
-  open IsOrdEquiv f-ordEquiv
-  open import Cubical.Foundations.Equiv using (invIsEq; secIsEq)
+IsOrdEquiv→IsOrdEmbed : (f : ⟨ α ⟩ ≃ ⟨ β ⟩) → IsOrdEquiv (str α) f (str β) → IsOrdEmbed (f ⁺¹)
+IsOrdEquiv→IsOrdEmbed {β} f ordEquiv = mkIsOrdEmbed
+  (λ a a′ → hPres≺ a a′ ⁺¹)
+  (λ b a′ b≺fa′ → (f ⁻¹) b
+    , (hPres≺ _ a′ ⁻¹) (transport (λ - → - ≺⟨ β ⟩ _) (sym $ secEq f b) b≺fa′)
+    , secEq f b)
+  where open IsOrdEquiv ordEquiv
 ```
 
 **引理** 给定两个序数, 它们之间的序数等价唯一.  
-**证明** 由于"是序数等价"是命题, 只需证该等价的底层函数唯一. 又序数等价也是序数模仿, 由序数模仿的唯一性得证. ∎
+**证明** 由于"是序数等价"是命题, 只需证该等价的底层函数唯一. 又序数等价也是序数嵌入, 由序数嵌入的唯一性得证. ∎
 
 ```agda
 isPropOrdEquiv : (α : Ord 𝓊) (β : Ord 𝓊′) → isProp (α ≃ₒ β)
-isPropOrdEquiv α β e₁@(f , _) e₂@(g , _) = eqToPath $ Σ≡Prop
+isPropOrdEquiv α β (f , f-ordEquiv) (g , g-ordEquiv) = eqToPath $ Σ≡Prop
   (λ _ → isPropPathToIsProp $ isPropIsOrdEquiv _ _ _)
-  {!   !} --(equivEq $ simulation-unique (equivFun f) (equivFun g) (ordEquiv-sim e₁) (ordEquiv-sim e₂))
+  (equivEq $ ordEmbed-unique (f ⁺¹) (g ⁺¹)
+    (IsOrdEquiv→IsOrdEmbed f f-ordEquiv)
+    (IsOrdEquiv→IsOrdEmbed g g-ordEquiv))
 ```
 
 **推论** 序数宇宙是集合.  
@@ -189,24 +183,26 @@ isPropOrdEquiv α β e₁@(f , _) e₂@(g , _) = eqToPath $ Σ≡Prop
 
 ```agda
 isSetOrd : isSet (Ord 𝓊)
-isSetOrd α β = equivFun equiv $ isOfHLevelLift 1 (isPropOrdEquiv α β)
+isSetOrd α β = (equiv ⁺¹) (isOfHLevelLift 1 $ isPropOrdEquiv α β)
   where
   equiv : isProp (Lift (α ≃ₒ β)) ≃ isProp (α ≡ β)
   equiv = cong≃ isProp $ compEquiv (invEquiv LiftEquiv) (OrdinalPath α β)
 ```
 
-## 非严格序
+## 序数的序
+
+序数之间的序 `_≤_` 定义为它们之间的嵌入的全体.
 
 ```agda
-Simulation : Ord 𝓊 → Ord 𝓋 → Type (𝓊 ⊔ 𝓋)
-Simulation α β = Σ (⟨ α ⟩ → ⟨ β ⟩) IsSimulation
+_≤_ : Ord 𝓊 → Ord 𝓋 → Type (𝓊 ⊔ 𝓋)
+α ≤ β = Σ (⟨ α ⟩ → ⟨ β ⟩) IsOrdEmbed
 ```
+
+因为嵌入是唯一的, 所以 `_≤_` 是命题.
 
 ```agda
-isPropSimulation : ∀ α β → isProp (Simulation {𝓊} {𝓋} α β)
-isPropSimulation α β (f , f-sim) (g , g-sim) = eqToPath $ Σ≡Prop
-  (isPropPathToIsProp ∘ isPropIsSimulation)
-  (simulation-unique f g f-sim g-sim)
+≤-prop : (α : Ord 𝓊) (β : Ord 𝓋) → isProp (α ≤ β)
+≤-prop α β (f , f-ordEmb) (g , g-ordEmb) = eqToPath $ Σ≡Prop
+  (isPropPathToIsProp ∘ isPropIsOrdEmbed)
+  (ordEmbed-unique f g f-ordEmb g-ordEmb)
 ```
-
-## 严格序

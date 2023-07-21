@@ -314,23 +314,40 @@ injective f = ∀ {x y} → f x ＝ f y → x ＝ y
 
 ### 同伦等价
 
-同伦等价 `_≃_` 可以简单理解为是在泛等基础中更容易处理的一种"同构", 它与真正的同构 `Iso` 也是同构的, 且同伦等价的. `equivFun` 用于取得同伦等价的底层函数, 它与 `Iso.fun` 所取得的函数有相同的行为. 同伦等价相比于同构的好处之一是"一个函数是一个同伦等价"一定是一个命题 (`isPropIsEquiv`), 而同构则不一定有这种性质. 由此性质我们有 `equivPath`, 它说如果底层函数道路相等, 那么同伦等价也道路相等.
+同伦等价 `_≃_` 可以简单理解为是在泛等基础中更容易处理的一种"同构", 它与真正的同构 `Iso` 也是同构的, 且同伦等价的. 同伦等价是一个Σ类型, 其左边即同伦等价的底层函数, 它与同构的正映射相同. 同伦等价相比于同构的好处之一是"一个函数是一个同伦等价"一定是一个命题 (`isPropIsEquiv`), 而同构则不一定有这种性质. 由此性质我们有 `equivPath`, 它说如果底层函数道路相等, 那么同伦等价也道路相等.
 
 此外, `invEquiv` 是同伦等价的对称性; `compEquiv` 是同伦等价的传递性; `cong≃` 是同伦等价的合同性; `LiftEquiv` 说明宇宙层级的提升不影响同伦等价.
 
 ```agda
 open import Cubical.Foundations.Equiv public
-  using (_≃_; equivFun; isPropIsEquiv; invEquiv; compEquiv; LiftEquiv)
+  using (_≃_; isPropIsEquiv; invEquiv; compEquiv; LiftEquiv; secIsEq)
   renaming (equivEq to equivPath)
 open import Cubical.Foundations.Equiv.Properties public using (cong≃)
 open import Cubical.Foundations.Isomorphism public using (Iso)
 ```
 
-以下是 `equivPath` 的 `＝` 版.
+为了方便使用我们有 `equivPath` 的 `＝` 版.
 
 ```agda
 equivEq : {e f : A ≃ B} → e .fst ＝ f .fst → e ＝ f
 equivEq = pathToEq ∘ equivPath ∘ eqToPath
+```
+
+为了方便阅读我们分别用 `_⁺¹` 和 `_⁻¹` 表示同伦等价所承诺的正映射和逆映射.
+
+```agda
+_⁺¹ : A ≃ B → A → B
+_⁺¹ = fst
+
+_⁻¹ : A ≃ B → B → A
+e ⁻¹ = fst (invEquiv e)
+```
+
+可以证明它们互逆.
+
+```agda
+secEq : (f : A ≃ B) (x : B) → (f ⁺¹ ∘ f ⁻¹) x ＝ x
+secEq (_ , f-equiv) = pathToEq ∘ (secIsEq f-equiv)
 ```
 
 以下是用 Agda 反射机制定义的宏, 搭配同伦等价使用, 用于更快地证明一些数学结构的**泛等原理 (univalence principle)**. 我们不需要关心这些工具的实现细节, 只需要知道什么是结构的泛等原理, 以及如何使用这套工具得到它. 具体可以看 `𝒮ᴰ-Record` 定义下面的例子, 以及本系列讲义的后续文章.
