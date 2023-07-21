@@ -157,20 +157,21 @@ simulation-unique {α} {β} f g f-sim g-sim =
 **证明** TODO ∎
 
 ```agda
-open import Cubical.Foundations.Equiv using (equiv-proof)
-open import Cubical.Data.Sigma using (PathPΣ)
-
 ordEquiv-sim : (e : α ≃ₒ β) → IsSimulation (equivFun (e .fst))
-ordEquiv-sim {β} (f , f-equiv) = mkIsSimulation
-  (λ a a′ → equivFun $ hPres≺ a a′)
-  (λ b a′ b≺fa′ → equivFun (invEquiv f) b
-    , (equivFun $ invEquiv $ hPres≺ _ a′) (transport (λ - → - ≺⟨ β ⟩ _) (sym $ eq b) b≺fa′)
-    , eq b)
+ordEquiv-sim {β} ((f , f-equiv) , f-ordEquiv) =
+  let
+    f⁻¹ = invIsEq f-equiv
+    sec : ∀ b → f (f⁻¹ b) ＝ b
+    sec b = pathToEq $ secIsEq f-equiv b
+  in
+  mkIsSimulation
+    (λ a a′ → equivFun $ hPres≺ a a′)
+    (λ b a′ b≺fa′ → f⁻¹ b
+      , (equivFun $ invEquiv $ hPres≺ _ a′) (transport (λ - → - ≺⟨ β ⟩ _) (sym $ sec b) b≺fa′)
+      , sec b)
   where
-  open IsOrdEquiv f-equiv
-  eq : ∀ b → equivFun f (equivFun (invEquiv f) b) ＝ b
-  eq b = pathToEq $ {!   !}
-  --fst f (snd f .equiv-proof b .fst .fst) ≡ b
+  open IsOrdEquiv f-ordEquiv
+  open import Cubical.Foundations.Equiv using (invIsEq; secIsEq)
 ```
 
 **引理** 给定两个序数, 它们之间的序数等价唯一.  
@@ -178,13 +179,13 @@ ordEquiv-sim {β} (f , f-equiv) = mkIsSimulation
 
 ```agda
 isPropOrdEquiv : (α : Ord 𝓊) (β : Ord 𝓊′) → isProp (α ≃ₒ β)
-isPropOrdEquiv α β e₁@(f , f-equiv) e₂@(g , g-equiv) = eqToPath $ Σ≡Prop
+isPropOrdEquiv α β e₁@(f , _) e₂@(g , _) = eqToPath $ Σ≡Prop
   (λ _ → isPropPathToIsProp $ isPropIsOrdEquiv _ _ _)
-  (equivEq $ simulation-unique (equivFun f) (equivFun g) (ordEquiv-sim e₁) (ordEquiv-sim e₂))
+  {!   !} --(equivEq $ simulation-unique (equivFun f) (equivFun g) (ordEquiv-sim e₁) (ordEquiv-sim e₂))
 ```
 
-**定理** 序数宇宙是集合.  
-**证明** 即证两个序数的相等是命题, 这等价于证两个序数间的等价唯一. ∎
+**推论** 序数宇宙是集合.  
+**证明** 即证两个序数的相等是命题, 由序数的泛等原理, 这等价于证两个序数间的等价唯一. ∎
 
 ```agda
 isSetOrd : isSet (Ord 𝓊)
@@ -205,14 +206,7 @@ Simulation α β = Σ (⟨ α ⟩ → ⟨ β ⟩) IsSimulation
 isPropSimulation : ∀ α β → isProp (Simulation {𝓊} {𝓋} α β)
 isPropSimulation α β (f , f-sim) (g , g-sim) = eqToPath $ Σ≡Prop
   (isPropPathToIsProp ∘ isPropIsSimulation)
-  (funExt $ elim λ x IH → ≺-ext (f x) (g x) λ z →
-    (λ z≺fx → let (a , a≺x , fa＝z) = formsInitSeg f-sim z x z≺fx in
-      transport (_≺ g x) (sym (IH a a≺x) ∙ fa＝z) (pres≺ g-sim a x a≺x))
-  , (λ z≺gx → let (a , a≺x , ga＝z) = formsInitSeg g-sim z x z≺gx in
-      transport (_≺ f x) (IH a a≺x ∙ ga＝z) (pres≺ f-sim a x a≺x)))
-  where open IsSimulation
-        open OrdStr (str α) using (elim)
-        open OrdStr (str β) using (≺-ext; _≺_)
+  (simulation-unique f g f-sim g-sim)
 ```
 
 ## 严格序
