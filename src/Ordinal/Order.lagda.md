@@ -1,6 +1,7 @@
 ---
 title: 泛等结构集合论 (4) 序数的序
 zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
+zhihu-url: https://zhuanlan.zhihu.com/p/644984990
 ---
 
 # 泛等结构集合论 (4) 序数的序
