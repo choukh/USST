@@ -41,7 +41,7 @@ Cantor-≴ X (f , f-inj) = noncontradiction ∈→∉ ∉→∈
 
 ```agda
   A : ℙ X
-  A x = Resize $ (∀ B → f B ＝ x → x ∉ B) , isPropΠ3 λ _ _ _ → isProp⊥
+  A x = Resize $ (∀ B → f B ≡ x → x ∉ B) , isPropΠ3 λ _ _ _ → isProp⊥
 ```
 
 一旦对角线集 `A` 构造完成, 由定义立即有 `f A ∈ A` 蕴含 `f A ∉ A`.
@@ -51,11 +51,11 @@ Cantor-≴ X (f , f-inj) = noncontradiction ∈→∉ ∉→∈
   ∈→∉ fA∈A = unresize fA∈A A refl
 ```
 
-另一方面, 假设 `f A ∉ A`, 要证 `f A ∈ A`. 即假设有一个 `B` 满足 `f B ＝ f A`, 要证 `f A ∉ B`. 由 `f` 的单射性可知 `A ＝ B`, 用它改写前提 `f A ∉ A` 右边的 `A` 即证. ∎
+另一方面, 假设 `f A ∉ A`, 要证 `f A ∈ A`. 即假设有一个 `B` 满足 `f B ≡ f A`, 要证 `f A ∉ B`. 由 `f` 的单射性可知 `A ≡ B`, 用它改写前提 `f A ∉ A` 右边的 `A` 即证. ∎
 
 ```agda
   ∉→∈ : f A ∉ A → f A ∈ A
-  ∉→∈ fA∉A = resize λ B fB＝ → transport (f A ∉_) (f-inj (sym fB＝)) fA∉A
+  ∉→∈ fA∉A = resize λ B fB≡ → subst (f A ∉_) (f-inj (sym fB≡)) fA∉A
 ```
 
 由康托尔定理我们可以知道作为 `GCH` 结论的那个和类型的两边互斥, 从而证明 `GCH` 的命题性. 今后不需要用到这一结论.
@@ -63,10 +63,10 @@ Cantor-≴ X (f , f-inj) = noncontradiction ∈→∉ ∉→∈
 ```agda
 isPropGCH : (𝓊 𝓋 : Level) → isProp (GCH 𝓊 𝓋)
 isPropGCH 𝓊 𝓋 = isPropΠ4 λ X Y _ _ → isPropΠ3 λ _ _ _ →
-  λ { (⊎.inl _)    (⊎.inl _)    → eqToPath $ ap ⊎.inl $ squash₁Eq _ _
+  λ { (⊎.inl _)    (⊎.inl _)    → cong ⊎.inl $ squash₁ _ _
     ; (⊎.inl Y≲X)  (⊎.inr ℙX≲Y) → ⊥-rec $ ∥∥-rec2 isProp⊥ (λ ℙX≲Y Y≲X → Cantor-≴ _ $ ≲-trans Y≲X ℙX≲Y) Y≲X ℙX≲Y
     ; (⊎.inr ℙX≲Y) (⊎.inl Y≲X)  → ⊥-rec $ ∥∥-rec2 isProp⊥ (λ ℙX≲Y Y≲X → Cantor-≴ _ $ ≲-trans Y≲X ℙX≲Y) Y≲X ℙX≲Y
-    ; (⊎.inr _)    (⊎.inr _)    → eqToPath $ ap ⊎.inr $ squash₁Eq _ _ }
+    ; (⊎.inr _)    (⊎.inr _)    → cong ⊎.inr $ squash₁ _ _ }
 ```
 
 ## 单集
@@ -77,49 +77,49 @@ isPropGCH 𝓊 𝓋 = isPropΠ4 λ X Y _ _ → isPropΠ3 λ _ _ _ →
 module Lemmas (X : Type 𝓊) (X-set : isSet X) where
 ```
 
-由 `X` 的某个项 `x` 所构成的单集 `｛ x ｝ : ℙ X` 定义为谓词 `x ＝_`. `X` 的集合性保证了 `x ＝_` 是一个谓词.
+由 `X` 的某个项 `x` 所构成的单集 `｛ x ｝ : ℙ X` 定义为谓词 `x ≡_`. `X` 的集合性保证了 `x ≡_` 是一个谓词.
 
 ```agda
   opaque
     ｛_｝ : X → ℙ X
-    ｛ x ｝ y = (x ＝ y) , transportIsProp (X-set _ _)
+    ｛ x ｝ y = (x ≡ y) , X-set _ _
 ```
 
-由 `_＝_` 的基本性质可以证明单集构造 `｛_｝` 具有单射性.
+由 `_≡_` 的基本性质可以证明单集的构造函数 `｛_｝` 具有单射性.
 
 ```agda
     ｛｝-inj : injective ｛_｝
-    ｛｝-inj H = transport (idfun _) (sym $ ap fst $ happly H _) refl
+    ｛｝-inj H = transport (sym $ cong fst $ funExt⁻ H _) refl
 ```
 
 我们说一个 `A : ℙ X` 是单集, 当且仅当它等于某个 `｛ x ｝`.
 
 ```agda
   is｛｝ : ℙ X → Type _
-  is｛｝ A = Σ x ∶ X , A ＝ ｛ x ｝
+  is｛｝ A = Σ x ∶ X , A ≡ ｛ x ｝
 ```
 
 注意尽管这里用的是Σ类型, 我们仍然能证明 "是单集" 是一个谓词, 因为见证 `A` 是单集的那个 `x` 唯一. 不过后面不需要用到这一结论.
 
 ```agda
   isPropIs｛｝ : (A : ℙ X) → isProp (is｛｝ A)
-  isPropIs｛｝ A (x₁ , refl) (x₂ , eq) = eqToPath $ Σ≡Prop
-    (λ _ → isPropPathToIsProp $ transportIsProp $ isSetΠ (λ _ → isSetHProp) _ _)
-    (｛｝-inj eq)
+  isPropIs｛｝ A (x₁ , eq₁) (x₂ , eq₂) = Σ≡Prop
+    (λ _ → isSetΠ (λ _ → isSetHProp) _ _)
+    (｛｝-inj $ sym eq₁ ∙ eq₂)
 ```
 
 接着我们证明康托尔定理的一个变体, 说 `ℙ X` 的自嵌入一定射到了单集之外. 我们能实际构造出这个非单集, 用的还是对角线法, 证明的结构与 `Cantor-≴` 非常类似, 这里不再赘述.
 
 ```agda
   Cantor-beyond｛｝ : (f : ℙ X → ℙ X) → injective f → Σ A ∶ ℙ X , ¬ is｛｝ (f A)
-  Cantor-beyond｛｝ f f-inj = A , λ (x , fA＝) → noncontradiction (∈→∉ x fA＝) (∉→∈ x fA＝)
+  Cantor-beyond｛｝ f f-inj = A , λ (x , fA≡) → noncontradiction (∈→∉ x fA≡) (∉→∈ x fA≡)
     where
     A : ℙ X
-    A x = Resize $ (∀ B → f B ＝ ｛ x ｝ → x ∉ B) , isPropΠ3 λ _ _ _ → isProp⊥
-    ∈→∉ : ∀ x → (f A ＝ ｛ x ｝) → x ∈ A → x ∉ A
-    ∈→∉ x fA＝ x∈A = unresize x∈A A fA＝
-    ∉→∈ : ∀ x → (f A ＝ ｛ x ｝) → x ∉ A → x ∈ A
-    ∉→∈ x fA＝ x∉A = resize λ B fB＝ → transport (x ∉_) (f-inj (fA＝ ∙ sym fB＝)) x∉A
+    A x = Resize $ (∀ B → f B ≡ ｛ x ｝ → x ∉ B) , isPropΠ3 λ _ _ _ → isProp⊥
+    ∈→∉ : ∀ x → (f A ≡ ｛ x ｝) → x ∈ A → x ∉ A
+    ∈→∉ x fA≡ x∈A = unresize x∈A A fA≡
+    ∉→∈ : ∀ x → (f A ≡ ｛ x ｝) → x ∉ A → x ∈ A
+    ∉→∈ x fA≡ x∉A = resize λ B fB≡ → subst (x ∉_) (f-inj (fA≡ ∙ sym fB≡)) x∉A
 ```
 
 ## 关键构造
@@ -153,21 +153,21 @@ module Lemmas (X : Type 𝓊) (X-set : isSet X) where
 
 ```agda
     X≲Y : X ≲ Y
-    X≲Y = (λ x → ｛ x ｝ , inl (x , refl)) , ｛｝-inj ∘ (ap fst)
+    X≲Y = (λ x → ｛ x ｝ , inl (x , refl)) , ｛｝-inj ∘ (cong fst)
 ```
 
 2. `Y` 单射到 `ℙ X`, 因为 `Y` 的项都是 `X` 的满足某些条件的子集.
 
 ```agda
     Y≲ℙX : Y ≲ ℙ X
-    Y≲ℙX = fst , λ fst-eq → Σ≡Prop (λ _ → squash₁Eq) fst-eq
+    Y≲ℙX = fst , λ fst-eq → Σ≡Prop (λ _ → squash₁) fst-eq
 ```
 
 3. 如果 `P` 可判定, 那么 `ℙ X` 单射到 `Y`, 因为这时 `X` 的所有子集都满足 `P` 可判定, 都会包括在 `Y` 里面.
 
 ```agda
     dec→ℙX≲Y : Dec P → ℙ X ≲ Y
-    dec→ℙX≲Y P-dec = (λ A → A , inr P-dec) , ap fst
+    dec→ℙX≲Y P-dec = (λ A → A , inr P-dec) , cong fst
 ```
 
 **引理** 如果 `P` 是命题且 `ℙ X` 单射到 `Y`, 那么 `P` 可判定.  
@@ -176,7 +176,7 @@ module Lemmas (X : Type 𝓊) (X-set : isSet X) where
 ```agda
     ℙX≲Y→dec : isProp P → ℙ X ≲ Y → Dec P
     ℙX≲Y→dec P-prop ℙX≲Y with ℙX≲Y
-    ... | (f , f-inj) with Cantor-beyond｛｝ (fst ∘ f) (f-inj ∘ (Σ≡Prop λ _ → squash₁Eq))
+    ... | (f , f-inj) with Cantor-beyond｛｝ (fst ∘ f) (f-inj ∘ Σ≡Prop (λ _ → squash₁))
     ... | (A , ¬sing) with f A
     ... | (fA , sing∨dec) = ∥∥-rec (isPropDec P-prop)
       (λ { (⊎.inl sing) → ⊥-rec $ ¬sing sing

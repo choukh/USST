@@ -81,37 +81,36 @@ module BinaryRelation {A : Type 𝓊} (_≺_ : A → A → Type 𝓋) where
 
 ### 外延性
 
-我们说 `_≺_` 是一个 **外延 (extensional)** 关系, 当且仅当对任意 `x y : A`, 如果对任意 `z : A` 都有 `z ≺ x` 当且仅当 `z ≺ y`, 那么 `x ＝ y`.
+我们说 `_≺_` 是一个 **外延 (extensional)** 关系, 当且仅当对任意 `x y : A`, 如果对任意 `z : A` 都有 `z ≺ x` 当且仅当 `z ≺ y`, 那么 `x ≡ y`.
 
 ```agda
   Extensional : Type _
-  Extensional = ∀ x y → (∀ z → z ≺ x ↔ z ≺ y) → x ＝ y
+  Extensional = ∀ x y → (∀ z → z ≺ x ↔ z ≺ y) → x ≡ y
 ```
 
 如果 `A` 是集合, 那么外延性是命题.
 
 ```agda
   isPropExtensional : isSet A → isProp Extensional
-  isPropExtensional A-set = isPropΠ3 λ _ _ _ → transportIsProp $ A-set _ _
+  isPropExtensional A-set = isPropΠ3 λ _ _ _ → A-set _ _
 ```
 
 **引理** 如果 `_≺_` 同时具有命题性和外延性那么 `A` 是集合.  
-**证明梗概** 由引理 `Collapsible＝→isSet`, 只要证明 `A` 上的相等类型 `x ＝ y` 可折叠, 就证明了 `A` 是集合. 可折叠是说能构造 `x ＝ y` 的自映射 `f` 且 `f` 是一个 2-常函数 (`∀ x y → f x ＝ f y`). 只要用作为自变量的那个 `eq : x ＝ y` 替换外延性的前提 `z ≺ x ↔ z ≺ y` 就能得到另一个 `x ＝ y`. 由于 `_≺_` 是命题, 所以 `z ≺ x ↔ z ≺ y` 是命题, 所以 `f` 是 2-常函数. ∎
+**证明梗概** 由引理 `Collapsible≡→isSet`, 只要证明 `A` 上的相等类型 `x ≡ y` 可折叠, 就证明了 `A` 是集合. 可折叠是说能构造 `x ≡ y` 的自映射 `f` 且 `f` 是一个 2-常函数 (`∀ x y → f x ≡ f y`). 只要用作为自变量的那个 `eq : x ≡ y` 替换外延性的前提 `z ≺ x ↔ z ≺ y` 就能得到另一个 `x ≡ y`. 由于 `_≺_` 是命题, 所以 `z ≺ x ↔ z ≺ y` 是命题, 所以 `f` 是 2-常函数. ∎
 
 ```agda
   open import Cubical.Foundations.Function using (2-Constant)
   open import Cubical.Relation.Nullary using (Collapsible; Collapsible≡→isSet)
 
   Extensional→isSet : Propositional → Extensional → isSet A
-  Extensional→isSet prop ext = Collapsible≡→isSet λ x y →
-    transport Collapsible (sym Path≡Eq) $ collapser x y , didCollapse x y
+  Extensional→isSet prop ext = Collapsible≡→isSet λ x y → collapser x y , didCollapse x y
     where
-    collapser : ∀ x y → x ＝ y → x ＝ y
-    collapser x y eq = ext x y λ z → (transport (z ≺_) eq) , (transport (z ≺_) (sym eq))
+    collapser : ∀ x y → x ≡ y → x ≡ y
+    collapser x y eq = ext x y λ z → (subst (z ≺_) eq) , (subst (z ≺_) (sym eq))
     didCollapse : ∀ x y → 2-Constant (collapser x y)
-    didCollapse x y p q = eqToPath $ ap (ext x y) $ funExt λ _ → Σ≡Prop
-      (λ _ _ _ → pathToEq $ isProp→ (prop _ _) _ _)
-      (funExt λ _ → pathToEq $ prop _ _ _ _)
+    didCollapse x y p q = cong (ext x y) $ funExt λ _ → Σ≡Prop
+      (λ _ _ _ → isProp→ (prop _ _) _ _)
+      (funExt λ _ → prop _ _ _ _)
 ```
 
 ### 良基性
@@ -312,13 +311,6 @@ _≃ₒ_ : Ord 𝓊 → Ord 𝓊′ → Type (𝓊 ⊔ 𝓊′)
 ```agda
 OrdPath : (α β : Ord 𝓊) → (α ≃ₒ β) ≃ (α ≡ β)
 OrdPath = ∫ 𝒮ᴰ-Ord .UARel.ua
-```
-
-上面的泛等原理使用路径 `_≡_` 表述, 也可以转换成使用归纳类型族 `_＝_` 表述.
-
-```
-OrdUnivalence : (α β : Ord 𝓊) → (α ≃ₒ β) ≃ (α ＝ β)
-OrdUnivalence α β = transport (α ≃ₒ β ≃_) Path≡Eq (OrdPath α β)
 ```
 
 有了序数的泛等原理之后, 就可以通过找到两个序数间保持 `_≺_` 关系的同伦等价来证明它们相等. 这体现了泛等基础的好处, 我们不需要商掉某个等价关系, 也不用像质料集合论那样用超限归纳证明两个同构的序数外延相等.

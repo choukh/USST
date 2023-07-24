@@ -54,7 +54,7 @@ module _ (α : Ord 𝓊) (a : ⟨ α ⟩) where
 
 ```agda
       (λ (x , x≺a) (y , y≺a) ext → Σ≡Prop
-        (λ _ → isPropPathToIsProp (≺-prop _ _))
+        (λ _ → ≺-prop _ _)
         (≺-ext x y λ z → (λ z≺x → ext (z , ≺-trans z x a z≺x x≺a) .fst z≺x)
                        , (λ z≺y → ext (z , ≺-trans z y a z≺y y≺a) .snd z≺y)))
 ```
@@ -107,12 +107,12 @@ module _ {α : Ord 𝓊} {a : ⟨ α ⟩} where
 ↓-reflects-≼ : (a b : ⟨ α ⟩) → α ↓ a ≤ α ↓ b → a ≼⟨ α ⟩ b
 ↓-reflects-≼ {α} a b (f , f-ordEmb) z z≺a = {!   !}
   where
-  ↑eq : ↑ ＝ ↑ ∘ f
+  ↑eq : ↑ ≡ ↑ ∘ f
   ↑eq = ordEmbed-unique ↑ (↑ ∘ f) ↑-ordEmbed (str {!   !})
 
 (TODO)
 
-↓-inj : (a b : ⟨ α ⟩) → α ↓ a ＝ α ↓ b → a ＝ b
+↓-inj : (a b : ⟨ α ⟩) → α ↓ a ≡ α ↓ b → a ≡ b
 ↓-inj a b eq = {!   !}
 
 ## 严格序

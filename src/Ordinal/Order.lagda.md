@@ -69,13 +69,13 @@ record IsOrdEmbed {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β ⟩
 ```agda
   field
     pres≺ : ∀ a a′ → a ≺⟨ α ⟩ a′ → f a ≺⟨ β ⟩ f a′
-    formsInitSeg : ∀ b a′ → b ≺⟨ β ⟩ f a′ → Σ a ∶ ⟨ α ⟩ , a ≺⟨ α ⟩ a′ × f a ＝ b
+    formsInitSeg : ∀ b a′ → b ≺⟨ β ⟩ f a′ → Σ a ∶ ⟨ α ⟩ , a ≺⟨ α ⟩ a′ × f a ≡ b
 ```
 
 ### 单射性
 
 **引理** 序数嵌入是单射.  
-**证明** 用双参数形式的良基归纳法 `elim2`, 拿到归纳假设 `IH : ∀ u v → u ≺ x → v ≺ y → f u ＝ f v → u ＝ v`, 要证 `f x ＝ f y → x ＝ y`. 用 `≺` 的外延性, 要证两种对称的情况 `p` 和 `q`, 我们只证 `p : ∀ z → z ≺ x → z ≺ y`. 由 `z ≺ x` 及嵌入的保序性有 `f z ≺ f x ≡ f y`. 由于嵌入能形成前段, 必有一个 `w` 满足 `w ≺ y` 且 `f w ＝ f z`. 再结合归纳假设有 `w ＝ z`, 改写目标即证 `w ≺ y`, 此乃前提. ∎
+**证明** 用双参数形式的良基归纳法 `elim2`, 拿到归纳假设 `IH : ∀ u v → u ≺ x → v ≺ y → f u ≡ f v → u ≡ v`, 要证 `f x ≡ f y → x ≡ y`. 用 `≺` 的外延性, 要证两种对称的情况 `p` 和 `q`, 我们只证 `p : ∀ z → z ≺ x → z ≺ y`. 由 `z ≺ x` 及嵌入的保序性有 `f z ≺ f x ≡ f y`. 由于嵌入能形成前段, 必有一个 `w` 满足 `w ≺ y` 且 `f w ≡ f z`. 再结合归纳假设有 `w ≡ z`, 改写目标即证 `w ≺ y`, 此乃前提. ∎
 
 ```agda
   inj : injective f
@@ -83,33 +83,33 @@ record IsOrdEmbed {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β ⟩
     where
     open OrdStr (str α) using (≺-ext; elim2)
 
-    aux : ∀ x y → (∀ u v → u ≺⟨ α ⟩ x → v ≺⟨ α ⟩ y → f u ＝ f v → u ＝ v) → f x ＝ f y → x ＝ y
-    aux x y IH fx＝fy = ≺-ext x y λ z → p z , q z
+    aux : ∀ x y → (∀ u v → u ≺⟨ α ⟩ x → v ≺⟨ α ⟩ y → f u ≡ f v → u ≡ v) → f x ≡ f y → x ≡ y
+    aux x y IH fx≡fy = ≺-ext x y λ z → p z , q z
       where
       p : ∀ z → z ≺⟨ α ⟩ x → z ≺⟨ α ⟩ y
-      p z z≺x = transport (λ - → - ≺⟨ α ⟩ y) w≡z w≺y
+      p z z≺x = subst (λ - → - ≺⟨ α ⟩ y) w≡z w≺y
         where
         fz≺fy : f z ≺⟨ β ⟩ f y
-        fz≺fy = transport (λ - → f z ≺⟨ β ⟩ -) fx＝fy (pres≺ z x z≺x)
-        Σw : Σ w ∶ ⟨ α ⟩ , (w ≺⟨ α ⟩ y × f w ＝ f z)
+        fz≺fy = subst (λ - → f z ≺⟨ β ⟩ -) fx≡fy (pres≺ z x z≺x)
+        Σw : Σ w ∶ ⟨ α ⟩ , (w ≺⟨ α ⟩ y × f w ≡ f z)
         Σw = formsInitSeg (f z) y fz≺fy
         w = fst Σw
         w≺y = fst $ snd Σw
-        fw＝fz = snd $ snd Σw
-        w≡z : w ＝ z
-        w≡z = sym $ IH z w z≺x w≺y (sym fw＝fz)
+        fw≡fz = snd $ snd Σw
+        w≡z : w ≡ z
+        w≡z = sym $ IH z w z≺x w≺y (sym fw≡fz)
       q : ∀ z → z ≺⟨ α ⟩ y → z ≺⟨ α ⟩ x
-      q z z≺y = transport (λ - → - ≺⟨ α ⟩ x) w≡z w≺x
+      q z z≺y = subst (λ - → - ≺⟨ α ⟩ x) w≡z w≺x
         where
         fz≺fx : f z ≺⟨ β ⟩ f x
-        fz≺fx = transport (λ - → f z ≺⟨ β ⟩ -) (sym fx＝fy) (pres≺ z y z≺y)
-        Σw : Σ w ∶ ⟨ α ⟩ , (w ≺⟨ α ⟩ x × f w ＝ f z)
+        fz≺fx = subst (λ - → f z ≺⟨ β ⟩ -) (sym fx≡fy) (pres≺ z y z≺y)
+        Σw : Σ w ∶ ⟨ α ⟩ , (w ≺⟨ α ⟩ x × f w ≡ f z)
         Σw = formsInitSeg (f z) x fz≺fx
         w = fst Σw
         w≺x = fst $ snd Σw
-        fw＝fz = snd $ snd Σw
-        w≡z : w ＝ z
-        w≡z = IH w z w≺x z≺y fw＝fz
+        fw≡fz = snd $ snd Σw
+        w≡z : w ≡ z
+        w≡z = IH w z w≺x z≺y fw≡fz
 ```
 
 ### 命题性
@@ -123,13 +123,13 @@ record IsOrdEmbed {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β ⟩
 ```
 
 **引理** "形成前段"是命题, 尽管没有截断.  
-**证明** 由于前段性是命题, 只需证 `b` 对应的 `α` 前段唯一. 假设有两个这样的前段, 分别有端点 `x` 和 `y` 被 `f` 射到 `b`, 由嵌入的单射性 `x ＝ y`. ∎
+**证明** 由于前段性是命题, 只需证 `b` 对应的 `α` 前段唯一. 假设有两个这样的前段, 分别有端点 `x` 和 `y` 被 `f` 射到 `b`, 由嵌入的单射性 `x ≡ y`. ∎
 
 ```agda
-  isPropFormsInitSeg : ∀ b a′ → b ≺⟨ β ⟩ f a′ → isProp (Σ a ∶ ⟨ α ⟩ , (a ≺⟨ α ⟩ a′) × (f a ＝ b))
-  isPropFormsInitSeg b a′ b≺fa′ (x , x≺a′ , fx＝b) (y , y≺a′ , fy＝b) = eqToPath $ Σ≡Prop
-    (λ _ → isPropPathToIsProp $ isProp× (≺-prop _ _) (transportIsProp $ underlying-set _ _))
-    (inj (fx＝b ∙ sym fy＝b))
+  isPropFormsInitSeg : ∀ b a′ → b ≺⟨ β ⟩ f a′ → isProp (Σ a ∶ ⟨ α ⟩ , (a ≺⟨ α ⟩ a′) × (f a ≡ b))
+  isPropFormsInitSeg b a′ b≺fa′ (x , x≺a′ , fx≡b) (y , y≺a′ , fy≡b) = Σ≡Prop
+    (λ _ → isProp× (≺-prop _ _) (underlying-set _ _))
+    (inj (fx≡b ∙ sym fy≡b))
     where
     open OrdStr (str α) using (≺-prop)
     open OrdStr (str β) using (underlying-set)
@@ -154,28 +154,28 @@ isPropIsOrdEmbed {α} {β} f = isOfHLevelRetractFromIso 1 IsOrdEmbedIsoΣ $ aux
 
 ```
 ordEmbed-unique : {α : Ord 𝓊} {β : Ord 𝓊′}
-  (f g : ⟨ α ⟩ → ⟨ β ⟩) → IsOrdEmbed f → IsOrdEmbed g → f ＝ g
+  (f g : ⟨ α ⟩ → ⟨ β ⟩) → IsOrdEmbed f → IsOrdEmbed g → f ≡ g
 ordEmbed-unique {α} {β} f g f-emb g-emb =
   funExt $ elim λ x IH → ≺-ext (f x) (g x) λ z →
-    (λ z≺fx → let (a , a≺x , fa＝z) = formsInitSeg f-emb z x z≺fx in
-      transport (_≺ g x) (sym (IH a a≺x) ∙ fa＝z) (pres≺ g-emb a x a≺x))
-  , (λ z≺gx → let (a , a≺x , ga＝z) = formsInitSeg g-emb z x z≺gx in
-      transport (_≺ f x) (IH a a≺x ∙ ga＝z) (pres≺ f-emb a x a≺x))
+    (λ z≺fx → let (a , a≺x , fa≡z) = formsInitSeg f-emb z x z≺fx in
+      subst (_≺ g x) (sym (IH a a≺x) ∙ fa≡z) (pres≺ g-emb a x a≺x))
+  , (λ z≺gx → let (a , a≺x , ga≡z) = formsInitSeg g-emb z x z≺gx in
+      subst (_≺ f x) (IH a a≺x ∙ ga≡z) (pres≺ f-emb a x a≺x))
   where open IsOrdEmbed
         open OrdStr (str α) using (elim)
         open OrdStr (str β) using (≺-ext; _≺_)
 ```
 
 **引理** 序数等价也是一个序数嵌入.  
-**证明** 要证序数等价的底层函数 `f` 保序且形成前段. 保序性即 `hPres≺` 的底层函数. 对任意 `b ≺ f a′`, 有 `f (f⁻¹ b) ＝ b`, 改写可得 `f (f⁻¹ b) ≺ f a′`, 再用 `hPres≺⁻¹` 即得 `(f⁻¹ b) ≺ a′`. 于是 `f⁻¹ b` 就是"形成前段"条件所要求的 `a`. ∎
+**证明** 要证序数等价的底层函数 `f` 保序且形成前段. 保序性即 `hPres≺` 的底层函数. 对任意 `b ≺ f a′`, 有 `f (f⁻¹ b) ≡ b`, 改写可得 `f (f⁻¹ b) ≺ f a′`, 再用 `hPres≺⁻¹` 即得 `(f⁻¹ b) ≺ a′`. 于是 `f⁻¹ b` 就是"形成前段"条件所要求的 `a`. ∎
 
 ```agda
 IsOrdEquiv→IsOrdEmbed : (f : ⟨ α ⟩ ≃ ⟨ β ⟩) → IsOrdEquiv (str α) f (str β) → IsOrdEmbed (f ⁺¹)
 IsOrdEquiv→IsOrdEmbed {β} f ordEquiv = mkIsOrdEmbed
   (λ a a′ → hPres≺ a a′ ⁺¹)
   (λ b a′ b≺fa′ → (f ⁻¹) b
-    , (hPres≺ _ a′ ⁻¹) (transport (λ - → - ≺⟨ β ⟩ _) (sym $ secEq f b) b≺fa′)
-    , secEq f b)
+    , (hPres≺ _ a′ ⁻¹) (subst (λ - → - ≺⟨ β ⟩ _) (sym $ secIsEq (snd f) b) b≺fa′)
+    , secIsEq (snd f) b)
   where open IsOrdEquiv ordEquiv
 ```
 
@@ -184,8 +184,8 @@ IsOrdEquiv→IsOrdEmbed {β} f ordEquiv = mkIsOrdEmbed
 
 ```agda
 isPropOrdEquiv : (α : Ord 𝓊) (β : Ord 𝓊′) → isProp (α ≃ₒ β)
-isPropOrdEquiv α β (f , f-ordEquiv) (g , g-ordEquiv) = eqToPath $ Σ≡Prop
-  (λ _ → isPropPathToIsProp $ isPropIsOrdEquiv _ _ _)
+isPropOrdEquiv α β (f , f-ordEquiv) (g , g-ordEquiv) = Σ≡Prop
+  (λ _ → isPropIsOrdEquiv _ _ _)
   (equivEq $ ordEmbed-unique (f ⁺¹) (g ⁺¹)
     (IsOrdEquiv→IsOrdEmbed f f-ordEquiv)
     (IsOrdEquiv→IsOrdEmbed g g-ordEquiv))
@@ -215,8 +215,7 @@ _≤_ : Ord 𝓊 → Ord 𝓋 → Type (𝓊 ⊔ 𝓋)
 
 ```agda
 ≤-prop : (α : Ord 𝓊) (β : Ord 𝓋) → isProp (α ≤ β)
-≤-prop α β (f , f-emb) (g , g-emb) = eqToPath $ Σ≡Prop
-  (isPropPathToIsProp ∘ isPropIsOrdEmbed)
+≤-prop α β (f , f-emb) (g , g-emb) = Σ≡Prop isPropIsOrdEmbed
   (ordEmbed-unique f g f-emb g-emb)
 ```
 
@@ -241,33 +240,33 @@ _≤_ : Ord 𝓊 → Ord 𝓋 → Type (𝓊 ⊔ 𝓋)
   (λ a a′ a≺a′ → pres≺ g-emb (f a) (f a′) (pres≺ f-emb a a′ a≺a′)) aux
   where
   open IsOrdEmbed
-  aux : ∀ c a′ → c ≺⟨ γ ⟩ g (f a′) → Σ a ∶ ⟨ α ⟩ , a ≺⟨ α ⟩ a′ × g (f a) ＝ c
-  aux c a′ c≺gfa = Σa .fst , Σa .snd .fst , ap g (Σa .snd .snd) ∙ Σb .snd .snd
+  aux : ∀ c a′ → c ≺⟨ γ ⟩ g (f a′) → Σ a ∶ ⟨ α ⟩ , a ≺⟨ α ⟩ a′ × g (f a) ≡ c
+  aux c a′ c≺gfa = Σa .fst , Σa .snd .fst , cong g (Σa .snd .snd) ∙ Σb .snd .snd
     where
-    Σb : Σ b ∶ ⟨ β ⟩ , b ≺⟨ β ⟩ f a′ × g b ＝ c
+    Σb : Σ b ∶ ⟨ β ⟩ , b ≺⟨ β ⟩ f a′ × g b ≡ c
     Σb = formsInitSeg g-emb c (f a′) c≺gfa
-    Σa : Σ a ∶ ⟨ α ⟩ , a ≺⟨ α ⟩ a′ × f a ＝ Σb .fst
+    Σa : Σ a ∶ ⟨ α ⟩ , a ≺⟨ α ⟩ a′ × f a ≡ Σb .fst
     Σa = formsInitSeg f-emb (Σb .fst) a′ (Σb .snd .fst)
 ```
 
-为了证明 `≤` 反对称, 我们先证双向嵌入蕴含等价, 再用泛等原理换到 `＝`.
+为了证明 `≤` 反对称, 我们先证双向嵌入蕴含等价, 再用泛等原理换到 `≡`.
 
 **引理** 双向嵌入蕴含等价.
-**证明** (TODO) ∎
+**证明** 两个方向的序数嵌入正好充当了序数等价的正映射和逆映射, 并且序数嵌入的唯一性保证了这两个映射是互逆的. 两个方向的序数嵌入的保序性正当提供了同伦保序的正映射和逆映射, 并且底序的命题性保证了它们是互逆的. ∎
 
 ```agda
 ≤-antisym-≃ₒ : α ≤ β → β ≤ α → α ≃ₒ β
 ≤-antisym-≃ₒ {α} {β} α≤β@(f , f-emb) β≤α@(g , g-emb) =
   isoToEquiv (iso f g fg gf) , mkIsOrderEquiv λ x y → isoToEquiv (iso
     (pres≺ f-emb x y)
-    {!   !} --(subst2 (underlyingRel α) (gf x) (gf y) ∘ (pres≺ g-emb _ _))
+    (subst2 (underlyingRel α) (gf x) (gf y) ∘ (pres≺ g-emb _ _))
     (λ _ → ≺-prop (str β) _ _ _ _)
     (λ _ → ≺-prop (str α) _ _ _ _))
   where
   fg : ∀ b → f (g b) ≡ b
-  fg = eqToPath ∘ happly (ordEmbed-unique (f ∘ g) (idfun _) (snd $ ≤-trans β≤α α≤β) (snd ≤-refl))
+  fg = funExt⁻ $ ordEmbed-unique (f ∘ g) (idfun _) (snd $ ≤-trans β≤α α≤β) (snd ≤-refl)
   gf : ∀ a → g (f a) ≡ a
-  gf = eqToPath ∘ happly (ordEmbed-unique (g ∘ f) (idfun _) (snd $ ≤-trans α≤β β≤α) (snd ≤-refl))
+  gf = funExt⁻ $ ordEmbed-unique (g ∘ f) (idfun _) (snd $ ≤-trans α≤β β≤α) (snd ≤-refl)
   open IsOrdEmbed
   open OrdStr
 ```
@@ -276,6 +275,6 @@ _≤_ : Ord 𝓊 → Ord 𝓋 → Type (𝓊 ⊔ 𝓋)
 **证明** 用序数的泛等原理改写 `≤-antisym-≃ₒ` 即证. ∎
 
 ```agda
-≤-antisym : α ≤ β → β ≤ α → α ＝ β
-≤-antisym α≤β β≤α = OrdUnivalence _ _ ⁺¹ $ ≤-antisym-≃ₒ α≤β β≤α
+≤-antisym : α ≤ β → β ≤ α → α ≡ β
+≤-antisym α≤β β≤α = OrdPath _ _ ⁺¹ $ ≤-antisym-≃ₒ α≤β β≤α
 ```

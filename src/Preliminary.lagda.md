@@ -14,10 +14,11 @@ zhihu-url: https://zhuanlan.zhihu.com/p/643059692
 
 **泛等基础 (univalent foundations, 简称 UF)** 中有原生的集合概念 `hSet`, 它可以视作一种**结构集合论 (structural set theory)** 的模型. 我们尝试在其中复刻传统质料集合论 (material set theory) 的基本概念, 如势, 序数, 连续统假设 (CH), 广义连续统假设 (GCH) 等, 并研究它们与排中律 (LEM) 和选择公理 (AC) 之间的反推事实. 这得益于 UF 是一种**中性数学基础 (foundation of neutral constructive mathematics)**. 本文是这一系列的第一篇, 主要介绍前置知识, 包括泛等基础以及集合论的一些基本概念.
 
-所谓泛等基础, 简单来说就是在 Martin-Löf 类型论 (MTLL) 的基础上加上泛等公理 (UA) 所得到的扩展, 它解决了 MLTT 的一些问题, 从而足够作为一种数学基础. 本文中我们使用 [Cubical Agda](https://agda.readthedocs.io/en/v2.6.3/language/cubical.html) 来作为泛等基础的具体实现.
+所谓泛等基础, 简单来说就是在 Martin-Löf 类型论 (MTLL) 的基础上加上泛等公理 (UA) 所得到的扩展, 它解决了 MLTT 的一些问题, 从而足够作为一种数学基础. 本文中我们使用 [Cubical Agda](https://agda.readthedocs.io/en/v2.6.3/language/cubical.html) 立方类型论来作为泛等基础的具体实现.
 
 ```agda
 {-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --hidden-argument-puns #-}
 module Preliminary where
 ```
 
@@ -252,49 +253,38 @@ syntax ∃-syntax A (λ x → B) = ∃ x ∶ A , B
 
 ### 相等类型
 
-"相等" 在泛等基础中是一个复杂的概念. 首先上面提到的库中的概念所涉及到的相等都采用了所谓**道路类型 (path type)** `_≡_`.
+"相等" 在泛等基础中是一个复杂的概念. 我们采用所谓**道路类型 (path type)** `PathP` 来表示相等. 它是一种异质相等, 其同质版记作 `_≡_`. 这里不会讲解它们的底层原理, 只简单介绍一下基本性质.
 
 ```agda
-open import Cubical.Foundations.Prelude public using (_≡_; subst; subst2)
+open import Cubical.Foundations.Prelude public
+  using ( PathP; _≡_; refl; sym; _∙_; cong; cong₂; subst; subst2
+        ; transport; funExt; funExt⁻; isProp→PathP)
 ```
 
-但本文中将更常使用定义为**归纳类型族 (inductive type family)** 的**命题相等类型 (propositional equality)** `_＝_`.
+- 首先最基本地, `_≡_` 具有自反性 `refl`, 对称性 `sym` 和 传递性 `_∙_`.
+- `cong` 叫做合同性.
+  - 库里的定义是相当一般化的版本, 除去里面涉及的依赖类型和异质相等, 简单来说合同性说的是 `x ≡ y → f x ≡ f y`.
+  - `cong₂` 是双参数版本的合同性, 简单来说是 `x ≡ y → u ≡ v → f x u ≡ f y v`.
+- `subst` 就是等量替换: `x ≡ y → P x → P y`.
+  - `subst2` 是双参数版本的等量替换: `x ≡ y → u ≡ v → P x u → P y v`.
+- `transport` 允许两个类型之间的等量替换: `A ≡ B → A → B`.
+- `funExt` 是函数的外延性: `(∀ x → f x ≡ g x) → f ≡ g`.
+- `funExt⁻` 是函数的外延性的逆: `f ≡ g → (∀ x → f x ≡ g x)`.
+- `isProp→PathP` 用于证明两个谓词应用的相等.
+  - 因为谓词是一个依赖函数, 在证明它所依赖的项相等之前, 谓词应用的相等看起来就是一个异质相等, 所以需要用 `PathP` 表达.
 
-```agda
-open import Cubical.Data.Equality public using () renaming (_≡_ to _＝_)
-```
-
-两种相等类型的定义是等价的, 但后者在非同伦论的数学中更加直观, 也更加容易使用. 我们导入了一堆它们之间的相互转化引理: `eqToPath`, `pathToEq`, `Path≡Eq` 等, 以灵活处理各种情况. 使用 `Σ≡Prop` 可以通过证明两个依值配对的左边分别相等来证明这两个依值配对相等, 只要它们的右边是一个谓词.
-
-```agda
-open import Cubical.Data.Equality public
-  using (eqToPath; pathToEq; Path≡Eq; isPropPathToIsProp; Σ≡Prop)
-  renaming (squash₁ to squash₁Eq)
-```
-
-虽然大部分情况下 `Σ≡Prop` 就够用了, 但有时候我们不得不用 `ΣPathP` 证明两个Σ类型路径相等.
+`ΣPathP` 用于证明两个Σ类型相等, 通过证明它们的左右两边分别相等.
 
 ```agda
 open import Cubical.Data.Sigma public using (ΣPathP)
 ```
 
-`_＝_` 具有自反性 `refl`, 对称性 `sym` 和 传递性 `_∙_`. 其中 `refl` 是 `_＝_` 归纳类型的唯一构造子, 可以做模式匹配和反演推理. 实际上, 包括对称性和传递性在内的 `_＝_` 的其他性质都通过 `refl` 推导而来. 下面是4个常用性质.
-
-`ap`, 也叫合同性, 它说 `x ＝ y → f x ＝ f y`.  
-`happly`, 也叫做同伦应用, 它说 `f ＝ g → (x : A) → f x ＝ g x`.  
-`transport`, 也叫做等量替换, 它说 `x ＝ y → P x → P y`.  
-`funExt`, 也叫做函数的外延性, 它说 `(∀ x → f x ＝ g x) → f ＝ g`.
+由于经常出现Σ类型的右边是命题的情况, 我们专门写出以下引理方便处理.
 
 ```agda
-open import Cubical.Data.Equality public
-  using (refl; sym; _∙_; ap; happly; transport; funExt)
-```
-
-以下引理会经常用到, 它将 "道路类型是命题" 的证明转化成 "相等类型是命题" 的证明.
-
-```agda
-transportIsProp : {A : Type 𝓊} {x y : A} → isProp (x ≡ y) → isProp (x ＝ y)
-transportIsProp = transport isProp Path≡Eq
+Σ≡Prop : {A : Type 𝓊} {B : A → Type 𝓋} → (∀ x → isProp (B x)) →
+  {p q : Σ A B} → fst p ≡ fst q → p ≡ q
+Σ≡Prop {B} prop path = ΣPathP (path , isProp→PathP (λ i → prop _) _ _)
 ```
 
 ### 单射性
@@ -305,35 +295,28 @@ transportIsProp = transport isProp Path≡Eq
 private variable A B C : Type 𝓊
 ```
 
-cubical 库里面对单射的定义是为高阶同伦类型改编过的版本, 且相等是用 `Path` 表述的. 对于集合层面的数学我们用传统的单射性定义就够了, 并且相等用 `_＝_` 表述.
+cubical 库里面对单射的定义是为高阶同伦类型改编过的版本, 且相等是用 `Path` 表述的. 对于集合层面的数学我们用传统的单射性定义就够了, 并且相等用 `_≡_` 表述.
 
 ```agda
 injective : (A → B) → Type _
-injective f = ∀ {x y} → f x ＝ f y → x ＝ y
+injective f = ∀ {x y} → f x ≡ f y → x ≡ y
 ```
 
 ### 同伦等价
 
-同伦等价 `_≃_` 可以简单理解为是在泛等基础中更容易处理的一种"同构", 它与真正的同构 `Iso` 也是同构的, 且同伦等价的. 同伦等价是一个Σ类型, 其左边即同伦等价的底层函数, 它与同构的正映射相同. 同伦等价相比于同构的好处之一是"一个函数是一个同伦等价"一定是一个命题 (`isPropIsEquiv`), 而同构则不一定有这种性质. 由此性质我们有 `equivPath`, 它说如果底层函数道路相等, 那么同伦等价也道路相等.
+同伦等价 `_≃_` 可以简单理解为是在泛等基础中更容易处理的一种"同构", 它与真正的同构 `Iso` 也是同构的, 且同伦等价的. 同伦等价是一个Σ类型, 其左边即同伦等价的底层函数, 它与同构的正映射相同. 同伦等价相比于同构的好处之一是"一个函数是一个同伦等价"一定是一个命题 (`isPropIsEquiv`), 而同构则不一定有这种性质. 由此性质我们有 `equivEq`, 它说如果底层函数道路相等, 那么同伦等价也道路相等.
 
 此外, `invEquiv` 是同伦等价的对称性; `compEquiv` 是同伦等价的传递性; `cong≃` 是同伦等价的合同性; `LiftEquiv` 说明宇宙层级的提升不影响同伦等价.
 
 ```agda
 open import Cubical.Foundations.Equiv public
-  using (_≃_; isEquiv; isPropIsEquiv; invEquiv; compEquiv; LiftEquiv; secIsEq)
-  renaming (equivEq to equivPath)
+  using ( _≃_; isEquiv; isPropIsEquiv; invEquiv; compEquiv; LiftEquiv
+        ; equivEq; secIsEq; retIsEq)
 open import Cubical.Foundations.Equiv.Properties public using (cong≃)
 open import Cubical.Foundations.Isomorphism public using (Iso; iso; section; retract; isoToEquiv)
 ```
 
-为了方便使用我们有 `equivPath` 的 `＝` 版.
-
-```agda
-equivEq : {e f : A ≃ B} → e .fst ＝ f .fst → e ＝ f
-equivEq = pathToEq ∘ equivPath ∘ eqToPath
-```
-
-为了方便阅读我们分别用 `_⁺¹` 和 `_⁻¹` 表示同伦等价所承诺的正映射和逆映射.
+为了方便阅读我们分别用 `_⁺¹` 和 `_⁻¹` 表示同伦等价所承诺的正映射和逆映射. `secIsEq` 以及 `retIsEq` 说它们互逆.
 
 ```agda
 _⁺¹ : A ≃ B → A → B
@@ -341,13 +324,6 @@ _⁺¹ = fst
 
 _⁻¹ : A ≃ B → B → A
 e ⁻¹ = fst (invEquiv e)
-```
-
-可以证明它们互逆.
-
-```agda
-secEq : (f : A ≃ B) (x : B) → (f ⁺¹ ∘ f ⁻¹) x ＝ x
-secEq (_ , f-equiv) = pathToEq ∘ (secIsEq f-equiv)
 ```
 
 以下是用 Agda 反射机制定义的宏, 搭配同伦等价使用, 用于更快地证明一些数学结构的**泛等原理 (univalence principle)**. 我们不需要关心这些工具的实现细节, 只需要知道什么是结构的泛等原理, 以及如何使用这套工具得到它. 具体可以看 `𝒮ᴰ-Record` 定义下面的例子, 以及本系列讲义的后续文章.
