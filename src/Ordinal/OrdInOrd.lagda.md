@@ -20,7 +20,7 @@ open import Ordinal.Order
 
 ## 前段
 
-上一章也提到了前段, 它就是序数 `α` 的底集 `⟨ α ⟩` 里小于某个元素 `a` 的那些元素 `B = Σ ⟨ α ⟩ (_≺ a)`, 它们也构成了一个序数.
+上一章已经提到了前段, 它就是序数 `α` 的底集 `⟨ α ⟩` 里小于某个元素 `a` 的那些元素 `B = Σ ⟨ α ⟩ (_≺ a)`, 它们也构成了一个序数, 记作 `α ↓ a`.
 
 ```agda
 module _ (α : Ord 𝓊) (a : ⟨ α ⟩) where
@@ -34,18 +34,18 @@ module _ (α : Ord 𝓊) (a : ⟨ α ⟩) where
     B = Σ ⟨ α ⟩ (_≺ a)
 ```
 
-为了完成构造, 我们还需要提供 `B` 的序数结构 `strB`. 首先取原序数的底序作为新序数的底序 `<`.
+为了完成构造, 我们还需要提供 `B` 的序数结构 `strB`. 首先取原序数的底序作为新序数的底序 `≺′`.
 
 ```agda
-    _<_ : B → B → Type 𝓊
-    (x , _) < (y , _) = x ≺ y
+    _≺′_ : B → B → Type 𝓊
+    (x , _) ≺′ (y , _) = x ≺ y
 ```
 
 现在还需要说明 `<` 也是良序. 命题性和传递性是显然的.
 
 ```agda
     strB : OrdStr B
-    strB = mkOrdinalStr _<_ $ BinaryRelation.mkWellOrdered
+    strB = mkOrdinalStr _≺′_ $ BinaryRelation.mkWellOrdered
       (λ _ _ → ≺-prop _ _)
       (λ _ _ _ x<y y<z → ≺-trans _ _ _ x<y y<z)
 ```
@@ -66,7 +66,7 @@ module _ (α : Ord 𝓊) (a : ⟨ α ⟩) where
         where open BinaryRelation
 ```
 
-### 前段解除
+### 前段嵌入
 
 (TODO)
 
@@ -85,7 +85,7 @@ module _ {α : Ord 𝓊} {a : ⟨ α ⟩} where
   ↑-bounded = snd
 ```
 
-前段解除是一个序数嵌入.
+前段嵌入是一个序数嵌入.
 
 ```agda
   ↑-ordEmbed : IsOrdEmbed ↑
@@ -104,16 +104,25 @@ module _ {α : Ord 𝓊} {a : ⟨ α ⟩} where
 
 (TODO)
 
+```agda
 ↓-reflects-≼ : (a b : ⟨ α ⟩) → α ↓ a ≤ α ↓ b → a ≼⟨ α ⟩ b
-↓-reflects-≼ {α} a b (f , f-ordEmb) z z≺a = {!   !}
+↓-reflects-≼ {α} a b le@(f , f-ordEmb) z z≺a = subst (λ - → - ≺⟨ α ⟩ b) ↑fz≡z (↑-bounded (f $ z , z≺a))
   where
-  ↑eq : ↑ ≡ ↑ ∘ f
-  ↑eq = ordEmbed-unique ↑ (↑ ∘ f) ↑-ordEmbed (str {!   !})
+  ↑∘f≡↑ : ↑ ∘ f ≡ ↑
+  ↑∘f≡↑ = ordEmbed-unique (↑ ∘ f) ↑ (≤-trans le ↓≤ .snd) ↑-ordEmbed
+  ↑fz≡z : ↑ (f $ z , z≺a) ≡ z
+  ↑fz≡z = funExt⁻ ↑∘f≡↑ (z , z≺a)
+```
 
 (TODO)
 
+```agda
 ↓-inj : (a b : ⟨ α ⟩) → α ↓ a ≡ α ↓ b → a ≡ b
-↓-inj a b eq = {!   !}
+↓-inj {α} a b eq = ≺-ext a b λ z →
+  (↓-reflects-≼ a b (subst (λ - → (α ↓ a) ≤ -) eq       ≤-refl) z) ,
+  (↓-reflects-≼ b a (subst (λ - → (α ↓ b) ≤ -) (sym eq) ≤-refl) z)
+  where open OrdStr (str α)
+```
 
 ## 严格序
 
@@ -126,5 +135,10 @@ _<_ : Ord 𝓊 → Ord 𝓋 → Type (𝓊 ⊔ 𝓋)
 
 (TODO)
 
+```agda
 <-prop : (α : Ord 𝓊) (β : Ord 𝓋) → isProp (α < β)
-<-prop = {!   !}
+<-prop α β (b₁ , eqv₁) (b₂ , eqv₂) = Σ≡Prop
+  (λ _ → isPropOrdEquiv _ _)
+  {!   !}
+  --(↓-inj b₁ b₂ ({!   !} ∙ (OrdPath _ _ ⁺¹) {!   !}))
+```
