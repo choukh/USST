@@ -310,15 +310,15 @@ _≃ₒ_ : Ord 𝓊 → Ord 𝓊′ → Type (𝓊 ⊔ 𝓊′)
 然后就可以用 `∫` 从 `𝒮ᴰ-Ord` 中取出序数的泛等原理: 两个序数的等价等价于它们的相等.
 
 ```agda
-OrdinalPath : (α β : Ord 𝓊) → (α ≃ₒ β) ≃ (α ≡ β)
-OrdinalPath = ∫ 𝒮ᴰ-Ord .UARel.ua
+OrdPath : (α β : Ord 𝓊) → (α ≃ₒ β) ≃ (α ≡ β)
+OrdPath = ∫ 𝒮ᴰ-Ord .UARel.ua
 ```
 
 上面的泛等原理使用路径 `_≡_` 表述, 也可以转换成使用归纳类型族 `_＝_` 表述.
 
 ```
-OrdinalUnivalence : (α β : Ord 𝓊) → (α ≃ₒ β) ≃ (α ＝ β)
-OrdinalUnivalence α β = transport (α ≃ₒ β ≃_) Path≡Eq (OrdinalPath α β)
+OrdUnivalence : (α β : Ord 𝓊) → (α ≃ₒ β) ≃ (α ＝ β)
+OrdUnivalence α β = transport (α ≃ₒ β ≃_) Path≡Eq (OrdPath α β)
 ```
 
 有了序数的泛等原理之后, 就可以通过找到两个序数间保持 `_≺_` 关系的同伦等价来证明它们相等. 这体现了泛等基础的好处, 我们不需要商掉某个等价关系, 也不用像质料集合论那样用超限归纳证明两个同构的序数外延相等.

@@ -255,7 +255,7 @@ syntax ∃-syntax A (λ x → B) = ∃ x ∶ A , B
 "相等" 在泛等基础中是一个复杂的概念. 首先上面提到的库中的概念所涉及到的相等都采用了所谓**道路类型 (path type)** `_≡_`.
 
 ```agda
-open import Cubical.Foundations.Prelude public using (_≡_)
+open import Cubical.Foundations.Prelude public using (_≡_; subst; subst2)
 ```
 
 但本文中将更常使用定义为**归纳类型族 (inductive type family)** 的**命题相等类型 (propositional equality)** `_＝_`.
@@ -320,10 +320,10 @@ injective f = ∀ {x y} → f x ＝ f y → x ＝ y
 
 ```agda
 open import Cubical.Foundations.Equiv public
-  using (_≃_; isPropIsEquiv; invEquiv; compEquiv; LiftEquiv; secIsEq)
+  using (_≃_; isEquiv; isPropIsEquiv; invEquiv; compEquiv; LiftEquiv; secIsEq)
   renaming (equivEq to equivPath)
 open import Cubical.Foundations.Equiv.Properties public using (cong≃)
-open import Cubical.Foundations.Isomorphism public using (Iso)
+open import Cubical.Foundations.Isomorphism public using (Iso; iso; section; retract; isoToEquiv)
 ```
 
 为了方便使用我们有 `equivPath` 的 `＝` 版.

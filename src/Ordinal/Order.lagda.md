@@ -155,12 +155,12 @@ isPropIsOrdEmbed {α} {β} f = isOfHLevelRetractFromIso 1 IsOrdEmbedIsoΣ $ aux
 ```
 ordEmbed-unique : {α : Ord 𝓊} {β : Ord 𝓊′}
   (f g : ⟨ α ⟩ → ⟨ β ⟩) → IsOrdEmbed f → IsOrdEmbed g → f ＝ g
-ordEmbed-unique {α} {β} f g f-ordEmb g-ordEmb =
+ordEmbed-unique {α} {β} f g f-emb g-emb =
   funExt $ elim λ x IH → ≺-ext (f x) (g x) λ z →
-    (λ z≺fx → let (a , a≺x , fa＝z) = formsInitSeg f-ordEmb z x z≺fx in
-      transport (_≺ g x) (sym (IH a a≺x) ∙ fa＝z) (pres≺ g-ordEmb a x a≺x))
-  , (λ z≺gx → let (a , a≺x , ga＝z) = formsInitSeg g-ordEmb z x z≺gx in
-      transport (_≺ f x) (IH a a≺x ∙ ga＝z) (pres≺ f-ordEmb a x a≺x))
+    (λ z≺fx → let (a , a≺x , fa＝z) = formsInitSeg f-emb z x z≺fx in
+      transport (_≺ g x) (sym (IH a a≺x) ∙ fa＝z) (pres≺ g-emb a x a≺x))
+  , (λ z≺gx → let (a , a≺x , ga＝z) = formsInitSeg g-emb z x z≺gx in
+      transport (_≺ f x) (IH a a≺x ∙ ga＝z) (pres≺ f-emb a x a≺x))
   where open IsOrdEmbed
         open OrdStr (str α) using (elim)
         open OrdStr (str β) using (≺-ext; _≺_)
@@ -199,7 +199,7 @@ isSetOrd : isSet (Ord 𝓊)
 isSetOrd α β = (equiv ⁺¹) (isOfHLevelLift 1 $ isPropOrdEquiv α β)
   where
   equiv : isProp (Lift (α ≃ₒ β)) ≃ isProp (α ≡ β)
-  equiv = cong≃ isProp $ compEquiv (invEquiv LiftEquiv) (OrdinalPath α β)
+  equiv = cong≃ isProp $ compEquiv (invEquiv LiftEquiv) (OrdPath α β)
 ```
 
 ## 非严格序
@@ -215,9 +215,67 @@ _≤_ : Ord 𝓊 → Ord 𝓋 → Type (𝓊 ⊔ 𝓋)
 
 ```agda
 ≤-prop : (α : Ord 𝓊) (β : Ord 𝓋) → isProp (α ≤ β)
-≤-prop α β (f , f-ordEmb) (g , g-ordEmb) = eqToPath $ Σ≡Prop
+≤-prop α β (f , f-emb) (g , g-emb) = eqToPath $ Σ≡Prop
   (isPropPathToIsProp ∘ isPropIsOrdEmbed)
-  (ordEmbed-unique f g f-ordEmb g-ordEmb)
+  (ordEmbed-unique f g f-emb g-emb)
 ```
 
 我们会在下一章定义了前段序数之后再定义严格序.
+
+### 性质
+
+我们证明 `≤` 确实是我们期望的非严格偏序, 即要证它满足自反, 传递, 和反对称性.
+
+`≤` 满足自反性, 因为恒等函数满足序数嵌入的条件.
+
+```agda
+≤-refl : α ≤ α
+≤-refl = idfun _ , mkIsOrdEmbed (λ a a′ a≺a′ → a≺a′) λ b a′ b≺a′ → b , b≺a′ , refl
+```
+
+`≤` 满足传递性, 因为复合函数满足序数嵌入的条件.
+
+```agda
+≤-trans : α ≤ β → β ≤ γ → α ≤ γ
+≤-trans {α} {β} {γ} (f , f-emb) (g , g-emb) = g ∘ f , mkIsOrdEmbed
+  (λ a a′ a≺a′ → pres≺ g-emb (f a) (f a′) (pres≺ f-emb a a′ a≺a′)) aux
+  where
+  open IsOrdEmbed
+  aux : ∀ c a′ → c ≺⟨ γ ⟩ g (f a′) → Σ a ∶ ⟨ α ⟩ , a ≺⟨ α ⟩ a′ × g (f a) ＝ c
+  aux c a′ c≺gfa = Σa .fst , Σa .snd .fst , ap g (Σa .snd .snd) ∙ Σb .snd .snd
+    where
+    Σb : Σ b ∶ ⟨ β ⟩ , b ≺⟨ β ⟩ f a′ × g b ＝ c
+    Σb = formsInitSeg g-emb c (f a′) c≺gfa
+    Σa : Σ a ∶ ⟨ α ⟩ , a ≺⟨ α ⟩ a′ × f a ＝ Σb .fst
+    Σa = formsInitSeg f-emb (Σb .fst) a′ (Σb .snd .fst)
+```
+
+为了证明 `≤` 反对称, 我们先证双向嵌入蕴含等价, 再用泛等原理换到 `＝`.
+
+**引理** 双向嵌入蕴含等价.
+**证明** (TODO) ∎
+
+```agda
+≤-antisym-≃ₒ : α ≤ β → β ≤ α → α ≃ₒ β
+≤-antisym-≃ₒ {α} {β} α≤β@(f , f-emb) β≤α@(g , g-emb) =
+  isoToEquiv (iso f g fg gf) , mkIsOrderEquiv λ x y → isoToEquiv (iso
+    (pres≺ f-emb x y)
+    {!   !} --(subst2 (underlyingRel α) (gf x) (gf y) ∘ (pres≺ g-emb _ _))
+    (λ _ → ≺-prop (str β) _ _ _ _)
+    (λ _ → ≺-prop (str α) _ _ _ _))
+  where
+  fg : ∀ b → f (g b) ≡ b
+  fg = eqToPath ∘ happly (ordEmbed-unique (f ∘ g) (idfun _) (snd $ ≤-trans β≤α α≤β) (snd ≤-refl))
+  gf : ∀ a → g (f a) ≡ a
+  gf = eqToPath ∘ happly (ordEmbed-unique (g ∘ f) (idfun _) (snd $ ≤-trans α≤β β≤α) (snd ≤-refl))
+  open IsOrdEmbed
+  open OrdStr
+```
+
+**定理** `≤` 反对称.
+**证明** 用序数的泛等原理改写 `≤-antisym-≃ₒ` 即证. ∎
+
+```agda
+≤-antisym : α ≤ β → β ≤ α → α ＝ β
+≤-antisym α≤β β≤α = OrdUnivalence _ _ ⁺¹ $ ≤-antisym-≃ₒ α≤β β≤α
+```

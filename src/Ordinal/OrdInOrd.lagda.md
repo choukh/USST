@@ -11,7 +11,7 @@ zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 
 ```agda
 {-# OPTIONS --cubical --safe #-}
-{-# OPTIONS --lossy-unification #-}
+{-# OPTIONS --lossy-unification --hidden-argument-puns #-}
 module Ordinal.OrdInOrd where
 open import Preliminary
 open import Ordinal.Base
@@ -71,14 +71,17 @@ module _ (α : Ord 𝓊) (a : ⟨ α ⟩) where
 (TODO)
 
 ```agda
-  ↑ : ⟨ _↓_ ⟩ → ⟨ α ⟩
+module _ {α : Ord 𝓊} {a : ⟨ α ⟩} where
+  open OrdStr (str α)
+
+  ↑ : ⟨ α ↓ a ⟩ → ⟨ α ⟩
   ↑ = fst
 ```
 
 (TODO)
 
 ```agda
-  ↑-bounded : (x : ⟨ _↓_ ⟩) → ↑ x ≺⟨ α ⟩ a
+  ↑-bounded : (x : ⟨ α ↓ a ⟩) → ↑ x ≺⟨ α ⟩ a
   ↑-bounded = snd
 ```
 
@@ -95,23 +98,22 @@ module _ (α : Ord 𝓊) (a : ⟨ α ⟩) where
 (TODO)
 
 ```agda
-↓≤ : (α : Ord 𝓊) (a : ⟨ α ⟩) → α ↓ a ≤ α
-↓≤ α a = ↑ α a , ↑-ordEmbed α a
+↓≤ : {a : ⟨ α ⟩} → α ↓ a ≤ α
+↓≤ = ↑ , ↑-ordEmbed
 ```
 
 (TODO)
 
-```agda
-↓-reflects-≼ : (α : Ord 𝓊) (a b : ⟨ α ⟩) → α ↓ a ≤ α ↓ b → a ≼⟨ α ⟩ b
-↓-reflects-≼ α a b eq = {!   !}
-```
+↓-reflects-≼ : (a b : ⟨ α ⟩) → α ↓ a ≤ α ↓ b → a ≼⟨ α ⟩ b
+↓-reflects-≼ {α} a b (f , f-ordEmb) z z≺a = {!   !}
+  where
+  ↑eq : ↑ ＝ ↑ ∘ f
+  ↑eq = ordEmbed-unique ↑ (↑ ∘ f) ↑-ordEmbed (str {!   !})
 
 (TODO)
 
-```agda
-↓-inj : (α : Ord 𝓊) (a b : ⟨ α ⟩) → α ↓ a ＝ α ↓ b → a ＝ b
-↓-inj α a b eq = {!   !}
-```
+↓-inj : (a b : ⟨ α ⟩) → α ↓ a ＝ α ↓ b → a ＝ b
+↓-inj a b eq = {!   !}
 
 ## 严格序
 
@@ -124,7 +126,5 @@ _<_ : Ord 𝓊 → Ord 𝓋 → Type (𝓊 ⊔ 𝓋)
 
 (TODO)
 
-```agda
 <-prop : (α : Ord 𝓊) (β : Ord 𝓋) → isProp (α < β)
 <-prop = {!   !}
-```
