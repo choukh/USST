@@ -129,30 +129,28 @@ module _ {α : Ord 𝓊} {a : ⟨ α ⟩} where
 
 ```agda
 ↓≃ₒ↓ : ((f , _) : α ≤ β) (a : ⟨ α ⟩) → α ↓ a ≃ₒ β ↓ (f a)
-↓≃ₒ↓ {α} {β} (f , emb) a = isoToEquiv (iso g h sec ret) ,
-  mkIsOrderEquiv λ { (x , x≺a) (y , y≺fa) → pres≺ x y ,
-    record { equiv-proof = λ fx≺fy →
-      let (w , w≺y , fw≡fx) = formsInitSeg (f x) y fx≺fy
-          x≺y : x ≺⟨ α ⟩ y
-          x≺y = subst (λ - → - ≺⟨ α ⟩ y) (inj fw≡fx) w≺y
-      in
-        (x≺y , ≺-prop (str β) _ _ _ _) , λ _ → Σ≡Prop
-          (λ _ → isProp→isSet (≺-prop (str $ β ↓ f a) _ _) _ _)
-          (≺-prop (str α) _ _ _ _)
-  } }
+↓≃ₒ↓ {α} {β} (f , emb) a = isoToEquiv i , mkIsOrderEquiv ordEquiv
   where
   open OrdStr
   open IsOrdEmbed emb
-  g : ⟨ α ↓ a ⟩ → ⟨ β ↓ f a ⟩
-  g (x , x≺a) = f x , pres≺ x a x≺a
-  h : ⟨ β ↓ f a ⟩ → ⟨ α ↓ a ⟩
-  h (y , y≺fa) = let (x , x≺a , _) = formsInitSeg y a y≺fa in x , x≺a
-  sec : section g h
-  sec (y , y≺fa) = let (_ , _ , fx≡y) = formsInitSeg y a y≺fa in
-    Σ≡Prop (λ _ → ≺-prop (str β) _ _) fx≡y
-  ret : retract g h
-  ret (x , x≺a) = let (_ , _ , fw≡fx) = formsInitSeg (f x) a (pres≺ _ _ x≺a) in
+  i : Iso ⟨ α ↓ a ⟩ ⟨ β ↓ f a ⟩
+  Iso.fun       i (x , x≺a) = f x , pres≺ x a x≺a
+  Iso.inv       i (y , y≺fa) = let (x , x≺a , _) = formsInitSeg y a y≺fa in x , x≺a
+  Iso.leftInv  i (x , x≺a) = let (_ , _ , fw≡fx) = formsInitSeg (f x) a (pres≺ _ _ x≺a) in
     Σ≡Prop (λ _ → ≺-prop (str α) _ _) (inj fw≡fx)
+  Iso.rightInv   i (y , y≺fa) = let (_ , _ , fx≡y) = formsInitSeg y a y≺fa in
+    Σ≡Prop (λ _ → ≺-prop (str β) _ _) fx≡y
+  ordEquiv : ∀ x y → x ≺⟨ α ↓ a ⟩ y ≃ (Iso.fun i x) ≺⟨ β ↓ f a ⟩ (Iso.fun i y)
+  ordEquiv (x , x≺a) (y , y≺fa) = pres≺ x y , isEquivPres≺ where
+    isEquivPres≺ : isEquiv (pres≺ x y)
+    isEquivPres≺ = record { equiv-proof = λ fx≺fy →
+      let (w , w≺y , fw≡fx) = formsInitSeg (f x) y fx≺fy
+          x≺y : x ≺⟨ α ⟩ y
+          x≺y = subst (λ - → - ≺⟨ α ⟩ y) (inj fw≡fx) w≺y
+      in (x≺y , ≺-prop (str β) _ _ _ _) , λ _ → Σ≡Prop
+          (λ _ → isProp→isSet (≺-prop (str β) _ _) _ _)
+          (≺-prop (str α) _ _ _ _)
+      }
 ```
 
 (TODO)
@@ -232,4 +230,4 @@ Ord⁺ 𝓊 = Ord 𝓊 , mkOrdinalStr _<_ <-wo
 Burali-Forti : ¬ (Σ α ∶ Ord 𝓊 , α ≃ₒ Ord⁺ 𝓊)
 Burali-Forti = {!   !}
 ```
- 
+  
