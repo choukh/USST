@@ -228,16 +228,16 @@ _≤_ : Ord 𝓊 → Ord 𝓋 → Type (𝓊 ⊔ 𝓋)
 ```agda
 ≤-antisym-≃ₒ : α ≤ β → β ≤ α → α ≃ₒ β
 ≤-antisym-≃ₒ {α} {β} α≤β@(f , f-emb) β≤α@(g , g-emb) =
-  isoToEquiv (iso f g fg gf) , mkIsOrderEquiv λ x y → isoToEquiv (iso
+  isoToEquiv (iso f g sec ret) , mkIsOrderEquiv λ x y → isoToEquiv (iso
     (pres≺ f-emb x y)
-    (subst2 (underlyingRel α) (gf x) (gf y) ∘ (pres≺ g-emb _ _))
+    (subst2 (underlyingRel α) (ret x) (ret y) ∘ (pres≺ g-emb _ _))
     (λ _ → ≺-prop (str β) _ _ _ _)
     (λ _ → ≺-prop (str α) _ _ _ _))
   where
-  fg : ∀ b → f (g b) ≡ b
-  fg = funExt⁻ $ ordEmbed-unique (f ∘ g) (idfun _) (snd $ ≤-trans β≤α α≤β) (snd ≤-refl)
-  gf : ∀ a → g (f a) ≡ a
-  gf = funExt⁻ $ ordEmbed-unique (g ∘ f) (idfun _) (snd $ ≤-trans α≤β β≤α) (snd ≤-refl)
+  sec : section f g
+  sec = funExt⁻ $ ordEmbed-unique (f ∘ g) (idfun _) (snd $ ≤-trans β≤α α≤β) (snd ≤-refl)
+  ret : retract f g
+  ret = funExt⁻ $ ordEmbed-unique (g ∘ f) (idfun _) (snd $ ≤-trans α≤β β≤α) (snd ≤-refl)
   open IsOrdEmbed
   open OrdStr
 ```

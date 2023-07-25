@@ -125,20 +125,111 @@ module _ {α : Ord 𝓊} {a : ⟨ α ⟩} where
   where open OrdStr (str α)
 ```
 
+(TODO)
+
+```agda
+↓≃ₒ↓ : ((f , _) : α ≤ β) (a : ⟨ α ⟩) → α ↓ a ≃ₒ β ↓ (f a)
+↓≃ₒ↓ {α} {β} (f , emb) a = isoToEquiv (iso g h sec ret) ,
+  mkIsOrderEquiv λ { (x , x≺a) (y , y≺fa) → pres≺ x y ,
+    record { equiv-proof = λ fx≺fy →
+      let (w , w≺y , fw≡fx) = formsInitSeg (f x) y fx≺fy
+          x≺y : x ≺⟨ α ⟩ y
+          x≺y = subst (λ - → - ≺⟨ α ⟩ y) (inj fw≡fx) w≺y
+      in
+        (x≺y , ≺-prop (str β) _ _ _ _) , λ _ → Σ≡Prop
+          (λ _ → isProp→isSet (≺-prop (str $ β ↓ f a) _ _) _ _)
+          (≺-prop (str α) _ _ _ _)
+  } }
+  where
+  open OrdStr
+  open IsOrdEmbed emb
+  g : ⟨ α ↓ a ⟩ → ⟨ β ↓ f a ⟩
+  g (x , x≺a) = f x , pres≺ x a x≺a
+  h : ⟨ β ↓ f a ⟩ → ⟨ α ↓ a ⟩
+  h (y , y≺fa) = let (x , x≺a , _) = formsInitSeg y a y≺fa in x , x≺a
+  sec : section g h
+  sec (y , y≺fa) = let (_ , _ , fx≡y) = formsInitSeg y a y≺fa in
+    Σ≡Prop (λ _ → ≺-prop (str β) _ _) fx≡y
+  ret : retract g h
+  ret (x , x≺a) = let (_ , _ , fw≡fx) = formsInitSeg (f x) a (pres≺ _ _ x≺a) in
+    Σ≡Prop (λ _ → ≺-prop (str α) _ _) (inj fw≡fx)
+```
+
+(TODO)
+
+```agda
+↓≡↓ : ((f , _) : α ≤ β) (a : ⟨ α ⟩) → α ↓ a ≡ β ↓ (f a)
+↓≡↓ f a = ≃ₒ→≡ $ ↓≃ₒ↓ f a
+```
+
 ## 严格序
 
 (TODO)
 
 ```agda
-_<_ : Ord 𝓊 → Ord 𝓋 → Type (𝓊 ⊔ 𝓋)
-α < β = Σ b ∶ ⟨ β ⟩ , α ≃ₒ (β ↓ b)
+_<_ : Ord 𝓊 → Ord 𝓊 → Type (𝓊 ⁺)
+α < β = Σ b ∶ ⟨ β ⟩ , α ≡ (β ↓ b)
 ```
 
 (TODO)
 
 ```agda
-<-prop : (α : Ord 𝓊) (β : Ord 𝓋) → isProp (α < β)
-<-prop α β (b₁ , eqv₁) (b₂ , eqv₂) = Σ≡Prop
-  (λ _ → isPropOrdEquiv _ _)
-  (↓-inj b₁ b₂ $ ≃ₒ→≡ $ ≃ₒ-trans (≃ₒ-sym eqv₁) eqv₂)
+module _ {𝓊} where
+  open BinaryRelation (_<_ {𝓊})
 ```
+
+(TODO)
+
+```agda
+  <-prop : Propositional
+  <-prop _ _ (b₁ , eq₁) (b₂ , eq₂) = Σ≡Prop
+    (λ _ → isSetOrd _ _)
+    (↓-inj b₁ b₂ $ (sym eq₁) ∙ eq₂)
+```
+
+(TODO)
+
+```agda
+  <-trans : Transitive
+  <-trans = {!   !}
+```
+
+(TODO)
+
+```agda
+  <-ext : Extensional
+  <-ext = {!   !}
+```
+
+(TODO)
+
+```agda
+  <-wf : WellFounded
+  <-wf = {!   !}
+```
+
+(TODO)
+
+```agda
+  <-wo : WellOrdered
+  <-wo = mkWellOrdered <-prop <-trans <-ext <-wf
+```
+
+## 吃自己
+
+(TODO)
+
+```agda
+Ord⁺ : ∀ 𝓊 → Ord (𝓊 ⁺)
+Ord⁺ 𝓊 = Ord 𝓊 , mkOrdinalStr _<_ <-wo
+```
+
+## 布拉利-福尔蒂悖论
+
+(TODO)
+
+```agda
+Burali-Forti : ¬ (Σ α ∶ Ord 𝓊 , α ≃ₒ Ord⁺ 𝓊)
+Burali-Forti = {!   !}
+```
+ 

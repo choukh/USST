@@ -310,7 +310,8 @@ injective f = ∀ {x y} → f x ≡ f y → x ≡ y
 
 ```agda
 open import Cubical.Foundations.Equiv public
-  using ( _≃_; isEquiv; isPropIsEquiv; idEquiv; invEquiv; compEquiv; LiftEquiv
+  using ( _≃_; isEquiv; isPropIsEquiv
+        ; idEquiv; invEquiv; compEquiv; LiftEquiv
         ; equivEq; secIsEq; retIsEq)
 open import Cubical.Foundations.Equiv.Properties public using (cong≃)
 open import Cubical.Foundations.Isomorphism public using (Iso; iso; section; retract; isoToEquiv)
