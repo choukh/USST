@@ -224,7 +224,7 @@ module BinaryRelation {A : Type 𝓊} (_≺_ : A → A → Type 𝓋) where
 
 ```agda
 record OrdStr (A : Type 𝓊) : Type (𝓊 ⁺) where
-  constructor mkOrdinalStr
+  constructor mkOrdStr
   open BinaryRelation
   field
     _≺_ : A → A → Type 𝓊

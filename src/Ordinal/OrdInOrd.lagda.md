@@ -45,7 +45,7 @@ module _ (α : Ord 𝓊) (a : ⟨ α ⟩) where
 
 ```agda
     strB : OrdStr B
-    strB = mkOrdinalStr _≺′_ $ BinaryRelation.mkWellOrdered
+    strB = mkOrdStr _≺′_ $ mkWellOrdered
       (λ _ _ → ≺-prop _ _)
       (λ _ _ _ x<y y<z → ≺-trans _ _ _ x<y y<z)
 ```
@@ -140,6 +140,7 @@ module _ {α : Ord 𝓊} {a : ⟨ α ⟩} where
     Σ≡Prop (λ _ → ≺-prop (str α) _ _) (inj fw≡fx)
   Iso.rightInv   i (y , y≺fa) = let (_ , _ , fx≡y) = formsInitSeg y a y≺fa in
     Σ≡Prop (λ _ → ≺-prop (str β) _ _) fx≡y
+
   ordEquiv : ∀ x y → x ≺⟨ α ↓ a ⟩ y ≃ (Iso.fun i x) ≺⟨ β ↓ f a ⟩ (Iso.fun i y)
   ordEquiv (x , x≺a) (y , y≺fa) = pres≺ x y , isEquivPres≺ where
     isEquivPres≺ : isEquiv (pres≺ x y)
@@ -177,6 +178,16 @@ _<_ : Ord 𝓊 → Ord 𝓊 → Type (𝓊 ⁺)
 (TODO)
 
 ```agda
+↓-reflects-≺ : (a b : ⟨ α ⟩) → α ↓ a < α ↓ b → a ≺⟨ α ⟩ b
+↓-reflects-≺ = {!   !}
+
+↓-preserves-≺ : (a b : ⟨ α ⟩) → a ≺⟨ α ⟩ b → α ↓ a < α ↓ b
+↓-preserves-≺ = {!   !}
+```
+
+(TODO)
+
+```agda
 module _ {𝓊} where
   open BinaryRelation (_<_ {𝓊})
 ```
@@ -204,7 +215,22 @@ module _ {𝓊} where
 
 ```agda
   <-ext : Extensional
-  <-ext α β H = {!   !}
+  <-ext α β H = ≃ₒ→≡ $ isoToEquiv i , mkIsOrderEquiv ordEquiv
+    where
+    α↓a<β : ∀ a → α ↓ a < β
+    α↓a<β a = H _ .fst (a , refl)
+    β↓b<α : ∀ b → β ↓ b < α
+    β↓b<α b = H _ .snd (b , refl)
+    i : Iso ⟨ α ⟩ ⟨ β ⟩
+    Iso.fun       i = fst ∘ α↓a<β
+    Iso.inv       i = fst ∘ β↓b<α
+    Iso.leftInv   i a = ↓-inj _ _ $ β↓b<α _ .snd ∙ α↓a<β a .snd
+    Iso.rightInv  i b = ↓-inj _ _ $ α↓a<β _ .snd ∙ β↓b<α b .snd
+
+    ordEquiv : ∀ x y → x ≺⟨ α ⟩ y ≃ Iso.fun i x ≺⟨ β ⟩ Iso.fun i y
+    ordEquiv x y = (λ x≺y → ↓-reflects-≺ _ _
+      (subst2 _<_ (sym $ α↓a<β x .snd) (sym $ α↓a<β y .snd) (↓-preserves-≺ x y x≺y))) ,
+      record { equiv-proof = λ y → ({!   !} , {!   !}) , {!   !} }
 ```
 
 (TODO)
@@ -231,8 +257,8 @@ module _ {𝓊} where
 (TODO)
 
 ```agda
-Ord⁺ : ∀ 𝓊 → Ord (𝓊 ⁺)
-Ord⁺ 𝓊 = Ord 𝓊 , mkOrdinalStr _<_ <-wo
+ord : ∀ 𝓊 → Ord (𝓊 ⁺)
+ord 𝓊 = Ord 𝓊 , mkOrdStr _<_ <-wo
 ```
 
 ## 布拉利-福尔蒂悖论的解决
@@ -240,6 +266,6 @@ Ord⁺ 𝓊 = Ord 𝓊 , mkOrdinalStr _<_ <-wo
 (TODO)
 
 ```agda
-Burali-Forti : ¬ (Σ α ∶ Ord 𝓊 , α ≃ₒ Ord⁺ 𝓊)
+Burali-Forti : ¬ (Σ α ∶ Ord 𝓊 , α ≃ₒ ord 𝓊)
 Burali-Forti = {!   !}
 ```
