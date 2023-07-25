@@ -106,7 +106,8 @@ module _ {α : Ord 𝓊} {a : ⟨ α ⟩} where
 
 ```agda
 ↓-reflects-≼ : (a b : ⟨ α ⟩) → α ↓ a ≤ α ↓ b → a ≼⟨ α ⟩ b
-↓-reflects-≼ {α} a b le@(f , f-ordEmb) z z≺a = subst (λ - → - ≺⟨ α ⟩ b) ↑fz≡z (↑-bounded (f $ z , z≺a))
+↓-reflects-≼ {α} a b le@(f , f-ordEmb) z z≺a =
+  subst (λ - → - ≺⟨ α ⟩ b) ↑fz≡z (↑-bounded (f $ z , z≺a))
   where
   ↑∘f≡↑ : ↑ ∘ f ≡ ↑
   ↑∘f≡↑ = ordEmbed-unique (↑ ∘ f) ↑ (≤-trans le ↓≤ .snd) ↑-ordEmbed
@@ -139,6 +140,5 @@ _<_ : Ord 𝓊 → Ord 𝓋 → Type (𝓊 ⊔ 𝓋)
 <-prop : (α : Ord 𝓊) (β : Ord 𝓋) → isProp (α < β)
 <-prop α β (b₁ , eqv₁) (b₂ , eqv₂) = Σ≡Prop
   (λ _ → isPropOrdEquiv _ _)
-  {!   !}
-  --(↓-inj b₁ b₂ ({!   !} ∙ (OrdPath _ _ ⁺¹) {!   !}))
+  (↓-inj b₁ b₂ $ ≃ₒ→≡ $ ≃ₒ-trans (≃ₒ-sym eqv₁) eqv₂)
 ```

@@ -306,11 +306,11 @@ injective f = ∀ {x y} → f x ≡ f y → x ≡ y
 
 同伦等价 `_≃_` 可以简单理解为是在泛等基础中更容易处理的一种"同构", 它与真正的同构 `Iso` 也是同构的, 且同伦等价的. 同伦等价是一个Σ类型, 其左边即同伦等价的底层函数, 它与同构的正映射相同. 同伦等价相比于同构的好处之一是"一个函数是一个同伦等价"一定是一个命题 (`isPropIsEquiv`), 而同构则不一定有这种性质. 由此性质我们有 `equivEq`, 它说如果底层函数道路相等, 那么同伦等价也道路相等.
 
-此外, `invEquiv` 是同伦等价的对称性; `compEquiv` 是同伦等价的传递性; `cong≃` 是同伦等价的合同性; `LiftEquiv` 说明宇宙层级的提升不影响同伦等价.
+此外, `idEquiv` 是同伦等价的自反性; `invEquiv` 是同伦等价的对称性; `compEquiv` 是同伦等价的传递性; `cong≃` 是同伦等价的合同性; `LiftEquiv` 说明宇宙层级的提升不影响同伦等价.
 
 ```agda
 open import Cubical.Foundations.Equiv public
-  using ( _≃_; isEquiv; isPropIsEquiv; invEquiv; compEquiv; LiftEquiv
+  using ( _≃_; isEquiv; isPropIsEquiv; idEquiv; invEquiv; compEquiv; LiftEquiv
         ; equivEq; secIsEq; retIsEq)
 open import Cubical.Foundations.Equiv.Properties public using (cong≃)
 open import Cubical.Foundations.Isomorphism public using (Iso; iso; section; retract; isoToEquiv)

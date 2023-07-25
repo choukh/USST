@@ -18,35 +18,6 @@ open import Preliminary
 open import Ordinal.Base
 ```
 
-## 底序
-
-当同时讨论多个序数中的 `≺` 关系时, 我们用 `x ≺⟨ α ⟩ y` 的记法标记 `≺` 所属的序数. 我们把 `≺⟨ α ⟩` 叫做 `α` 的底序, 与底集相对应, 它们共同组成了一个序数的底层结构. 若把 `≺` 看作"属于"关系, `∀ z → z ≺⟨ α ⟩ x → z ≺⟨ α ⟩ y` 则可以看作是"包含"关系, 记作 `≼`. 但要注意这些都只是类比的说法, `x` 和 `y` 本身不是集合.
-
-以下代码定义了一个支持 `x ≺⟨ α ⟩ y` 和 `x ≼⟨ α ⟩ y` 记法的类型类 (typeclass) `Underlying`.
-
-```agda
-record Underlying {𝓊} (O : Type (𝓊 ⁺)) : Type (𝓊 ⁺) where
-  field
-    underlyingSet : O → Type 𝓊
-    underlyingRel : (α : O) → underlyingSet α → underlyingSet α → Type 𝓊
-  syntax underlyingRel α x y = x ≺⟨ α ⟩ y
-
-  underlyingPoRel : (α : O) → underlyingSet α → underlyingSet α → Type 𝓊
-  underlyingPoRel α x y = ∀ z → z ≺⟨ α ⟩ x → z ≺⟨ α ⟩ y
-  syntax underlyingPoRel α x y = x ≼⟨ α ⟩ y
-
-open Underlying ⦃...⦄ public
-```
-
-我们对序数实装 `Underlying` 类型类.
-
-```agda
-instance
-  underlying : Underlying (Ord 𝓊)
-  underlyingSet ⦃ underlying ⦄ = ⟨_⟩
-  underlyingRel ⦃ underlying ⦄ = OrdStr._≺_ ∘ str
-```
-
 ## 序数嵌入
 
 我们说序数底集间的一个映射是序数嵌入, 当且仅当它保序, 且它的像能形成一个前段.
