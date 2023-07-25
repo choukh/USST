@@ -34,14 +34,14 @@ module _ (α : Ord 𝓊) (a : ⟨ α ⟩) where
     B = Σ ⟨ α ⟩ (_≺ a)
 ```
 
-为了完成构造, 我们还需要提供 `B` 的序数结构 `strB`. 首先取原序数的底序作为新序数的底序 `≺′`.
+为了完成构造, 我们还需要说明 `B` 具有序数结构 `strB`. 首先取原序数的底序作为新序数的底序 `≺′`.
 
 ```agda
     _≺′_ : B → B → Type 𝓊
     (x , _) ≺′ (y , _) = x ≺ y
 ```
 
-现在还需要说明 `<` 也是良序. 命题性和传递性是显然的.
+现在还需要说明 `<` 也是良序. 其中命题性和传递性是显然的.
 
 ```agda
     strB : OrdStr B
@@ -169,6 +169,11 @@ _<_ : Ord 𝓊 → Ord 𝓊 → Type (𝓊 ⁺)
 α < β = Σ b ∶ ⟨ β ⟩ , α ≡ (β ↓ b)
 ```
 
+```agda
+<→≤ : α < β → α ≤ β
+<→≤ {β} (b , α≡β↓b) = subst (_≤ β) (sym α≡β↓b) ↓≤
+```
+
 (TODO)
 
 ```agda
@@ -189,14 +194,19 @@ module _ {𝓊} where
 
 ```agda
   <-trans : Transitive
-  <-trans = {!   !}
+  <-trans α β γ (b , α≡β↓b) β<γ = α<γ
+    where
+    β↓b<γ : (β ↓ b) < γ
+    β↓b<γ = <→≤ β<γ .fst b , ↓≡↓ (<→≤ β<γ) b
+    α<γ : α < γ
+    α<γ = subst (_< γ) (sym α≡β↓b) β↓b<γ
 ```
 
 (TODO)
 
 ```agda
   <-ext : Extensional
-  <-ext = {!   !}
+  <-ext α β H = {!   !}
 ```
 
 (TODO)
@@ -222,7 +232,7 @@ Ord⁺ : ∀ 𝓊 → Ord (𝓊 ⁺)
 Ord⁺ 𝓊 = Ord 𝓊 , mkOrdinalStr _<_ <-wo
 ```
 
-## 布拉利-福尔蒂悖论
+## 布拉利-福尔蒂悖论的解决
 
 (TODO)
 
@@ -230,4 +240,3 @@ Ord⁺ 𝓊 = Ord 𝓊 , mkOrdinalStr _<_ <-wo
 Burali-Forti : ¬ (Σ α ∶ Ord 𝓊 , α ≃ₒ Ord⁺ 𝓊)
 Burali-Forti = {!   !}
 ```
-  
