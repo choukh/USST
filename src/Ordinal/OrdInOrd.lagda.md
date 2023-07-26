@@ -255,6 +255,13 @@ module _ {𝓊} where
 (TODO)
 
 ```agda
+  <-irrefl : Irreflexive
+  <-irrefl = WellFounded→Irreflexive <-wf
+```
+
+(TODO)
+
+```agda
   <-wo : WellOrdered
   <-wo = mkWellOrdered <-prop <-trans <-ext <-wf
 ```
@@ -301,8 +308,10 @@ ordInOrd {𝓊} α = isoToEquiv i , mkIsOrderEquiv λ x y → isoToEquiv (j x y)
 
 ```agda
 Burali-Forti : ¬ (Σ α ∶ Ord 𝓊 , α ≃ₒ ord 𝓊)
-Burali-Forti {𝓊} (α , f) = {!   !}
+Burali-Forti {𝓊} (α , f) = <-irrefl _ H
   where
-  g : α ≃ₒ ord 𝓊 ↓ α
-  g = {!   !}
+  g : ord 𝓊 ↓ α ≃ₒ ord 𝓊
+  g = ≃ₒ-trans (≃ₒ-sym $ ordInOrd α) f
+  H : ord 𝓊 < ord 𝓊
+  H = α , ≃ₒ→≡ g
 ```
