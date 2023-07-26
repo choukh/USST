@@ -306,10 +306,8 @@ ordInOrd {α} = isoToEquiv i , mkIsOrderEquiv λ x y → isoToEquiv (j x y)
 
 ```agda
 Burali-Forti : ¬ (Σ α ∶ Ord 𝓊 , α ≃ₒ Ω)
-Burali-Forti (α , f) = <-irrefl _ H
+Burali-Forti (α , f) = <-irrefl _ (α , eq)
   where
-  g : Ω ↓ α ≃ₒ Ω
-  g = ≃ₒ-trans (≃ₒ-sym ordInOrd) f
-  H : Ω < Ω
-  H = α , ≃ₒ→≡ g
+  eq : Ω ↓ α ≡ Ω
+  eq = ≃ₒ→≡ $ ≃ₒ-trans (≃ₒ-sym ordInOrd) f
 ```
