@@ -129,29 +129,26 @@ module _ {α : Ord 𝓊} {a : ⟨ α ⟩} where
 
 ```agda
 ↓≃ₒ↓ : ((f , _) : α ≤ β) (a : ⟨ α ⟩) → α ↓ a ≃ₒ β ↓ (f a)
-↓≃ₒ↓ {α} {β} (f , emb) a = isoToEquiv i , mkIsOrderEquiv ordEquiv
+↓≃ₒ↓ {α} {β} (f , emb) a = isoToEquiv i , mkIsOrderEquiv λ x y → isoToEquiv (j x y)
   where
   open OrdStr
   open IsOrdEmbed emb
   i : Iso ⟨ α ↓ a ⟩ ⟨ β ↓ f a ⟩
   Iso.fun       i (x , x≺a) = f x , pres≺ x a x≺a
   Iso.inv       i (y , y≺fa) = let (x , x≺a , _) = formsInitSeg y a y≺fa in x , x≺a
-  Iso.leftInv  i (x , x≺a) = let (_ , _ , fw≡fx) = formsInitSeg (f x) a (pres≺ _ _ x≺a) in
+  Iso.leftInv   i (x , x≺a) = let (_ , _ , fw≡fx) = formsInitSeg (f x) a (pres≺ _ _ x≺a) in
     Σ≡Prop (λ _ → ≺-prop (str α) _ _) (inj fw≡fx)
-  Iso.rightInv   i (y , y≺fa) = let (_ , _ , fx≡y) = formsInitSeg y a y≺fa in
+  Iso.rightInv  i (y , y≺fa) = let (_ , _ , fx≡y) = formsInitSeg y a y≺fa in
     Σ≡Prop (λ _ → ≺-prop (str β) _ _) fx≡y
 
-  ordEquiv : ∀ x y → x ≺⟨ α ↓ a ⟩ y ≃ (Iso.fun i x) ≺⟨ β ↓ f a ⟩ (Iso.fun i y)
-  ordEquiv (x , x≺a) (y , y≺fa) = pres≺ x y , isEquivPres≺ where
-    isEquivPres≺ : isEquiv (pres≺ x y)
-    isEquivPres≺ = record { equiv-proof = λ fx≺fy →
-      let (w , w≺y , fw≡fx) = formsInitSeg (f x) y fx≺fy
-          x≺y : x ≺⟨ α ⟩ y
-          x≺y = subst (λ - → - ≺⟨ α ⟩ y) (inj fw≡fx) w≺y
-      in (x≺y , ≺-prop (str β) _ _ _ _) , λ _ → Σ≡Prop
-          (λ _ → isProp→isSet (≺-prop (str β) _ _) _ _)
-          (≺-prop (str α) _ _ _ _)
-      }
+  module _ (u@(x , x≺a) v@(y , y≺fa) : ⟨ α ↓ a ⟩) where
+    j : Iso (u ≺⟨ α ↓ a ⟩ v) (Iso.fun i u ≺⟨ β ↓ f a ⟩ Iso.fun i v)
+    Iso.fun       j = pres≺ x y
+    Iso.inv       j H =
+      let (w , w≺y , fw≡fx) = formsInitSeg (f x) y H in
+      subst (λ - → - ≺⟨ α ⟩ y) (inj fw≡fx) w≺y
+    Iso.leftInv   j _ = ≺-prop (str α) _ _ _ _
+    Iso.rightInv  j _ = ≺-prop (str β) _ _ _ _
 ```
 
 (TODO)
@@ -215,31 +212,23 @@ module _ {𝓊} where
 
 ```agda
   <-ext : Extensional
-  <-ext α β H = ≃ₒ→≡ $ isoToEquiv i , mkIsOrderEquiv ordEquiv
+  <-ext α β H = ≃ₒ→≡ $ isoToEquiv i , mkIsOrderEquiv λ x y → isoToEquiv (j x y)
     where
-    α↓a<β : ∀ a → α ↓ a < β
-    α↓a<β a = H _ .fst (a , refl)
-    β↓b<α : ∀ b → β ↓ b < α
-    β↓b<α b = H _ .snd (b , refl)
+    f : ∀ a → α ↓ a < β
+    f a = H _ .fst (a , refl)
+    g : ∀ b → β ↓ b < α
+    g b = H _ .snd (b , refl)
     i : Iso ⟨ α ⟩ ⟨ β ⟩
-    Iso.fun       i = fst ∘ α↓a<β
-    Iso.inv       i = fst ∘ β↓b<α
-    Iso.leftInv   i a = ↓-inj _ _ $ β↓b<α _ .snd ∙ α↓a<β a .snd
-    Iso.rightInv  i b = ↓-inj _ _ $ α↓a<β _ .snd ∙ β↓b<α b .snd
-
-    ordEquiv : ∀ x y → x ≺⟨ α ⟩ y ≃ Iso.fun i x ≺⟨ β ⟩ Iso.fun i y
-    ordEquiv x y = f , f-equiv
-      where
-      open OrdStr (str β)
-      f : x ≺⟨ α ⟩ y → Iso.fun i x ≺⟨ β ⟩ Iso.fun i y
-      f x≺y = ↓-reflects-≺ _ _ $ subst2 _<_ (sym $ α↓a<β x .snd) (sym $ α↓a<β y .snd) (↓-preserves-≺ x y x≺y)
-      g : Iso.fun i x ≺⟨ β ⟩ Iso.fun i y → x ≺⟨ α ⟩ y
-      g x≺y = ↓-reflects-≺ _ _ $ subst2 _<_ (α↓a<β x .snd) (α↓a<β y .snd) (↓-preserves-≺ _ _ x≺y)
-      f-equiv : isEquiv f
-      f-equiv = record { equiv-proof = λ x≺y →
-        ({!   !} , ≺-prop _ _ _ _) , λ _ → Σ≡Prop
-          (λ _ → isProp→isSet (≺-prop _ _) _ _)
-          {!   !} }
+    Iso.fun       i = fst ∘ f
+    Iso.inv       i = fst ∘ g
+    Iso.leftInv   i a = ↓-inj _ _ $ g _ .snd ∙ f a .snd
+    Iso.rightInv  i b = ↓-inj _ _ $ f _ .snd ∙ g b .snd
+    module _ x y where
+      j : Iso (x ≺⟨ α ⟩ y) (Iso.fun i x ≺⟨ β ⟩ Iso.fun i y)
+      Iso.fun       j H = ↓-reflects-≺ _ _ $ subst2 _<_ (sym $ f x .snd) (sym $ f y .snd) (↓-preserves-≺ x y H)
+      Iso.inv       j H = ↓-reflects-≺ _ _ $ subst2 _<_ (f x .snd) (f y .snd) (↓-preserves-≺ _ _ H)
+      Iso.leftInv   j _ = OrdStr.≺-prop (str α) _ _ _ _
+      Iso.rightInv  j _ = OrdStr.≺-prop (str β) _ _ _ _
 ```
 
 (TODO)
