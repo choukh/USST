@@ -269,35 +269,35 @@ module _ {𝓊} where
 (TODO)
 
 ```agda
-Ω : ∀ 𝓊 → Ord (𝓊 ⁺)
-Ω 𝓊 = Ord 𝓊 , mkOrdStr _<_ <-wo
+Ω : ∀ {𝓊} → Ord (𝓊 ⁺)
+Ω {𝓊} = Ord 𝓊 , mkOrdStr _<_ <-wo
 ```
 
 (TODO)
 
 ```agda
-_ : ⟨ Ω 𝓊 ⟩ ≡ Ord 𝓊
+_ : ⟨ Ω ⟩ ≡ Ord 𝓊
 _ = refl
 ```
 
 (TODO)
 
 ```agda
-ordInOrd : ∀ α → α ≃ₒ Ω 𝓊 ↓ α
-ordInOrd {𝓊} α = isoToEquiv i , mkIsOrderEquiv λ x y → isoToEquiv (j x y)
+ordInOrd : {α : Ord 𝓊} → α ≃ₒ Ω ↓ α
+ordInOrd {α} = isoToEquiv i , mkIsOrderEquiv λ x y → isoToEquiv (j x y)
   where
   open OrdStr
-  i : Iso ⟨ α ⟩ ⟨ Ω 𝓊 ↓ α ⟩
+  i : Iso ⟨ α ⟩ ⟨ Ω ↓ α ⟩
   Iso.fun i x = α ↓ x , x , refl
   Iso.inv i (β , a , α↓a≡β) = a
   Iso.leftInv i _ = refl
-  Iso.rightInv i (β , a , α↓a≡β) = ΣPathP $ α↓a≡β , isProp→PathP (λ _ → ≺-prop (str $ Ω 𝓊) _ _) _ _
+  Iso.rightInv i (β , a , α↓a≡β) = ΣPathP $ α↓a≡β , isProp→PathP (λ _ → ≺-prop (str Ω) _ _) _ _
   module _ x y where
-    j : Iso (x ≺⟨ α ⟩ y) (Iso.fun i x ≺⟨ Ω 𝓊 ↓ α ⟩ Iso.fun i y)
+    j : Iso (x ≺⟨ α ⟩ y) (Iso.fun i x ≺⟨ Ω ↓ α ⟩ Iso.fun i y)
     Iso.fun       j = ↓-preserves-≺ _ _
     Iso.inv       j = ↓-reflects-≺ _ _
     Iso.leftInv   j _ = ≺-prop (str α) _ _ _ _
-    Iso.rightInv  j _ = ≺-prop (str $ Ω 𝓊 ↓ α) (Iso.fun i x) (Iso.fun i y) _ _
+    Iso.rightInv  j _ = ≺-prop (str $ Ω ↓ α) (Iso.fun i x) (Iso.fun i y) _ _
 ```
 
 ## 布拉利-福尔蒂悖论
@@ -305,11 +305,11 @@ ordInOrd {𝓊} α = isoToEquiv i , mkIsOrderEquiv λ x y → isoToEquiv (j x y)
 (TODO)
 
 ```agda
-Burali-Forti : ¬ (Σ α ∶ Ord 𝓊 , α ≃ₒ Ω 𝓊)
-Burali-Forti {𝓊} (α , f) = <-irrefl _ H
+Burali-Forti : ¬ (Σ α ∶ Ord 𝓊 , α ≃ₒ Ω)
+Burali-Forti (α , f) = <-irrefl _ H
   where
-  g : Ω 𝓊 ↓ α ≃ₒ Ω 𝓊
-  g = ≃ₒ-trans (≃ₒ-sym $ ordInOrd α) f
-  H : Ω 𝓊 < Ω 𝓊
+  g : Ω ↓ α ≃ₒ Ω
+  g = ≃ₒ-trans (≃ₒ-sym ordInOrd) f
+  H : Ω < Ω
   H = α , ≃ₒ→≡ g
 ```
