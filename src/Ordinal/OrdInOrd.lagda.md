@@ -228,9 +228,18 @@ module _ {𝓊} where
     Iso.rightInv  i b = ↓-inj _ _ $ α↓a<β _ .snd ∙ β↓b<α b .snd
 
     ordEquiv : ∀ x y → x ≺⟨ α ⟩ y ≃ Iso.fun i x ≺⟨ β ⟩ Iso.fun i y
-    ordEquiv x y = (λ x≺y → ↓-reflects-≺ _ _
-      (subst2 _<_ (sym $ α↓a<β x .snd) (sym $ α↓a<β y .snd) (↓-preserves-≺ x y x≺y))) ,
-      record { equiv-proof = λ y → ({!   !} , {!   !}) , {!   !} }
+    ordEquiv x y = f , f-equiv
+      where
+      open OrdStr (str β)
+      f : x ≺⟨ α ⟩ y → Iso.fun i x ≺⟨ β ⟩ Iso.fun i y
+      f x≺y = ↓-reflects-≺ _ _ $ subst2 _<_ (sym $ α↓a<β x .snd) (sym $ α↓a<β y .snd) (↓-preserves-≺ x y x≺y)
+      g : Iso.fun i x ≺⟨ β ⟩ Iso.fun i y → x ≺⟨ α ⟩ y
+      g x≺y = ↓-reflects-≺ _ _ $ subst2 _<_ (α↓a<β x .snd) (α↓a<β y .snd) (↓-preserves-≺ _ _ x≺y)
+      f-equiv : isEquiv f
+      f-equiv = record { equiv-proof = λ x≺y →
+        ({!   !} , ≺-prop _ _ _ _) , λ _ → Σ≡Prop
+          (λ _ → isProp→isSet (≺-prop _ _) _ _)
+          {!   !} }
 ```
 
 (TODO)
