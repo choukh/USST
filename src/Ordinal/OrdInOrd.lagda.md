@@ -189,6 +189,8 @@ _<_ : Ord 𝓊 → Ord 𝓊 → Type (𝓊 ⁺)
 ↓-preserves-≺ a b a≺b = (a , a≺b) , ↓≡↓ ↓≤
 ```
 
+### 性质
+
 (TODO)
 
 ```agda
@@ -266,11 +268,41 @@ ord : ∀ 𝓊 → Ord (𝓊 ⁺)
 ord 𝓊 = Ord 𝓊 , mkOrdStr _<_ <-wo
 ```
 
-## 布拉利-福尔蒂悖论的解决
+(TODO)
+
+```agda
+_ : ⟨ ord 𝓊 ⟩ ≡ Ord 𝓊
+_ = refl
+```
+
+(TODO)
+
+```agda
+ordInOrd : ∀ α → α ≃ₒ ord 𝓊 ↓ α
+ordInOrd {𝓊} α = isoToEquiv i , mkIsOrderEquiv λ x y → isoToEquiv (j x y)
+  where
+  open OrdStr
+  i : Iso ⟨ α ⟩ ⟨ ord 𝓊 ↓ α ⟩
+  Iso.fun i x = α ↓ x , x , refl
+  Iso.inv i (β , a , α↓a≡β) = a
+  Iso.leftInv i _ = refl
+  Iso.rightInv i (β , a , α↓a≡β) = ΣPathP $ α↓a≡β , isProp→PathP (λ _ → ≺-prop (str $ ord 𝓊) _ _) _ _
+  module _ x y where
+    j : Iso (x ≺⟨ α ⟩ y) (Iso.fun i x ≺⟨ ord 𝓊 ↓ α ⟩ Iso.fun i y)
+    Iso.fun       j = ↓-preserves-≺ _ _
+    Iso.inv       j = ↓-reflects-≺ _ _
+    Iso.leftInv   j _ = ≺-prop (str α) _ _ _ _
+    Iso.rightInv  j _ = ≺-prop (str $ ord 𝓊 ↓ α) (Iso.fun i x) (Iso.fun i y) _ _
+```
+
+## 布拉利-福尔蒂悖论
 
 (TODO)
 
 ```agda
 Burali-Forti : ¬ (Σ α ∶ Ord 𝓊 , α ≃ₒ ord 𝓊)
-Burali-Forti = {!   !}
+Burali-Forti {𝓊} (α , f) = {!   !}
+  where
+  g : α ≃ₒ ord 𝓊 ↓ α
+  g = {!   !}
 ```
