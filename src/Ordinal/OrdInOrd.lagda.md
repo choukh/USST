@@ -118,8 +118,8 @@ module _ {α : Ord 𝓊} {a : ⟨ α ⟩} where
 (TODO)
 
 ```agda
-↓-inj : (a b : ⟨ α ⟩) → α ↓ a ≡ α ↓ b → a ≡ b
-↓-inj {α} a b eq = ≺-ext a b λ z →
+↓-inj : {a b : ⟨ α ⟩} → α ↓ a ≡ α ↓ b → a ≡ b
+↓-inj {α} {a} {b} eq = ≺-ext a b λ z →
   (↓-reflects-≼ a b (subst (λ - → (α ↓ a) ≤ -) eq       ≤-refl) z) ,
   (↓-reflects-≼ b a (subst (λ - → (α ↓ b) ≤ -) (sym eq) ≤-refl) z)
   where open OrdStr (str α)
@@ -154,8 +154,8 @@ module _ {α : Ord 𝓊} {a : ⟨ α ⟩} where
 (TODO)
 
 ```agda
-↓≡↓ : ((f , _) : α ≤ β) (a : ⟨ α ⟩) → α ↓ a ≡ β ↓ (f a)
-↓≡↓ f a = ≃ₒ→≡ $ ↓≃ₒ↓ f a
+↓≡↓ : ((f , _) : α ≤ β) {a : ⟨ α ⟩} → α ↓ a ≡ β ↓ (f a)
+↓≡↓ f {a} = ≃ₒ→≡ $ ↓≃ₒ↓ f a
 ```
 
 ## 严格序
@@ -176,10 +176,17 @@ _<_ : Ord 𝓊 → Ord 𝓊 → Type (𝓊 ⁺)
 
 ```agda
 ↓-reflects-≺ : (a b : ⟨ α ⟩) → α ↓ a < α ↓ b → a ≺⟨ α ⟩ b
-↓-reflects-≺ = {!   !}
+↓-reflects-≺ {α} a b ↓<↓ = subst (λ a → a ≺⟨ α ⟩ b) (sym eq) bounded
+  where
+  bnd : ⟨ α ↓ b ⟩
+  bnd = ↓<↓ .fst
+  bounded : ↑ bnd ≺⟨ α ⟩ b
+  bounded = ↑-bounded bnd
+  eq : a ≡ ↑ bnd
+  eq = ↓-inj $ (sym $ ↓<↓ .snd) ∙ ↓≡↓ ↓≤
 
 ↓-preserves-≺ : (a b : ⟨ α ⟩) → a ≺⟨ α ⟩ b → α ↓ a < α ↓ b
-↓-preserves-≺ = {!   !}
+↓-preserves-≺ a b a≺b = (a , a≺b) , ↓≡↓ ↓≤
 ```
 
 (TODO)
@@ -195,7 +202,7 @@ module _ {𝓊} where
   <-prop : Propositional
   <-prop _ _ (b₁ , eq₁) (b₂ , eq₂) = Σ≡Prop
     (λ _ → isSetOrd _ _)
-    (↓-inj b₁ b₂ $ eq₁ ∙ sym eq₂)
+    (↓-inj $ eq₁ ∙ sym eq₂)
 ```
 
 (TODO)
@@ -205,7 +212,7 @@ module _ {𝓊} where
   <-trans α β γ (b , β↓b≡α) β<γ = subst (_< γ) β↓b≡α β↓b<γ
     where
     β↓b<γ : (β ↓ b) < γ
-    β↓b<γ = <→≤ β<γ .fst b , sym (↓≡↓ (<→≤ β<γ) b)
+    β↓b<γ = <→≤ β<γ .fst b , sym (↓≡↓ $ <→≤ β<γ)
 ```
 
 (TODO)
@@ -221,12 +228,12 @@ module _ {𝓊} where
     i : Iso ⟨ α ⟩ ⟨ β ⟩
     Iso.fun       i = fst ∘ f
     Iso.inv       i = fst ∘ g
-    Iso.leftInv   i a = ↓-inj _ _ $ g _ .snd ∙ f a .snd
-    Iso.rightInv  i b = ↓-inj _ _ $ f _ .snd ∙ g b .snd
+    Iso.leftInv   i a = ↓-inj $ g _ .snd ∙ f a .snd
+    Iso.rightInv  i b = ↓-inj $ f _ .snd ∙ g b .snd
     module _ x y where
       j : Iso (x ≺⟨ α ⟩ y) (Iso.fun i x ≺⟨ β ⟩ Iso.fun i y)
-      Iso.fun       j H = ↓-reflects-≺ _ _ $ subst2 _<_ (sym $ f x .snd) (sym $ f y .snd) (↓-preserves-≺ x y H)
-      Iso.inv       j H = ↓-reflects-≺ _ _ $ subst2 _<_ (f x .snd) (f y .snd) (↓-preserves-≺ _ _ H)
+      Iso.fun       j H = ↓-reflects-≺ _ _ $ subst2 _<_ (sym $ f x .snd) (sym $ f y .snd) (↓-preserves-≺ _ _ H)
+      Iso.inv       j H = ↓-reflects-≺ _ _ $ subst2 _<_ (f x .snd)       (f y .snd)       (↓-preserves-≺ _ _ H)
       Iso.leftInv   j _ = OrdStr.≺-prop (str α) _ _ _ _
       Iso.rightInv  j _ = OrdStr.≺-prop (str β) _ _ _ _
 ```
@@ -240,7 +247,7 @@ module _ {𝓊} where
     open OrdStr (str α)
     Acc↓ : (a : ⟨ α ⟩) → Acc (α ↓ a)
     Acc↓ = elim λ a IH → acc λ β ((b , b≺a) , α↓a↓b≡β) →
-      subst Acc (sym (↓≡↓ ↓≤ _) ∙ α↓a↓b≡β) (IH b b≺a)
+      subst Acc (sym (↓≡↓ ↓≤) ∙ α↓a↓b≡β) (IH b b≺a)
 ```
 
 (TODO)
