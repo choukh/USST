@@ -139,7 +139,12 @@ module _ {α : Ord 𝓊} {a : ⟨ α ⟩} where
 下面是前段的一个重要性质, 它将不同序数的前段联系起来.
 
 **引理** 序数 `α` 的 `a` 前段等价于被 `α` 通过某 `f` 所嵌入的另一个序数 `β` 的 `f a` 前段.  
-**证明** 
+**证明** 给定 `α` 到 `β` 的序数嵌入 `f` 以及 `α` 的底集元素 `a`, 要证 `α ↓ a ≃ₒ β ↓ (f a)`. 需要分别证明它们的底集等价且底序等价.
+
+- 对于底集的等价, 我们构造同构来证明.
+  - 正映射使用 `f` 及其保序性 `pres≺` 将 `(x , x≺a)` 映射到 `(f x , pres≺ _ _ x≺a)`.
+  - 逆映射由 `f` 的"形成前段"性质 `formsInitSeg` 得到. 它对任意 `(y , y≺fa)` 都给出了一个 `(x , x≺a)`.
+  - 两个方向的互逆性均由 `formsInitSeg` 的右分量可得.
 
 ```agda
 ↓≃ₒ↓ : ((f , _) : α ≤ β) (a : ⟨ α ⟩) → α ↓ a ≃ₒ β ↓ (f a)
@@ -148,18 +153,24 @@ module _ {α : Ord 𝓊} {a : ⟨ α ⟩} where
   open OrdStr
   open IsOrdEmbed emb
   i : Iso ⟨ α ↓ a ⟩ ⟨ β ↓ f a ⟩
-  Iso.fun       i (x , x≺a) = f x , pres≺ x a x≺a
-  Iso.inv       i (y , y≺fa) = let (x , x≺a , _) = formsInitSeg y a y≺fa in x , x≺a
-  Iso.leftInv   i (x , x≺a) = let (_ , _ , fw≡fx) = formsInitSeg (f x) a (pres≺ _ _ x≺a) in
+  Iso.fun       i (x , x≺a) = f x , pres≺ _ _ x≺a
+  Iso.inv       i (y , y≺fa) = let (x , x≺a , _) = formsInitSeg _ _ y≺fa in x , x≺a
+  Iso.leftInv   i (x , x≺a) = let (_ , _ , fw≡fx) = formsInitSeg _ _ (pres≺ _ _ x≺a) in
     Σ≡Prop (λ _ → ≺-prop (str α) _ _) (inj fw≡fx)
-  Iso.rightInv  i (y , y≺fa) = let (_ , _ , fx≡y) = formsInitSeg y a y≺fa in
+  Iso.rightInv  i (y , y≺fa) = let (_ , _ , fx≡y) = formsInitSeg _ _ y≺fa in
     Σ≡Prop (λ _ → ≺-prop (str β) _ _) fx≡y
+```
 
+- 对于底序的等价, 我们同样构造同构来证明.
+  - 正映射都 `f` 的保序性 `pres≺` 得到.
+  - 逆映射由 `f` 的"形成前段"性质 `formsInitSeg` 得到.
+  - 两个方向的互逆性均由 `_≺_` 的命题性得到.
+
+```agda
   module _ (u@(x , x≺a) v@(y , y≺fa) : ⟨ α ↓ a ⟩) where
     j : Iso (u ≺⟨ α ↓ a ⟩ v) (Iso.fun i u ≺⟨ β ↓ f a ⟩ Iso.fun i v)
     Iso.fun       j = pres≺ x y
-    Iso.inv       j H =
-      let (w , w≺y , fw≡fx) = formsInitSeg (f x) y H in
+    Iso.inv       j H = let (w , w≺y , fw≡fx) = formsInitSeg (f x) y H in
       subst (λ - → - ≺⟨ α ⟩ y) (inj fw≡fx) w≺y
     Iso.leftInv   j _ = ≺-prop (str α) _ _ _ _
     Iso.rightInv  j _ = ≺-prop (str β) _ _ _ _
