@@ -173,6 +173,33 @@ isSetOrd α β = (equiv ⁺¹) (isOfHLevelLift 1 $ isPropOrdEquiv α β)
   equiv = cong≃ isProp $ compEquiv (invEquiv LiftEquiv) (OrdPath α β)
 ```
 
+## 被嵌入序数
+
+```agda
+record EmbeddedOrd 𝓊 : Type (𝓊 ⁺) where
+  field
+    { carrier } : Type 𝓊
+    carrier-set : isSet carrier
+    { R } : carrier → carrier → Type 𝓊
+    relation-prop : ∀ x y → isProp (R x y)
+    { target } : Ord 𝓊
+    embed : carrier → ⟨ target ⟩
+    pres≺ : ∀ a a′ → R a a′ → embed a ≺⟨ target ⟩ embed a′
+    formsInitSeg : ∀ b a′ → b ≺⟨ target ⟩ embed a′ → Σ a ∶ carrier , R a a′ × embed a ≡ b
+
+cast : EmbeddedOrd 𝓊 → Ord 𝓊
+cast embedded = carrier , mkOrdStr R wo
+  where
+  open EmbeddedOrd embedded
+  open OrdStr (str target)
+  open BinaryRelation R
+  wo : WellOrdered
+  WellOrdered.≺-prop  wo _ _ = relation-prop _ _
+  WellOrdered.≺-trans wo x y z x≺y y≺z = {!   !}
+  WellOrdered.≺-ext   wo x y H = {!   !}
+  WellOrdered.≺-wf    wo x = {!   !}
+```
+
 ## 非严格序
 
 序数之间的非严格序 `_≤_` 定义为它们之间的嵌入的全体.
