@@ -25,6 +25,9 @@ open import Ordinal.Base
 ```agda
 record IsOrdEmbed {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β ⟩) : Type (𝓊 ⊔ 𝓋) where
   constructor mkIsOrdEmbed
+  field
+    pres≺ : ∀ a a′ → a ≺⟨ α ⟩ a′ → f a ≺⟨ β ⟩ f a′
+    formsInitSeg : ∀ b a′ → b ≺⟨ β ⟩ f a′ → Σ a ∶ ⟨ α ⟩ , a ≺⟨ α ⟩ a′ × f a ≡ b
 ```
 
 保序性 `pres≺` 很简单, 它就是上一章序等价 `hPres≺` 的弱化版. "形成前段" `formsInitSeg` 这一性质的直观可以参考下图. 它说只要一个底集元素被射到, 那么比它小的元素都会被射到, 也就是映射的像能形成 `≺` 的一个前段.
@@ -35,12 +38,6 @@ record IsOrdEmbed {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β ⟩
   f |            f |  
     ↓              ↓  
 ... f a ... ≺₂ ... f a′ ...  
-```
-
-```agda
-  field
-    pres≺ : ∀ a a′ → a ≺⟨ α ⟩ a′ → f a ≺⟨ β ⟩ f a′
-    formsInitSeg : ∀ b a′ → b ≺⟨ β ⟩ f a′ → Σ a ∶ ⟨ α ⟩ , a ≺⟨ α ⟩ a′ × f a ≡ b
 ```
 
 ### 单射性
@@ -180,24 +177,33 @@ record EmbeddedOrd 𝓊 : Type (𝓊 ⁺) where
   field
     { carrier } : Type 𝓊
     carrier-set : isSet carrier
-    { R } : carrier → carrier → Type 𝓊
-    relation-prop : ∀ x y → isProp (R x y)
+    { _≺_ } : carrier → carrier → Type 𝓊
+    relation-prop : ∀ x y → isProp (x ≺ y)
     { target } : Ord 𝓊
     embed : carrier → ⟨ target ⟩
-    pres≺ : ∀ a a′ → R a a′ → embed a ≺⟨ target ⟩ embed a′
-    formsInitSeg : ∀ b a′ → b ≺⟨ target ⟩ embed a′ → Σ a ∶ carrier , R a a′ × embed a ≡ b
+    inj : injective embed
+    pres≺ : ∀ a a′ → a ≺ a′ → embed a ≺⟨ target ⟩ embed a′
+    formsInitSeg : ∀ b a′ → b ≺⟨ target ⟩ embed a′ → Σ a ∶ carrier , a ≺ a′ × embed a ≡ b
 
-cast : EmbeddedOrd 𝓊 → Ord 𝓊
-cast embedded = carrier , mkOrdStr R wo
+tieup : EmbeddedOrd 𝓊 → Ord 𝓊
+tieup embedded = carrier , mkOrdStr _≺_ wo
   where
-  open EmbeddedOrd embedded
-  open OrdStr (str target)
-  open BinaryRelation R
+  open EmbeddedOrd embedded renaming (embed to f)
+  open OrdStr (str target) using (≺-trans; ≺-ext; elim)
+  open BinaryRelation _≺_
   wo : WellOrdered
   WellOrdered.≺-prop  wo _ _ = relation-prop _ _
-  WellOrdered.≺-trans wo x y z x≺y y≺z = {!   !}
-  WellOrdered.≺-ext   wo x y H = {!   !}
-  WellOrdered.≺-wf    wo x = {!   !}
+  WellOrdered.≺-trans wo x y z x≺y y≺z =
+    let fx≺fz : f x ≺⟨ target ⟩ f z
+        fx≺fz = ≺-trans _ _ _ (pres≺ _ _ x≺y) (pres≺ _ _ y≺z)
+        (x′ , x′≺z , fx′≡fx) = formsInitSeg _ _ fx≺fz
+    in subst (_≺ z) (inj fx′≡fx) x′≺z
+  WellOrdered.≺-ext wo x y H = inj $ ≺-ext (f x) (f y) λ z →
+    (λ z≺fx → let (x′ , x′≺x , fx′≡z) = formsInitSeg _ _ z≺fx in
+      subst (λ z → z ≺⟨ target ⟩ f y) fx′≡z $ pres≺ _ _ $ H _ .fst x′≺x) ,
+    (λ z≺fy → let (y′ , y′≺y , fy′≡z) = formsInitSeg _ _ z≺fy in
+      subst (λ z → z ≺⟨ target ⟩ f x) fy′≡z $ pres≺ _ _ $ H _ .snd y′≺y)
+  WellOrdered.≺-wf wo x = {!   !}
 ```
 
 ## 非严格序
