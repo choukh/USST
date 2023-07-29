@@ -170,16 +170,15 @@ isSetOrd α β = (equiv ⁺¹) (isOfHLevelLift 1 $ isPropOrdEquiv α β)
   equiv = cong≃ isProp $ compEquiv (invEquiv LiftEquiv) (OrdPath α β)
 ```
 
-## 被嵌入序数
+## 嵌入的序数
 
 ```agda
 record EmbeddedOrd 𝓊 : Type (𝓊 ⁺) where
   field
-    { carrier } : Type 𝓊
-    carrier-set : isSet carrier
-    { _≺_ } : carrier → carrier → Type 𝓊
+    carrier : Type 𝓊
+    _≺_ : carrier → carrier → Type 𝓊
     relation-prop : ∀ x y → isProp (x ≺ y)
-    { target } : Ord 𝓊
+    target : Ord 𝓊
     embed : carrier → ⟨ target ⟩
     inj : injective embed
     pres≺ : ∀ a a′ → a ≺ a′ → embed a ≺⟨ target ⟩ embed a′
@@ -203,7 +202,10 @@ tieup embedded = carrier , mkOrdStr _≺_ wo
       subst (λ z → z ≺⟨ target ⟩ f y) fx′≡z $ pres≺ _ _ $ H _ .fst x′≺x) ,
     (λ z≺fy → let (y′ , y′≺y , fy′≡z) = formsInitSeg _ _ z≺fy in
       subst (λ z → z ≺⟨ target ⟩ f x) fy′≡z $ pres≺ _ _ $ H _ .snd y′≺y)
-  WellOrdered.≺-wf wo x = {!   !}
+  WellOrdered.≺-wf wo x = aux (f x) refl where
+    aux : ∀ y {x} (eq : f x ≡ y) → Acc x
+    aux = elim λ y IH eq → acc λ z z≺x → IH (f z)
+      (subst (λ y → f z ≺⟨ target ⟩ y) eq (pres≺ _ _ z≺x)) refl
 ```
 
 ## 非严格序

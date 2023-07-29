@@ -20,11 +20,7 @@ open BinaryRelation
 
 ```agda
 module Pre {A : Type 𝓊} (A-set : isSet A) where
+```
 
   ℍ : Ord (𝓊 ⁺)
-  ℍ = (Σ α ∶ Ord 𝓊 , ⟨ α ⟩ ≲ A) , mkOrdStr (λ (α , _) (β , _) → α < β) (mkWellOrdered
-    (λ _ _ → <-prop _ _)
-    (λ _ _ _ → <-trans _ _ _)
-    {!   !}
-    {!   !})
-```
+  ℍ = ?
