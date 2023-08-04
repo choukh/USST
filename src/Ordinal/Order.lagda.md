@@ -170,7 +170,13 @@ isSetOrd α β = (equiv ⁺¹) (isOfHLevelLift 1 $ isPropOrdEquiv α β)
   equiv = cong≃ isProp $ compEquiv (invEquiv LiftEquiv) (OrdPath α β)
 ```
 
-## 嵌入的序数
+### 嵌入序数
+
+我们称一个配备了序关系 `_≺_` 的类型 `carrier` (它在满足接下来给出的条件后会自动成为一个集合) 构成了一个到序数 `target` 的**嵌入序数 (`EmbeddedOrd`)**, 当且仅当 `carrier` 到 `target` 底集的映射 `embed` 满足:
+
+1. `inj` : 具有单射性
+2. `pres≺` : 保序
+3. `formsInitSeg` : 能形成前段
 
 ```agda
 record EmbeddedOrd 𝓊 : Type (𝓊 ⁺) where
@@ -183,27 +189,85 @@ record EmbeddedOrd 𝓊 : Type (𝓊 ⁺) where
     inj : injective embed
     pres≺ : ∀ a a′ → a ≺ a′ → embed a ≺⟨ target ⟩ embed a′
     formsInitSeg : ∀ b a′ → b ≺⟨ target ⟩ embed a′ → Σ a ∶ carrier , a ≺ a′ × embed a ≡ b
+```
 
+**引理** 嵌入序数到序数有一个典范映射, 它将嵌入序数映射到以 `carrier` 为底集, `_≺_` 为底序的序数. 
+
+```agda
 tieup : EmbeddedOrd 𝓊 → Ord 𝓊
 tieup embedded = carrier , mkOrdStr _≺_ wo
+```
+
+**证明** 我们用 `f` 表示嵌入映射, `≺-trans` 和 `≺-ext` 指 `target` 底序的传递性和外延性, `elim` 指 `target` 底集的良基归纳法.
+
+```agda
   where
   open EmbeddedOrd embedded renaming (embed to f)
   open OrdStr (str target) using (≺-trans; ≺-ext; elim)
   open BinaryRelation _≺_
+```
+
+我们需要说明 `_≺_` 是良序, 即满足命题性, 传递性, 外延性和良基性. 其中命题性是显然的.
+
+```agda
   wo : WellOrdered
   WellOrdered.≺-prop  wo _ _ = relation-prop _ _
+```
+
+对于传递性, 假设 `x ≺ y` 和 `y ≺ z`, 由保序性有 `f x ≺ f y` 和 `f y ≺ f z`.
+
+由 `target` 底序的传递性 `≺-trans` 有 `f x ≺ f z`.
+
+由"形成前段"性, 存在 `x′ ≺ z` 满足 `f x′ ≡ f x`.
+
+由 `f` 的单射性有 `x′ ≡ x`, 改写即得 `x ≺ z`.
+
+```agda
   WellOrdered.≺-trans wo x y z x≺y y≺z =
     let fx≺fz : f x ≺⟨ target ⟩ f z
         fx≺fz = ≺-trans _ _ _ (pres≺ _ _ x≺y) (pres≺ _ _ y≺z)
         (x′ , x′≺z , fx′≡fx) = formsInitSeg _ _ fx≺fz
     in subst (_≺ z) (inj fx′≡fx) x′≺z
+```
+
+对于外延性, 假设 `H : ∀ z → z ≺ x ↔ z ≺ y`, 要证 `x ≡ y`.
+
+由 `f` 的单射性我们证 `f x ≡ f y`.
+
+又由 `target` 底序的外延性 `≺-ext` 只需证对任意 `z` 都有 `z ≺ f x ↔ z ≺ f y`.
+
+我们只证左到右: 假设 `z ≺ f x`, 要证 `z ≺ f y`.
+
+由"形成前段"性, 存在 `x′ ≺ x` 满足 `f x′ ≡ z`, 改写目标即证 `f x′ ≺ f y`.
+
+由保序性只需证 `x′ ≺ y`. 由前提 `x′ ≺ x` 和 `H` 即得.
+
+```agda
   WellOrdered.≺-ext wo x y H = inj $ ≺-ext (f x) (f y) λ z →
     (λ z≺fx → let (x′ , x′≺x , fx′≡z) = formsInitSeg _ _ z≺fx in
       subst (λ z → z ≺⟨ target ⟩ f y) fx′≡z $ pres≺ _ _ $ H _ .fst x′≺x) ,
     (λ z≺fy → let (y′ , y′≺y , fy′≡z) = formsInitSeg _ _ z≺fy in
       subst (λ z → z ≺⟨ target ⟩ f x) fy′≡z $ pres≺ _ _ $ H _ .snd y′≺y)
+```
+
+对于良基性, 需要仔细选取辅助命题 `aux` 的形式. 我们先证任意满足 `f x ≡ y` 的 `x` 可及.
+
+条件 `f x ≡ y` 看似多余, 但其实对于良基归纳法的使用是必须的.
+
+一旦此 `aux` 完成, 那么对任意 `x` 令 `y` 为 `f x` 就可以得到 `x` 可及, 也就完成了良基性的证明.
+
+```agda
   WellOrdered.≺-wf wo x = aux (f x) refl where
     aux : ∀ y {x} (eq : f x ≡ y) → Acc x
+```
+
+最后我们证 `aux`. 用良基归纳法, 假设任意满足 `f x ≡ y` 的 `x` 和 `y`, 有归纳假设 "对任意 `v ≺ y` , 如果有 `f u ≡ v`, 那么 `u` 可及", 要证 `x` 可及.
+
+用构造子 `acc`, 我们证任意 `z ≺ x` 可及. 用归纳假设, 令 `u` 为 `z`, `v` 为 `f z`, 只需证 `f z ≺ y`.
+
+用 `f x ≡ y` 改写即证 `f z ≺ f x`. 由前提 `z ≺ x` 和保序性得证. ∎
+
+```agda
     aux = elim λ y IH eq → acc λ z z≺x → IH (f z)
       (subst (λ y → f z ≺⟨ target ⟩ y) eq (pres≺ _ _ z≺x)) refl
 ```
