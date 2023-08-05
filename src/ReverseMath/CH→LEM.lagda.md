@@ -64,8 +64,8 @@ Cantor-≴ X (f , f-inj) = noncontradiction ∈→∉ ∉→∈
 isPropGCH : (𝓊 𝓋 : Level) → isProp (GCH 𝓊 𝓋)
 isPropGCH 𝓊 𝓋 = isPropΠ4 λ X Y _ _ → isPropΠ3 λ _ _ _ →
   λ { (⊎.inl _)    (⊎.inl _)    → cong ⊎.inl $ squash₁ _ _
-    ; (⊎.inl Y≲X)  (⊎.inr ℙX≲Y) → ⊥-rec $ ∥∥-rec2 isProp⊥ (λ ℙX≲Y Y≲X → Cantor-≴ _ $ ≲-trans Y≲X ℙX≲Y) Y≲X ℙX≲Y
-    ; (⊎.inr ℙX≲Y) (⊎.inl Y≲X)  → ⊥-rec $ ∥∥-rec2 isProp⊥ (λ ℙX≲Y Y≲X → Cantor-≴ _ $ ≲-trans Y≲X ℙX≲Y) Y≲X ℙX≲Y
+    ; (⊎.inl Y≲X)  (⊎.inr ℙX≲Y) → ⊥-rec $ ∥∥₁-rec2 isProp⊥ (λ ℙX≲Y Y≲X → Cantor-≴ _ $ ≲-trans Y≲X ℙX≲Y) Y≲X ℙX≲Y
+    ; (⊎.inr ℙX≲Y) (⊎.inl Y≲X)  → ⊥-rec $ ∥∥₁-rec2 isProp⊥ (λ ℙX≲Y Y≲X → Cantor-≴ _ $ ≲-trans Y≲X ℙX≲Y) Y≲X ℙX≲Y
     ; (⊎.inr _)    (⊎.inr _)    → cong ⊎.inr $ squash₁ _ _ }
 ```
 
@@ -178,7 +178,7 @@ module Lemmas (X : Type 𝓊) (X-set : isSet X) where
     ℙX≲Y→dec P-prop ℙX≲Y with ℙX≲Y
     ... | (f , f-inj) with Cantor-beyond｛｝ (fst ∘ f) (f-inj ∘ Σ≡Prop (λ _ → squash₁))
     ... | (A , ¬sing) with f A
-    ... | (fA , sing∨dec) = ∥∥-rec (isPropDec P-prop)
+    ... | (fA , sing∨dec) = ∥∥₁-rec (isPropDec P-prop)
       (λ { (⊎.inl sing) → ⊥-rec $ ¬sing sing
          ; (⊎.inr dec)  → dec })
       sing∨dec
@@ -200,14 +200,14 @@ module Lemmas (X : Type 𝓊) (X-set : isSet X) where
     Y≴X Y≲X@(f , f-inj) = NonEmptyDec P λ P-dec → Cantor-≴ X (≲-trans (dec→ℙX≲Y P-dec) Y≲X)
 ```
 
-有了这个引理, 接下来的两条引理就是自明的了. 只是要注意命题截断的一些技术细节. `CH` 将给我们 `≲` 的命题截断, 由于最终目标 `Dec P` 也是命题, 可以用 `∥∥-rec` 消掉这个截断.
+有了这个引理, 接下来的两条引理就是自明的了. 只是要注意命题截断的一些技术细节. `CH` 将给我们 `≲` 的命题截断, 由于最终目标 `Dec P` 也是命题, 可以用 `∥∥₁-rec` 消掉这个截断.
 
 ```agda
     isCHType→ℙX≲Y : isCHType X Y → ∥ ℙ X ≲ Y ∥₁
     isCHType→ℙX≲Y ch-type = ch-type (X≲Y , Y≴X) Y≲ℙX
 
     isCHType→lem : isCHType X Y → isProp P → Dec P
-    isCHType→lem ch-type P-prop = ∥∥-rec (isPropDec P-prop) (ℙX≲Y→dec P-prop) (isCHType→ℙX≲Y ch-type)
+    isCHType→lem ch-type P-prop = ∥∥₁-rec (isPropDec P-prop) (ℙX≲Y→dec P-prop) (isCHType→ℙX≲Y ch-type)
 ```
 
 ## 结论
