@@ -21,21 +21,45 @@ open import Ordinal.Order
 
 ## 前段
 
+前段是指序数 `α` 的底集 `⟨ α ⟩` 里小于某个上界 `a` 的那些元素, 它们具有类型 `Σ ⟨ α ⟩ (_≺ a)`, 以其为 `carrier` 可以构成一个嵌入序数 `initSeg`.
+
 ```agda
 module _ (α : Ord 𝓊) (a : ⟨ α ⟩) where
   open OrdStr (str α)
 
   initSeg : EmbeddedOrd 𝓊
   EmbeddedOrd.carrier       initSeg = Σ ⟨ α ⟩ (_≺ a)
+```
+
+`initSeg` 的底序遵循 `α` 的底序.
+
+```agda
   EmbeddedOrd._≺_           initSeg (x , _) (y , _) = x ≺ y
   EmbeddedOrd.relation-prop initSeg _ _ = ≺-prop _ _
+```
+
+`initSeg` 的嵌入目标即是 `α`, 嵌入映射是Σ类型的左投影, 即 `fst`.
+
+```agda
   EmbeddedOrd.target        initSeg = α
   EmbeddedOrd.embed         initSeg = fst
-  EmbeddedOrd.inj           initSeg = Σ≡Prop (λ _ → ≺-prop _ _)
-  EmbeddedOrd.pres≺         initSeg _ _ = idfun _
-  EmbeddedOrd.formsInitSeg  initSeg b a′ le = (b , b≺a) , le , refl
-    where b≺a = ≺-trans _ _ _ le (a′ .snd)
 ```
+
+嵌入映射是单射, 因为依值配对 `carrier` 的右边是命题, 不影响配对整体的相等.
+
+```agda
+  EmbeddedOrd.inj           initSeg = Σ≡Prop (λ _ → ≺-prop _ _)
+```
+
+嵌入映射的保序性和"形成前段"性是显然的.
+
+```agda
+  EmbeddedOrd.pres≺         initSeg _ _ = idfun _
+  EmbeddedOrd.formsInitSeg  initSeg b (a′ , a′≺a) b≺a′ = (b , b≺a) , b≺a′ , refl
+    where b≺a = ≺-trans _ _ _ b≺a′ a′≺a
+```
+
+我们将这样的 `initSeg` 所对应的序数记作 `α ↓ a`.
 
 ```agda
 infix 21 _↓_
