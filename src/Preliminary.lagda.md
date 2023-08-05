@@ -257,6 +257,8 @@ syntax ∃-syntax A (λ x → B) = ∃ x ∶ A , B
 
 ### 集合截断
 
+与命题截断类似的, 我们有集合截断 `∥_∥₂`, 它将高阶群胚截断为集合.
+
 ```agda
 open import Cubical.HITs.SetTruncation public
   using (∥_∥₂; ∣_∣₂; squash₂)

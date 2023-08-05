@@ -36,7 +36,7 @@ isProp≤ : (κ : Card 𝓊) (μ : Card 𝓋) → isProp (κ ≤ μ)
 isProp≤ κ μ = str (κ ≤ₕ μ)
 ```
 
-```agda
+
 module Pre {A : Type 𝓊} (A-set : isSet A) where
 
   hartogs : EmbeddedOrd (𝓊 ⁺)
@@ -51,4 +51,4 @@ module Pre {A : Type 𝓊} (A-set : isSet A) where
 
   ℍ : Ord (𝓊 ⁺)
   ℍ = tieup hartogs
-```
+
