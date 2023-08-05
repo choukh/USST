@@ -43,7 +43,11 @@ record IsOrdEmbed {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β ⟩
 ### 单射性
 
 **引理** 序数嵌入是单射.  
-**证明** 用双参数形式的良基归纳法 `elim2`, 拿到归纳假设 `IH : ∀ u v → u ≺ x → v ≺ y → f u ≡ f v → u ≡ v`, 要证 `f x ≡ f y → x ≡ y`. 用 `≺` 的外延性, 要证两种对称的情况 `p` 和 `q`, 我们只证 `p : ∀ z → z ≺ x → z ≺ y`. 由 `z ≺ x` 及嵌入的保序性有 `f z ≺ f x ≡ f y`. 由于嵌入能形成前段, 必有一个 `w` 满足 `w ≺ y` 且 `f w ≡ f z`. 再结合归纳假设有 `w ≡ z`, 改写目标即证 `w ≺ y`, 此乃前提. ∎
+**证明** 用双参数形式的良基归纳法 `elim2`, 拿到归纳假设
+
+`IH : ∀ u v → u ≺ x → v ≺ y → f u ≡ f v → u ≡ v`,
+
+要证 `f x ≡ f y → x ≡ y`.
 
 ```agda
   inj : injective f
@@ -52,9 +56,23 @@ record IsOrdEmbed {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β ⟩
     open OrdStr (str α) using (≺-ext; elim2)
 
     aux : ∀ x y → (∀ u v → u ≺⟨ α ⟩ x → v ≺⟨ α ⟩ y → f u ≡ f v → u ≡ v) → f x ≡ f y → x ≡ y
+```
+
+用 `≺` 的外延性, 要证两种对称的情况 `p` 和 `q`, 我们只证 `p : ∀ z → z ≺ x → z ≺ y`.
+
+```agda
     aux x y IH fx≡fy = ≺-ext x y λ z → p z , q z
       where
       p : ∀ z → z ≺⟨ α ⟩ x → z ≺⟨ α ⟩ y
+```
+
+由 `z ≺ x` 及嵌入的保序性有 `f z ≺ f x ≡ f y`.
+
+由于嵌入能形成前段, 必有一个 `w` 满足 `w ≺ y` 且 `f w ≡ f z`.
+
+再结合归纳假设有 `w ≡ z`, 改写目标即证 `w ≺ y`, 此乃前提.
+
+```agda
       p z z≺x = subst (λ - → - ≺⟨ α ⟩ y) w≡z w≺y
         where
         fz≺fy : f z ≺⟨ β ⟩ f y
@@ -66,6 +84,11 @@ record IsOrdEmbed {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β ⟩
         fw≡fz = snd $ snd Σw
         w≡z : w ≡ z
         w≡z = sym $ IH z w z≺x w≺y (sym fw≡fz)
+```
+
+`q` 同理可证. ∎
+
+```agda
       q : ∀ z → z ≺⟨ α ⟩ y → z ≺⟨ α ⟩ x
       q z z≺y = subst (λ - → - ≺⟨ α ⟩ x) w≡z w≺x
         where
