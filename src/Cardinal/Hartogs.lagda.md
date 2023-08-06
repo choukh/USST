@@ -53,7 +53,17 @@ module Pre {A : Type 𝓊} (A-set : isSet A) where
     H (f , f-inj) = f ∘ g , g-inj ∘ f-inj where
       g = <→≤ β<ₒα′ .fst
       g-inj = IsOrdEmbed.inj $ <→≤ β<ₒα′ .snd
+```
 
+```agda
   ℍ : Ord (𝓊 ⁺)
   ℍ = tieup hartogs
+```
+
+```agda
+  ℍ→ℙ³ : ⟨ ℍ ⟩ → ℙ $ ℙ $ ℙ A
+  ℍ→ℙ³ = {!   !}
+
+  ℍ→ℙ³-inj : injective ℍ→ℙ³
+  ℍ→ℙ³-inj = {!   !}
 ```
