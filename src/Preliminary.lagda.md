@@ -306,7 +306,7 @@ open import Cubical.Data.Sigma public using (ΣPathP)
 我们约定仅在本文剩下的篇幅中使用 `A` `B` `C` 表示任意层级的类型.
 
 ```agda
-private variable A B C : Type 𝓊
+private variable A B C X : Type 𝓊
 ```
 
 cubical 库里面对单射的定义是为高阶同伦类型改编过的版本, 且相等是用 `Path` 表述的. 对于集合层面的数学我们用传统的单射性定义就够了, 并且相等用 `_≡_` 表述.
@@ -354,18 +354,25 @@ open import Cubical.Displayed.Universe public using (𝒮-Univ)
 
 给定任意类型 `X : Type 𝓊`, 我们把 `X` 到命题宇宙 `hProp 𝓊` 的函数叫做 `X` 的幂集, 记作 `ℙ X`, 它的项也叫 `X` 的子集.
 
-给定项 `x : X` 和子集 `A : ℙ X`, "`x` 属于 `A`" 定义为 `⟨ A x ⟩`. `A` 是取值到 `hProp 𝓊` 的函数, 这保证了属于关系是取值到命题的. 此外, 可以证明幂集确实是一个集合: `isSetℙ`.
+给定项 `x : X` 和子集 `A : ℙ X`, 属于关系 `x ∈ A` 定义为 `⟨ A x ⟩`. `A` 是取值到 `hProp 𝓊` 的函数, 这保证了属于关系是取值到命题的. 此外, 可以证明幂集确实是一个集合: `isSetℙ`.
 
 ```agda
 open import Cubical.Foundations.Powerset public
-  using (ℙ; _∈_; isSetℙ)
+  using (ℙ; _∈_; _⊆_; isSetℙ)
 ```
 
 不属于符号 `_∉_` 定义为 `_∈_` 的否定, 即 `x ∉ A = ¬ x ∈ A`.
 
 ```agda
-_∉_ : {X : Type 𝓊} → X → ℙ X → Type _
+_∉_ : X → ℙ X → Type _
 x ∉ A = ¬ x ∈ A
+```
+
+包含关系 `A ⊆ B` 的定义为 `∀ x → x ∈ A → x ∈ B`, 真包含 `A ⊂ B` 定义为 `A ⊆ B` 且存在 `x ∈ B` 但 `x ∉ A`.
+
+```agda
+_⊂_ : ℙ X → ℙ X → Type _
+A ⊂ B = A ⊆ B × (∃ x ∶ _ , x ∈ B × x ∉ A)
 ```
 
 ## 公理
