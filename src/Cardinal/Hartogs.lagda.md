@@ -26,7 +26,7 @@ Card 𝓊 = ∥ hSet 𝓊 ∥₂
 
 ```agda
 _≤ₕ_ : Card 𝓊 → Card 𝓋 → hProp (𝓊 ⊔ 𝓋)
-_≤ₕ_ = ∥∥₂-rec2 isSetHProp λ (A , _) (B , _) → ∥ A ≲ B ∥₁ , squash₁
+_≤ₕ_ = ∥∥₂-rec2 isSetHProp λ (A , _) (B , _) → ∥ A ↪ B ∥₁ , squash₁
 ```
 
 ```agda
@@ -49,7 +49,7 @@ module Pre {A : Type 𝓊} (A-set : isSet A) where
   EmbeddedOrd.inj           hartogs = Σ≡Prop λ _ → ≤-prop _ _
   EmbeddedOrd.pres≺         hartogs _ _ = idfun _
   EmbeddedOrd.formsInitSeg  hartogs β (α′ , le) β<ₒα′ = (β , ∥∥₁-map H le) , β<ₒα′ , refl where
-    H : ⟨ α′ ⟩ ≲ A → Σ (⟨ β ⟩ → A) injective
+    H : ⟨ α′ ⟩ ↪ A → Σ (⟨ β ⟩ → A) injective
     H (f , f-inj) = f ∘ g , g-inj ∘ f-inj where
       g = <→≤ β<ₒα′ .fst
       g-inj = IsOrdEmbed.inj $ <→≤ β<ₒα′ .snd
@@ -61,8 +61,17 @@ module Pre {A : Type 𝓊} (A-set : isSet A) where
 ```
 
 
-  ℍ→ℙ³ : ⟨ ℍ ⟩ → ℙ $ ℙ $ ℙ A
-  ℍ→ℙ³ (β , le) X = {! _⊆_  !}
+  ℍ→ℙ³ : ⟨ ℍ ⟩ → ℙ (ℙ (ℙ A))
+  ℍ→ℙ³ (β , le) X = ((Σ (ℙ $ ℙ A) λ X → Lt ⟪ X ⟫) ≃ ⟨ β ⟩) , {!   !}
+    where
+    ⟪_⟫ : ∀ {𝓊} {X : Type 𝓊} → ℙ X → Type _
+    ⟪ A ⟫ = Σ _ (_∈ A)
+  
+    record Lt (X : Type (𝓊 ⁺)) : Type (𝓊 ⁺) where
+      field _<_ : X → X → Type 𝓊
+
+    ⟪⊂⟫ : (X : ℙ $ ℙ A) → Lt ⟪ X ⟫
+    ⟪⊂⟫ X = record { _<_ = λ (x , _) (y , _) → x ⊂ y }
 
   ℍ→ℙ³-inj : injective ℍ→ℙ³
   ℍ→ℙ³-inj = {!   !}

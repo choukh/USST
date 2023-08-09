@@ -12,7 +12,7 @@ zhihu-url: https://zhuanlan.zhihu.com/p/643059692
 
 ## 前言
 
-**泛等基础 (univalent foundations, 简称 UF)** 中有原生的集合概念 `hSet`, 它可以视作一种**结构集合论 (structural set theory)** 的模型. 我们尝试在其中复刻传统质料集合论 (material set theory) 的基本概念, 如势, 序数, 连续统假设 (CH), 广义连续统假设 (GCH) 等, 并研究它们与排中律 (LEM) 和选择公理 (AC) 之间的反推事实. 这得益于 UF 是一种**中性数学基础 (foundation of neutral constructive mathematics)**. 本文是这一系列的第一篇, 主要介绍前置知识, 包括泛等基础以及集合论的一些基本概念.
+**泛等基础 (univalent foundations, 简称 UF)** 中有原生的集合概念 `hSet`, 它可以视作一种**结构集合论 (structural set theory)** 的模型. 我们尝试在其中复刻传统质料集合论 (material set theory) 的基本概念, 如序数, 基数, 连续统假设 (CH), 广义连续统假设 (GCH) 等, 并研究它们与排中律 (LEM) 和选择公理 (AC) 之间的反推事实. 这得益于 UF 是一种**中性数学基础 (foundation of neutral constructive mathematics)**. 本文是这一系列的第一篇, 主要介绍前置知识, 包括泛等基础以及集合论的一些基本概念.
 
 所谓泛等基础, 简单来说就是在 Martin-Löf 类型论 (MTLL) 的基础上加上泛等公理 (UA) 所得到的扩展, 它解决了 MLTT 的一些问题, 从而足够作为一种数学基础. 本文中我们使用 [Cubical Agda](https://agda.readthedocs.io/en/v2.6.3/language/cubical.html) 立方类型论来作为泛等基础的具体实现.
 
@@ -301,21 +301,6 @@ open import Cubical.Data.Sigma public using (ΣPathP)
 Σ≡Prop {B} prop path = ΣPathP (path , isProp→PathP (λ i → prop _) _ _)
 ```
 
-### 单射性
-
-我们约定仅在本文剩下的篇幅中使用 `A` `B` `C` 表示任意层级的类型.
-
-```agda
-private variable A B C X : Type 𝓊
-```
-
-cubical 库里面对单射的定义是为高阶同伦类型改编过的版本, 且相等是用 `Path` 表述的. 对于集合层面的数学我们用传统的单射性定义就够了, 并且相等用 `_≡_` 表述.
-
-```agda
-injective : (A → B) → Type _
-injective f = ∀ {x y} → f x ≡ f y → x ≡ y
-```
-
 ### 同伦等价
 
 同伦等价 `_≃_` 可以简单理解为是在泛等基础中更容易处理的一种"同构", 它与真正的同构 `Iso` 也是同构的, 且同伦等价的. 同伦等价是一个Σ类型, 其左边即同伦等价的底层函数, 它与同构的正映射相同. 同伦等价相比于同构的好处之一是"一个函数是一个同伦等价"一定是一个命题 (`isPropIsEquiv`), 而同构则不一定有这种性质. 由此性质我们有 `equivEq`, 它说如果底层函数道路相等, 那么同伦等价也道路相等.
@@ -329,6 +314,12 @@ open import Cubical.Foundations.Equiv public
         ; equivEq; secIsEq; retIsEq)
 open import Cubical.Foundations.Equiv.Properties public using (cong≃)
 open import Cubical.Foundations.Isomorphism public using (Iso; iso; section; retract; isoToEquiv)
+```
+
+我们约定仅在本文剩下的篇幅中使用 `A` `B` `C` 表示任意层级的类型.
+
+```agda
+private variable A B C X : Type 𝓊
 ```
 
 为了方便阅读我们分别用 `_⁺¹` 和 `_⁻¹` 表示同伦等价所承诺的正映射和逆映射. `secIsEq` 以及 `retIsEq` 说它们互逆.
@@ -489,44 +480,41 @@ isPropAC : (𝓊 𝓋 ℓ′′ : Level) → isProp (AC 𝓊 𝓋 ℓ′′)
 isPropAC 𝓊 𝓋 ℓ′′ = isPropΠ6 λ _ _ _ _ _ _ → isPropΠ λ _ → squash₁
 ```
 
-## 势
+## 单射
 
-我们说类型 `A` 的势小于等于 `B`, 记作 `A ≲ B`, 当且仅当有任意 `A` 到 `B` 的单射函数. 注意这里用的是Σ类型, 我们并没有做命题截断. 有时候延迟截断会更方便处理.
-
-```agda
-_≲_ : Type 𝓊 → Type 𝓋 → Type _
-A ≲ B = Σ (A → B) injective
-
-_≴_ : Type 𝓊 → Type 𝓋 → Type _
-A ≴ B = ¬ A ≲ B
-```
-
-`≲` 构成一个预序.
+cubical 库里面对单射的定义是为高阶同伦类型改编过的版本, 且相等是用 `Path` 表述的. 对于集合层面的数学我们用传统的单射性定义就够了.
 
 ```agda
-≲-refl : A ≲ A
-≲-refl = idfun _ , λ refl → refl
-
-≲-trans : A ≲ B → B ≲ C → A ≲ C
-≲-trans (f , f-inj) (g , g-inj) = g ∘ f , f-inj ∘ g-inj
+injective : (A → B) → Type _
+injective f = ∀ {x y} → f x ≡ f y → x ≡ y
 ```
 
-`≲` 的反对称性 (即施罗德-伯恩斯坦定理) 依赖于排中律.
-
-我们说 `A` 的势严格小于 `B`, 当且仅当 `A` 的势小于等于 `B` 且 `B` 的势不小于等于 `A`.
+我们将 `A` 到 `B` 的单射的全体记作 `A ↪ B`. 注意这里用的是Σ类型, 并没有做命题截断, 有时候延迟截断会更方便处理.
 
 ```agda
-_⋨_ : Type 𝓊 → Type 𝓋 → Type _
-A ⋨ B = A ≲ B × B ≴ A
+_↪_ : Type 𝓊 → Type 𝓋 → Type _
+A ↪ B = Σ (A → B) injective
 ```
+
+`↪` 构成一个预序.
+
+```agda
+↪-refl : A ↪ A
+↪-refl = idfun _ , λ refl → refl
+
+↪-trans : A ↪ B → B ↪ C → A ↪ C
+↪-trans (f , f-inj) (g , g-inj) = g ∘ f , f-inj ∘ g-inj
+```
+
+`↪` 的反对称性 (即施罗德-伯恩斯坦定理) 依赖于排中律.
 
 ## 连续统假设
 
-连续统假设是说如果一个集合的势严格大于自然数集, 并且小于等于自然数集的幂集, 那么它的势就大于等于自然数集的幂集. 由于没有排中律, 我们采用了这种迂回表达.
+连续统假设是说如果有单射链 `ℕ ↪ X ↪ ℙ ℕ` 且 `¬ X ↪ ℕ`, 那么 `ℙ ℕ ↪ X`, 也就是说没有一个集合在单射意义上正好卡在自然数集与其幂集之间. 由于没有排中律, 我们采用了这种迂回表达.
 
 ```agda
 isCHType : Type 𝓊 → Type 𝓋 → Type _
-isCHType X Y = X ⋨ Y → Y ≲ ℙ X → ∥ ℙ X ≲ Y ∥₁
+isCHType N X = N ↪ X → (¬ X ↪ N) → X ↪ ℙ N → ∥ ℙ N ↪ X ∥₁
 
 CH : (𝓊 : Level) → Type _
 CH 𝓊 = (X : Type 𝓊) → isSet X → isCHType ℕ X
@@ -536,37 +524,37 @@ CH 𝓊 = (X : Type 𝓊) → isSet X → isCHType ℕ X
 
 ```agda
 isPropCH : (𝓊 : Level) → isProp (CH 𝓊)
-isPropCH 𝓊 = isPropΠ4 λ _ _ _ _ → squash₁
+isPropCH 𝓊 = isPropΠ5 λ _ _ _ _ _ → squash₁
 ```
 
 ## 广义连续统假设
 
-无穷集定义为势大于等于自然数集的集合.
+无穷集定义为被自然数集单射的集合.
 
 ```agda
 infinite : Type 𝓊 → Type _
-infinite X = ℕ ≲ X
+infinite X = ℕ ↪ X
 ```
 
-广义连续统假设是说, 对任意无穷集和它的幂集, 都没有一个正好卡在它们中间的势.
+广义连续统假设是说, 对任意无穷集和它的幂集, 都没有一个集合在单射意义上正好卡在它们中间.
 
 ```agda
 isGCHType : Type 𝓊 → Type 𝓋 → Type _
-isGCHType X Y = infinite X → X ≲ Y → Y ≲ ℙ X → ∥ Y ≲ X ∥₁ ⊎ ∥ ℙ X ≲ Y ∥₁
+isGCHType X Y = infinite X → X ↪ Y → Y ↪ ℙ X → ∥ Y ↪ X ∥₁ ⊎ ∥ ℙ X ↪ Y ∥₁
 
 GCH : (𝓊 𝓋 : Level) → Type _
 GCH 𝓊 𝓋 = (X : Type 𝓊) (Y : Type 𝓋) → isSet X → isSet Y → isGCHType X Y
 ```
 
-注意 `GCH` 最终指向的和类型并没有做命题截断, 但我们仍然能证明 `GCH` 是一个命题. 实际上, 只要和类型的两边是互斥的命题, 那么这个和类型就是命题. 不难看出 `Y ≲ X` 与 `ℙ X ≲ Y` 互斥, 否则违反康托尔定理, 所以广义连续统假设也是一个命题. 我们把相关证明放在下一章.
+注意 `GCH` 最终指向的和类型并没有做命题截断, 但我们仍然能证明 `GCH` 是一个命题. 实际上, 只要和类型的两边是互斥的命题, 那么这个和类型就是命题. 不难看出 `Y ↪ X` 与 `ℙ X ↪ Y` 互斥, 否则违反康托尔定理, 所以广义连续统假设也是一个命题. 我们把相关证明放在下一章.
 
 广义连续统假设蕴含连续统假设.
 
 ```agda
 GCH→CH : ∀ 𝓊 → GCH 𝓊₀ 𝓊 → CH 𝓊
-GCH→CH 𝓊 gch X X-set (ℕ≲X , X≴ℕ) X≲ℙℕ with gch ℕ X isSetℕ X-set ≲-refl ℕ≲X X≲ℙℕ
-... | (⊎.inl X≲ℕ)  = ∥∥₁-map (⊥-rec ∘ X≴ℕ) X≲ℕ
-... | (⊎.inr ℙℕ≲X) = ℙℕ≲X
+GCH→CH 𝓊 gch X X-set ℕ↪X ¬X↪ℕ X↪ℙℕ with gch ℕ X isSetℕ X-set ↪-refl ℕ↪X X↪ℙℕ
+... | (⊎.inl X↪ℕ)  = ∥∥₁-map (⊥-rec ∘ ¬X↪ℕ) X↪ℕ
+... | (⊎.inr ℙℕ↪X) = ℙℕ↪X
 ```
 
 ## 非数学
