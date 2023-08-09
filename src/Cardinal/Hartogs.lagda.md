@@ -60,6 +60,10 @@ module Pre {A : Type 𝓊} (A-set : isSet A) where
   ℍ = tieup hartogs
 ```
 
+```agda
+--resize
+```
+
 
   ℍ→ℙ³ : ⟨ ℍ ⟩ → ℙ (ℙ (ℙ A))
   ℍ→ℙ³ (β , le) X = ((Σ (ℙ $ ℙ A) λ X → Lt ⟪ X ⟫) ≃ ⟨ β ⟩) , {!   !}

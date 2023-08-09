@@ -152,7 +152,7 @@ _ = λ A B → Σ A B
 
 ```agda
 open import Cubical.Data.Empty public
-  using (⊥) renaming (rec to ⊥-rec)
+  using (⊥; ⊥*) renaming (rec to ⊥-rec)
 ```
 
 命题 `A` 的否定是 `A` 到 `⊥` 的函数 `A → ⊥`, 简记作 `¬ A`.
@@ -161,7 +161,12 @@ open import Cubical.Data.Empty public
 open import Cubical.Relation.Nullary public using (¬_)
 ```
 
-单元类型 `Unit : Type` 对应于逻辑真, 它只有一个项 `tt : Unit`. 本文不需要用到.
+单元类型 `⊤ : Type` 对应于逻辑真, 它只有一个项 `tt : Unit`.
+
+```agda
+open import Cubical.Data.Unit public using (tt; tt*)
+  renaming (Unit to ⊤; Unit* to ⊤*; isPropUnit to isProp⊤; isPropUnit* to isProp⊤*)
+```
 
 自然数类型由以下两条规则归纳定义而成.
 
@@ -191,10 +196,10 @@ open import Cubical.Foundations.Prelude public
   using (isProp; isSet; isPropIsProp; isProp→isSet)
 ```
 
-可以证明空类型是命题, 自然数类型是集合.
+可以证明空类型, 单元类型和自然数类型都是集合.
 
 ```agda
-open import Cubical.Data.Empty public using (isProp⊥)
+open import Cubical.Data.Empty public using (isProp⊥; isProp⊥*)
 open import Cubical.Data.Nat public using (isSetℕ)
 ```
 
@@ -224,6 +229,16 @@ open import Cubical.Foundations.HLevels public using (hSet; isGroupoidHSet)
 ```agda
 open import Cubical.Foundations.Structure public
   using (TypeWithStr; ⟨_⟩; str)
+```
+
+我们用表示 `⟪⊥⟫` 假命题, 用表示 `⟪⊤⟫` 真命题.
+
+```agda
+⟪⊥⟫ : hProp 𝓊
+⟪⊥⟫ = ⊥* , isProp⊥*
+
+⟪⊤⟫ : hProp 𝓊
+⟪⊤⟫ = ⊤* , isProp⊤*
 ```
 
 ### 命题截断
@@ -299,6 +314,12 @@ open import Cubical.Data.Sigma public using (ΣPathP)
 Σ≡Prop : {A : Type 𝓊} {B : A → Type 𝓋} → (∀ x → isProp (B x)) →
   {p q : Σ A B} → fst p ≡ fst q → p ≡ q
 Σ≡Prop {B} prop path = ΣPathP (path , isProp→PathP (λ i → prop _) _ _)
+```
+
+由泛等公理我们有命题外延性.
+
+```agda
+open import Cubical.Foundations.Univalence public using (hPropExt)
 ```
 
 ### 同伦等价
