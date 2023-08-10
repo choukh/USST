@@ -1,4 +1,6 @@
 name: USST
-depend: cubical
+depend:
+  cubical
+  standard-library
 include: src
 flags: -W noUnsupportedIndexedMatch

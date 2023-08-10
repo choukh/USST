@@ -27,35 +27,35 @@ open import Ordinal.Order
 module _ (α : Ord 𝓊) (a : ⟨ α ⟩) where
   open OrdStr (str α)
 
-  initSeg : EmbeddedOrd 𝓊
-  EmbeddedOrd.carrier       initSeg = Σ ⟨ α ⟩ (_≺ a)
+  initSeg : EmbedOrd 𝓊 𝓊
+  EmbedOrd.carrier       initSeg = Σ ⟨ α ⟩ (_≺ a)
 ```
 
 `initSeg` 的底序遵循 `α` 的底序.
 
 ```agda
-  EmbeddedOrd._≺_           initSeg (x , _) (y , _) = x ≺ y
-  EmbeddedOrd.relation-prop initSeg _ _ = ≺-prop _ _
+  EmbedOrd._≺_           initSeg (x , _) (y , _) = x ≺ y
+  EmbedOrd.relation-prop initSeg _ _ = ≺-prop _ _
 ```
 
 `initSeg` 的嵌入目标即是 `α`, 嵌入映射是Σ类型的左投影, 即 `fst`.
 
 ```agda
-  EmbeddedOrd.target        initSeg = α
-  EmbeddedOrd.embed         initSeg = fst
+  EmbedOrd.target        initSeg = α
+  EmbedOrd.embed         initSeg = fst
 ```
 
 嵌入映射是单射, 因为依值配对 `carrier` 的右边是命题, 不影响配对整体的相等.
 
 ```agda
-  EmbeddedOrd.inj           initSeg = Σ≡Prop λ _ → ≺-prop _ _
+  EmbedOrd.inj           initSeg = Σ≡Prop λ _ → ≺-prop _ _
 ```
 
 嵌入映射的保序性和"形成前段"性是显然的.
 
 ```agda
-  EmbeddedOrd.pres≺         initSeg _ _ = idfun _
-  EmbeddedOrd.formsInitSeg  initSeg b (a′ , a′≺a) b≺a′ = (b , b≺a) , b≺a′ , refl
+  EmbedOrd.pres≺         initSeg _ _ = idfun _
+  EmbedOrd.formsInitSeg  initSeg b (a′ , a′≺a) b≺a′ = (b , b≺a) , b≺a′ , refl
     where b≺a = ≺-trans _ _ _ b≺a′ a′≺a
 ```
 

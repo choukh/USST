@@ -195,19 +195,19 @@ isSetOrd α β = (equiv ⁺¹) (isOfHLevelLift 1 $ isPropOrdEquiv α β)
 
 ### 嵌入序数
 
-我们称一个配备了序关系 `_≺_` 的类型 `carrier` (它在满足接下来给出的条件后会自动成为一个集合) 构成了一个到序数 `target` 的**嵌入序数 (`EmbeddedOrd`)**, 当且仅当 `carrier` 到 `target` 底集的映射 `embed` 满足:
+我们称一个配备了序关系 `_≺_` 的类型 `carrier` (它在满足接下来给出的条件后会自动成为一个集合) 构成了一个到序数 `target` 的**嵌入序数 (`EmbedOrd`)**, 当且仅当 `carrier` 到 `target` 底集的映射 `embed` 满足:
 
 1. `inj` : 具有单射性
 2. `pres≺` : 保序
 3. `formsInitSeg` : 能形成前段
 
 ```agda
-record EmbeddedOrd 𝓊 : Type (𝓊 ⁺) where
+record EmbedOrd 𝓊 𝓋 : Type (𝓊 ⁺ ⊔ 𝓋 ⁺) where
   field
     carrier : Type 𝓊
     _≺_ : carrier → carrier → Type 𝓊
     relation-prop : ∀ x y → isProp (x ≺ y)
-    target : Ord 𝓊
+    target : Ord 𝓋
     embed : carrier → ⟨ target ⟩
     inj : injective embed
     pres≺ : ∀ a a′ → a ≺ a′ → embed a ≺⟨ target ⟩ embed a′
@@ -217,7 +217,7 @@ record EmbeddedOrd 𝓊 : Type (𝓊 ⁺) where
 **引理** 嵌入序数到序数有一个典范映射, 它将嵌入序数映射到以 `carrier` 为底集, `_≺_` 为底序的序数. 
 
 ```agda
-tieup : EmbeddedOrd 𝓊 → Ord 𝓊
+tieup : EmbedOrd 𝓊 𝓋 → Ord 𝓊
 tieup embedded = carrier , mkOrdStr _≺_ wo
 ```
 
@@ -225,7 +225,7 @@ tieup embedded = carrier , mkOrdStr _≺_ wo
 
 ```agda
   where
-  open EmbeddedOrd embedded renaming (embed to f)
+  open EmbedOrd embedded renaming (embed to f)
   open OrdStr (str target) using (≺-trans; ≺-ext; elim)
   open BinaryRelation _≺_
 ```
@@ -293,6 +293,30 @@ tieup embedded = carrier , mkOrdStr _≺_ wo
 ```agda
     aux = elim λ y IH eq → acc λ z z≺x → IH (f z)
       (subst (λ y → f z ≺⟨ target ⟩ y) eq (pres≺ _ _ z≺x)) refl
+```
+
+## 序数宇宙调整
+
+假设 `PR`, 利用嵌入序数, 我们可以将任意 `β : Ord 𝓋` 调整到 `Ord 𝓊` 上, 只要找到一个 `A : Type 𝓊` 满足 `A ≃ ⟨ β ⟩`.
+
+```agda
+ResizeOrd : ⦃ _ : PR ⦄ (A : Type 𝓊) (β : Ord 𝓋) → A ≃ ⟨ β ⟩ → Ord 𝓊
+ResizeOrd {𝓊} {𝓋} A β f = tieup emb
+  where
+  open OrdStr (str β)
+  _<ₕ_ : A → A → hProp 𝓊
+  x <ₕ y = Resize ((f ⁺¹) x ≺⟨ β ⟩ (f ⁺¹) y , ≺-prop _ _)
+  emb : EmbedOrd 𝓊 𝓋
+  EmbedOrd.carrier       emb = A
+  EmbedOrd._≺_           emb = fst ∘₂ _<ₕ_
+  EmbedOrd.relation-prop emb = str ∘₂ _<ₕ_
+  EmbedOrd.target        emb = β
+  EmbedOrd.embed         emb = f ⁺¹
+  EmbedOrd.inj           emb = equivFunInjective f
+  EmbedOrd.pres≺         emb _ _ = unresize
+  EmbedOrd.formsInitSeg  emb b a′ b≺fa′ = (f ⁻¹) b , resize H , secIsEq (snd f) b where
+    H : (f ⁺¹ ∘ f ⁻¹) b ≺ (f ⁺¹) a′
+    H = subst (_≺ (f ⁺¹) a′) (sym $ secIsEq (snd f) b) b≺fa′
 ```
 
 ## 非严格序

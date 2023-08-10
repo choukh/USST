@@ -50,7 +50,9 @@ module Preliminary where
 
 ```agda
 open import Cubical.Foundations.Prelude public
-  using (Type; Level; Lift) renaming (ℓ-zero to 𝓊₀; ℓ-suc to _⁺; ℓ-max to _⊔_)
+  using (Type; Level; Lift)
+  renaming (ℓ-zero to 𝓊₀; ℓ-suc to _⁺; ℓ-max to _⊔_)
+
 𝓊₁ = 𝓊₀ ⁺
 𝓊₂ = 𝓊₁ ⁺
 ```
@@ -110,6 +112,7 @@ _ = λ A B → ∀ x → B x
 ```agda
 open import Cubical.Foundations.Function public
   using (_$_; _∘_; idfun; uncurry)
+open import Function public using (_∘₂_)
 ```
 
 ### 依值配对类型 (Σ类型)
@@ -164,8 +167,8 @@ open import Cubical.Relation.Nullary public using (¬_)
 单元类型 `⊤ : Type` 对应于逻辑真, 它只有一个项 `tt : Unit`.
 
 ```agda
-open import Cubical.Data.Unit public using (tt; tt*)
-  renaming (Unit to ⊤; Unit* to ⊤*; isPropUnit to isProp⊤; isPropUnit* to isProp⊤*)
+open import Cubical.Data.Unit public
+  using (tt; tt*) renaming (Unit to ⊤; Unit* to ⊤*)
 ```
 
 自然数类型由以下两条规则归纳定义而成.
@@ -200,6 +203,7 @@ open import Cubical.Foundations.Prelude public
 
 ```agda
 open import Cubical.Data.Empty public using (isProp⊥; isProp⊥*)
+open import Cubical.Data.Unit public renaming (isPropUnit to isProp⊤; isPropUnit* to isProp⊤*)
 open import Cubical.Data.Nat public using (isSetℕ)
 ```
 
@@ -231,14 +235,14 @@ open import Cubical.Foundations.Structure public
   using (TypeWithStr; ⟨_⟩; str)
 ```
 
-我们用表示 `⟪⊥⟫` 假命题, 用表示 `⟪⊤⟫` 真命题.
-
+我们用表示 `⟦⊥⟧` 假命题, 用表示 `⟦⊤⟧` 真命题.
+⟦⊥⟧
 ```agda
-⟪⊥⟫ : hProp 𝓊
-⟪⊥⟫ = ⊥* , isProp⊥*
+⟦⊥⟧ : hProp 𝓊
+⟦⊥⟧ = ⊥* , isProp⊥*
 
-⟪⊤⟫ : hProp 𝓊
-⟪⊤⟫ = ⊤* , isProp⊤*
+⟦⊤⟧ : hProp 𝓊
+⟦⊤⟧ = ⊤* , isProp⊤*
 ```
 
 ### 命题截断
@@ -332,7 +336,7 @@ open import Cubical.Foundations.Univalence public using (hPropExt)
 open import Cubical.Foundations.Equiv public
   using ( _≃_; isEquiv; isPropIsEquiv
         ; idEquiv; invEquiv; compEquiv; LiftEquiv
-        ; equivEq; secIsEq; retIsEq)
+        ; equivEq; secIsEq; retIsEq; equivToIso)
 open import Cubical.Foundations.Equiv.Properties public using (cong≃)
 open import Cubical.Foundations.Isomorphism public using (Iso; iso; section; retract; isoToEquiv)
 ```
@@ -385,6 +389,13 @@ x ∉ A = ¬ x ∈ A
 ```agda
 _⊂_ : ℙ X → ℙ X → Type _
 A ⊂ B = A ⊆ B × (∃ x ∶ _ , x ∈ B × x ∉ A)
+```
+
+幂集可以转化为Σ类型.
+
+```agda
+⟦_⟧ : {X : Type 𝓊} → ℙ X → Type _
+⟦ A ⟧ = Σ _ (_∈ A)
 ```
 
 ## 公理
@@ -508,6 +519,15 @@ cubical 库里面对单射的定义是为高阶同伦类型改编过的版本, �
 ```agda
 injective : (A → B) → Type _
 injective f = ∀ {x y} → f x ≡ f y → x ≡ y
+```
+
+同构与同伦等价都是单射.
+
+```agda
+open import Cubical.Foundations.Isomorphism public using (isoFunInjective)
+
+equivFunInjective : (f : A ≃ B) → injective (f ⁺¹)
+equivFunInjective f = isoFunInjective (equivToIso f) _ _
 ```
 
 我们将 `A` 到 `B` 的单射的全体记作 `A ↪ B`. 注意这里用的是Σ类型, 并没有做命题截断, 有时候延迟截断会更方便处理.

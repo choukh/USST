@@ -12,12 +12,15 @@ zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 ```agda
 {-# OPTIONS --cubical --safe #-}
 {-# OPTIONS --lossy-unification #-}
+{-# OPTIONS --hidden-argument-puns #-}
 
 module Cardinal.Hartogs where
 open import Preliminary
 open import Ordinal renaming ( _≤_ to _≤ₒ_; ≤-prop to ≤ₒ-prop
                              ; _<_ to _<ₒ_; <-prop to <ₒ-prop)
 ```
+
+## 基数
 
 ```agda
 Card : (𝓊 : Level) → Type (𝓊 ⁺)
@@ -37,18 +40,20 @@ _≤_ : Card 𝓊 → Card 𝓋 → Type (𝓊 ⊔ 𝓋)
 ≤-prop κ μ = str (κ ≤ₕ μ)
 ```
 
+## 哈特格斯数
+
 ```agda
 module Pre {A : Type 𝓊} (A-set : isSet A) where
 
-  hartogs : EmbeddedOrd (𝓊 ⁺)
-  EmbeddedOrd.carrier       hartogs = Σ (B , strB) ∶ Ord 𝓊 , ∣ B , OrdStr.underlying-set strB ∣₂ ≤ ∣ A , A-set ∣₂
-  EmbeddedOrd._≺_           hartogs (α , _) (β , _) = α <ₒ β
-  EmbeddedOrd.relation-prop hartogs _ _ = <ₒ-prop _ _
-  EmbeddedOrd.target        hartogs = Ω
-  EmbeddedOrd.embed         hartogs = fst
-  EmbeddedOrd.inj           hartogs = Σ≡Prop λ _ → ≤-prop _ _
-  EmbeddedOrd.pres≺         hartogs _ _ = idfun _
-  EmbeddedOrd.formsInitSeg  hartogs β (α′ , le) β<ₒα′ = (β , ∥∥₁-map H le) , β<ₒα′ , refl where
+  hartogs : EmbedOrd (𝓊 ⁺) (𝓊 ⁺)
+  EmbedOrd.carrier       hartogs = Σ (B , strB) ∶ Ord 𝓊 , ∣ B , OrdStr.underlying-set strB ∣₂ ≤ ∣ A , A-set ∣₂
+  EmbedOrd._≺_           hartogs (α , _) (β , _) = α <ₒ β
+  EmbedOrd.relation-prop hartogs _ _ = <ₒ-prop _ _
+  EmbedOrd.target        hartogs = Ω
+  EmbedOrd.embed         hartogs = fst
+  EmbedOrd.inj           hartogs = Σ≡Prop λ _ → ≤-prop _ _
+  EmbedOrd.pres≺         hartogs _ _ = idfun _
+  EmbedOrd.formsInitSeg  hartogs β (α′ , le) β<ₒα′ = (β , ∥∥₁-map H le) , β<ₒα′ , refl where
     H : ⟨ α′ ⟩ ↪ A → Σ (⟨ β ⟩ → A) injective
     H (f , f-inj) = f ∘ g , g-inj ∘ f-inj where
       g = <→≤ β<ₒα′ .fst
@@ -60,23 +65,22 @@ module Pre {A : Type 𝓊} (A-set : isSet A) where
   ℍ = tieup hartogs
 ```
 
-```agda
---resize
-```
-
 
   ℍ→ℙ³ : ⟨ ℍ ⟩ → ℙ (ℙ (ℙ A))
-  ℍ→ℙ³ (β , le) X = ((Σ (ℙ $ ℙ A) λ X → Lt ⟪ X ⟫) ≃ ⟨ β ⟩) , {!   !}
+  ℍ→ℙ³ (β , le) X = Lift (Sub ≃ ⟨ β ⟩) , isOfHLevelLift 1 λ _ _ → Σ≡Prop (λ _ → isPropIsEquiv _) (unique _ _)
     where
-    ⟪_⟫ : ∀ {𝓊} {X : Type 𝓊} → ℙ X → Type _
-    ⟪ A ⟫ = Σ _ (_∈ A)
-  
-    record Lt (X : Type (𝓊 ⁺)) : Type (𝓊 ⁺) where
-      field _<_ : X → X → Type 𝓊
-
-    ⟪⊂⟫ : (X : ℙ $ ℙ A) → Lt ⟪ X ⟫
-    ⟪⊂⟫ X = record { _<_ = λ (x , _) (y , _) → x ⊂ y }
+    Sub : Type (𝓊 ⁺)
+    Sub = Σ (x , _) ∶ ⟦ X ⟧ , Σ (y , _) ∶ ⟦ X ⟧ , x ⊂ y
+    unique : isProp (Sub → ⟨ β ⟩)
+    unique = {!   !}
 
   ℍ→ℙ³-inj : injective ℍ→ℙ³
   ℍ→ℙ³-inj = {!   !}
 
+
+回想我们有: 假设 `PR`, 可以将任意 `β : Ord 𝓋` 调整到 `Ord 𝓊` 上, 只要找到一个 `A : Type 𝓊` 满足 `A ≃ ⟨ β ⟩`.
+
+```agda
+_ : ⦃ _ : PR ⦄ (A : Type 𝓊) (β : Ord 𝓋) → A ≃ ⟨ β ⟩ → Ord 𝓊
+_ = ResizeOrd
+```
