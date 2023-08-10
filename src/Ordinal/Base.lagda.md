@@ -1,10 +1,10 @@
 ---
-title: 泛等结构集合论 (3) 序数的定义及其泛等原理
+title: 泛等结构集合论 (4) 序数的定义及其泛等原理
 zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 zhihu-url: https://zhuanlan.zhihu.com/p/643453391
 ---
 
-# 泛等结构集合论 (3) 序数的定义及其泛等原理
+# 泛等结构集合论 (4) 序数的定义及其泛等原理
 
 > 交流Q群: 893531731  
 > 本文源码: [Ordinal.Base.lagda.md](https://github.com/choukh/USST/blob/main/src/Ordinal/Base.lagda.md)  
@@ -15,6 +15,7 @@ zhihu-url: https://zhuanlan.zhihu.com/p/643453391
 ```agda
 {-# OPTIONS --cubical --safe #-}
 {-# OPTIONS --hidden-argument-puns #-}
+
 module Ordinal.Base where
 open import Preliminary
 ```
@@ -107,11 +108,9 @@ module BinaryRelation {A : Type 𝓊} (_≺_ : A → A → Type 𝓋) where
   Extensional→isSet prop ext = Collapsible≡→isSet λ x y → collapser x y , didCollapse x y
     where
     collapser : ∀ x y → x ≡ y → x ≡ y
-    collapser x y eq = ext x y λ z → (subst (z ≺_) eq) , (subst (z ≺_) (sym eq))
+    collapser x y eq = ext x y λ z → →: (subst (z ≺_) eq) ←: (subst (z ≺_) (sym eq))
     didCollapse : ∀ x y → 2-Constant (collapser x y)
-    didCollapse x y p q = cong (ext x y) $ funExt λ _ → Σ≡Prop
-      (λ _ _ _ → isProp→ (prop _ _) _ _)
-      (funExt λ _ → prop _ _ _ _)
+    didCollapse x y p q = cong (ext x y) $ funExt λ _ → isProp↔ (prop _ _) (prop _ _) _ _
 ```
 
 ### 良基性

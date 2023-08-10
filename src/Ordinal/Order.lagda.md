@@ -1,10 +1,10 @@
 ---
-title: 泛等结构集合论 (4) 序数的序
+title: 泛等结构集合论 (5) 序数的序
 zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 zhihu-url: https://zhuanlan.zhihu.com/p/644984990
 ---
 
-# 泛等结构集合论 (4) 序数的序
+# 泛等结构集合论 (5) 序数的序
 
 > 交流Q群: 893531731  
 > 本文源码: [Ordinal.Order.lagda.md](https://github.com/choukh/USST/blob/main/src/Ordinal/Order.lagda.md)  
@@ -13,6 +13,7 @@ zhihu-url: https://zhuanlan.zhihu.com/p/644984990
 ```agda
 {-# OPTIONS --cubical --safe #-}
 {-# OPTIONS --lossy-unification --hidden-argument-puns #-}
+
 module Ordinal.Order where
 open import Preliminary
 open import Ordinal.Base
@@ -61,7 +62,7 @@ record IsOrdEmbed {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β ⟩
 用 `≺` 的外延性, 要证两种对称的情况 `p` 和 `q`, 我们只证 `p : ∀ z → z ≺ x → z ≺ y`.
 
 ```agda
-    aux x y IH fx≡fy = ≺-ext x y λ z → p z , q z
+    aux x y IH fx≡fy = ≺-ext x y λ z → →: p z ←: q z
       where
       p : ∀ z → z ≺⟨ α ⟩ x → z ≺⟨ α ⟩ y
 ```
@@ -148,9 +149,9 @@ ordEmbed-unique : {α : Ord 𝓊} {β : Ord 𝓊′}
   (f g : ⟨ α ⟩ → ⟨ β ⟩) → IsOrdEmbed f → IsOrdEmbed g → f ≡ g
 ordEmbed-unique {α} {β} f g f-emb g-emb =
   funExt $ elim λ x IH → ≺-ext (f x) (g x) λ z →
-    (λ z≺fx → let (a , a≺x , fa≡z) = formsInitSeg f-emb z x z≺fx in
+    →: (λ z≺fx → let (a , a≺x , fa≡z) = formsInitSeg f-emb z x z≺fx in
       subst (_≺ g x) (sym (IH a a≺x) ∙ fa≡z) (pres≺ g-emb a x a≺x))
-  , (λ z≺gx → let (a , a≺x , ga≡z) = formsInitSeg g-emb z x z≺gx in
+    ←: (λ z≺gx → let (a , a≺x , ga≡z) = formsInitSeg g-emb z x z≺gx in
       subst (_≺ f x) (IH a a≺x ∙ ga≡z) (pres≺ f-emb a x a≺x))
   where open IsOrdEmbed
         open OrdStr (str α) using (elim)
@@ -267,10 +268,10 @@ tieup embedded = carrier , mkOrdStr _≺_ wo
 
 ```agda
   WellOrdered.≺-ext wo x y H = inj $ ≺-ext (f x) (f y) λ z →
-    (λ z≺fx → let (x′ , x′≺x , fx′≡z) = formsInitSeg _ _ z≺fx in
-      subst (λ z → z ≺⟨ target ⟩ f y) fx′≡z $ pres≺ _ _ $ H _ .fst x′≺x) ,
-    (λ z≺fy → let (y′ , y′≺y , fy′≡z) = formsInitSeg _ _ z≺fy in
-      subst (λ z → z ≺⟨ target ⟩ f x) fy′≡z $ pres≺ _ _ $ H _ .snd y′≺y)
+    →: (λ z≺fx → let (x′ , x′≺x , fx′≡z) = formsInitSeg _ _ z≺fx in
+      subst (λ z → z ≺⟨ target ⟩ f y) fx′≡z $ pres≺ _ _ $ H _ .to   x′≺x)
+    ←: (λ z≺fy → let (y′ , y′≺y , fy′≡z) = formsInitSeg _ _ z≺fy in
+      subst (λ z → z ≺⟨ target ⟩ f x) fy′≡z $ pres≺ _ _ $ H _ .from y′≺y)
 ```
 
 对于良基性, 需要仔细选取辅助命题 `aux` 的形式. 我们先证任意满足 `f x ≡ y` 的 `x` 可及.

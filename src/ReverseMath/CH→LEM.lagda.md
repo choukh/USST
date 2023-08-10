@@ -1,10 +1,10 @@
 ---
-title: 泛等结构集合论 (2) 开胃菜:CH → LEM
+title: 泛等结构集合论 (3) 开胃菜:CH → LEM
 zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 zhihu-url: https://zhuanlan.zhihu.com/p/643217740
 ---
 
-# 泛等结构集合论 (2) 开胃菜: CH → LEM
+# 泛等结构集合论 (3) 开胃菜: CH → LEM
 
 > 交流Q群: 893531731  
 > 本文源码: [CH→LEM.lagda.md](https://github.com/choukh/USST/blob/main/src/ReverseMath/CH→LEM.lagda.md)  
@@ -14,6 +14,7 @@ zhihu-url: https://zhuanlan.zhihu.com/p/643217740
 
 ```agda
 {-# OPTIONS --cubical --safe #-}
+
 open import Preliminary
 module ReverseMath.CH→LEM ⦃ _ : PR ⦄ where
 ```

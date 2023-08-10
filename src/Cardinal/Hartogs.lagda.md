@@ -1,9 +1,9 @@
 ---
-title: 泛等结构集合论 (6) 哈特格斯数
+title: 泛等结构集合论 (7) 哈特格斯数
 zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 ---
 
-# 泛等结构集合论 (6) 哈特格斯数
+# 泛等结构集合论 (7) 哈特格斯数
 
 > 交流Q群: 893531731  
 > 本文源码: [Cardinal.Hartogs.lagda.md](https://github.com/choukh/USST/blob/main/src/Cardinal/Hartogs.lagda.md)  
@@ -65,22 +65,23 @@ module Pre {A : Type 𝓊} (A-set : isSet A) where
   ℍ = tieup hartogs
 ```
 
-
+```agda
   ℍ→ℙ³ : ⟨ ℍ ⟩ → ℙ (ℙ (ℙ A))
-  ℍ→ℙ³ (β , le) X = Lift (Sub ≃ ⟨ β ⟩) , isOfHLevelLift 1 λ _ _ → Σ≡Prop (λ _ → isPropIsEquiv _) (unique _ _)
-    where
-    Sub : Type (𝓊 ⁺)
-    Sub = Σ (x , _) ∶ ⟦ X ⟧ , Σ (y , _) ∶ ⟦ X ⟧ , x ⊂ y
-    unique : isProp (Sub → ⟨ β ⟩)
-    unique = {!   !}
+  ℍ→ℙ³ (β , _) X = Lift ∥ Iso Sub ⟨ β ⟩ ∥₁ , isOfHLevelLift 1 squash₁
+    where Sub = Σ (x , _) ∶ ⟦ X ⟧ , Σ (y , _) ∶ ⟦ X ⟧ , x ⊂ y
 
   ℍ→ℙ³-inj : injective ℍ→ℙ³
   ℍ→ℙ³-inj = {!   !}
+```
 
+```agda
+  resizeCarrier : ⦃ _ : PR ⦄ → Type (𝓊 ⁺)
+  resizeCarrier = Σ X ∶ ℙ⁺ 2 A 𝓊 , Σ a ∶ ⟨ ℍ ⟩ , {!   !} ≡ X
+```
 
 回想我们有: 假设 `PR`, 可以将任意 `β : Ord 𝓋` 调整到 `Ord 𝓊` 上, 只要找到一个 `A : Type 𝓊` 满足 `A ≃ ⟨ β ⟩`.
 
 ```agda
-_ : ⦃ _ : PR ⦄ (A : Type 𝓊) (β : Ord 𝓋) → A ≃ ⟨ β ⟩ → Ord 𝓊
-_ = ResizeOrd
+  _ : ⦃ _ : PR ⦄ (A : Type 𝓊) (β : Ord 𝓋) → A ≃ ⟨ β ⟩ → Ord 𝓊
+  _ = ResizeOrd
 ```

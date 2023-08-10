@@ -1,10 +1,10 @@
 ---
-title: 泛等结构集合论 (5) 吃自己:序数宇宙也是序数
+title: 泛等结构集合论 (6) 吃自己:序数宇宙也是序数
 zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 zhihu-url: https://zhuanlan.zhihu.com/p/646397707
 ---
 
-# 泛等结构集合论 (5) 吃自己: 序数宇宙也是序数
+# 泛等结构集合论 (6) 吃自己: 序数宇宙也是序数
 
 > 交流Q群: 893531731  
 > 本文源码: [Ordinal.OrdInOrd.lagda.md](https://github.com/choukh/USST/blob/main/src/Ordinal/OrdInOrd.lagda.md)  
@@ -13,6 +13,7 @@ zhihu-url: https://zhuanlan.zhihu.com/p/646397707
 ```agda
 {-# OPTIONS --cubical --safe #-}
 {-# OPTIONS --lossy-unification --hidden-argument-puns #-}
+
 module Ordinal.OrdInOrd where
 open import Preliminary
 open import Ordinal.Base
@@ -136,7 +137,9 @@ module _ {α : Ord 𝓊} {a : ⟨ α ⟩} where
 
 ```agda
 ↓-inj : {a b : ⟨ α ⟩} → α ↓ a ≡ α ↓ b → a ≡ b
-↓-inj {α} {a} {b} eq = ≺-ext a b λ z → ↓-reflects-≼ a b H₁ z , ↓-reflects-≼ b a H₂ z
+↓-inj {α} {a} {b} eq = ≺-ext a b λ z →
+  →: ↓-reflects-≼ a b H₁ z
+  ←: ↓-reflects-≼ b a H₂ z
   where
   open OrdStr (str α)
   H₁ : α ↓ a ≤ α ↓ b
@@ -329,9 +332,9 @@ module _ {𝓊} where
   <-ext α β H = ≃ₒ→≡ $ isoToEquiv i , mkIsOrderEquiv λ x y → isoToEquiv (j x y)
     where
     f : ∀ a → α ↓ a < β
-    f a = H _ .fst ↓<
+    f a = H _ .to   ↓<
     g : ∀ b → β ↓ b < α
-    g b = H _ .snd ↓<
+    g b = H _ .from ↓<
     i : Iso ⟨ α ⟩ ⟨ β ⟩
     Iso.fun       i = fst ∘ f
     Iso.inv       i = fst ∘ g
