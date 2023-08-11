@@ -167,12 +167,17 @@ A ⊂ B = A ⊆ B × (∃ x ∶ _ , x ∈ B × x ∉ A)
 
 ### 降级幂集
 
-在非直谓的设定下, 我们可以使用另一种幂集的定义 `ℙ⁺`, 我们称之为降级幂集, 它更接近传统集合论中的幂集. `ℙ⁺` 与 `ℙ` 的区别在于 TODO.
+在非直谓的设定下, 我们可以使用另一种幂集的定义 `ℙ[_]`, 我们称之为降级幂集, 它更接近传统集合论中的幂集. `ℙ[_]` 与 `ℙ` 的区别在于 TODO.
 
 ```agda
-ℙ⁺ : ℕ → Type 𝓊 → (𝓋 : Level) → Type (𝓊 ⊔ (𝓋 ⁺))
-ℙ⁺ zero X 𝓋 = X → hProp 𝓋
-ℙ⁺ (suc n) X 𝓋 = ℙ⁺ n X 𝓋 → hProp 𝓋
+ℙ[_] : (𝓋 : Level) → Type 𝓊 → Type (𝓊 ⊔ (𝓋 ⁺))
+ℙ[ 𝓋 ] X = X → hProp 𝓋
+```
+
+```agda
+ℙ[_][_]⁺ : (𝓋 : Level) → ℕ → Type 𝓊 → Type (𝓊 ⊔ (𝓋 ⁺))
+ℙ[ 𝓋 ][ zero ]⁺  X = ℙ[ 𝓋 ] X
+ℙ[ 𝓋 ][ suc n ]⁺ X = ℙ[ 𝓋 ][ n ]⁺ X → hProp 𝓋
 ```
 
 现在, 局部假设 `PR`.
@@ -185,13 +190,13 @@ module _ ⦃ _ : PR ⦄ where
   Morphℙ : (X → Y) → (X → hProp 𝓊) → (Y → hProp 𝓋)
   Morphℙ f A y = Resize $ (∀ x → f x ≡ y → ⟨ A x ⟩) , isPropΠ2 λ _ _ → str (A _)
 
-  Resizeℙ : ℙ X → ℙ⁺ 0 X 𝓊
+  Resizeℙ : ℙ X → ℙ[ 𝓊 ] X
   Resizeℙ = Morphℙ (idfun _)
 
-  Resizeℙ² : ℙ (ℙ X) → ℙ⁺ 1 X 𝓊
+  Resizeℙ² : ℙ (ℙ X) → ℙ[ 𝓊 ][ 1 ]⁺ X
   Resizeℙ² = Morphℙ Resizeℙ
 
-  Resizeℙ³ : ℙ (ℙ (ℙ X)) → ℙ⁺ 2 X 𝓊
+  Resizeℙ³ : ℙ (ℙ (ℙ X)) → ℙ[ 𝓊 ][ 2 ]⁺ X
   Resizeℙ³ = Morphℙ (Morphℙ Resizeℙ)
 ```
 

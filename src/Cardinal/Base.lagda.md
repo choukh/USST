@@ -40,10 +40,30 @@ _≤_ : Card 𝓊 → Card 𝓋 → Type (𝓊 ⊔ 𝓋)
 ≤-prop κ μ = str (κ ≤ₕ μ)
 ```
 
+## 超限归纳与超限递归
+
+`Ω` 底序的良基消去规则 `elim` 是超限归纳和超限递归的一般形式, 稍微整形一下就可以得到超限归纳 `ind` 和超限递归 `rec`.
+
+```agda
+ind : {P : Ord 𝓊 → Type 𝓋} → (∀ α → (∀ a → P (α ↓ a)) → P α) → ∀ α → P α
+ind {P} IH = OrdStr.elim (str Ω) IH′ where
+  IH′ : ∀ α → (∀ β → β <ₒ α → P β) → P α
+  IH′ α H = IH α λ a → H (α ↓ a) (a , refl)
+
+rec : {A : Type 𝓋} → ((α : Ord 𝓊) → (⟨ α ⟩ → A) → A) → Ord 𝓊 → A
+rec = ind
+```
+
+```agda
+ind-compute : {P : Ord 𝓊 → Type 𝓋} (H : ∀ α → (∀ a → P (α ↓ a)) → P α)
+  (α : Ord 𝓊) → ind H α ≡ H α (λ a → ind H (α ↓ a))
+ind-compute {P} IH = {!   !}
+```
+
 ## 哈特格斯数
 
 ```agda
-module Pre {A : Type 𝓊} (A-set : isSet A) where
+module PredicativeHartogs {A : Type 𝓊} (A-set : isSet A) where
 
   hartogs : EmbedOrd (𝓊 ⁺) (𝓊 ⁺)
   EmbedOrd.carrier       hartogs = Σ (B , strB) ∶ Ord 𝓊 , ∣ B , OrdStr.underlying-set strB ∣₂ ≤ ∣ A , A-set ∣₂
@@ -76,7 +96,7 @@ module Pre {A : Type 𝓊} (A-set : isSet A) where
 
 ```agda
   resizeCarrier : ⦃ _ : PR ⦄ → Type (𝓊 ⁺)
-  resizeCarrier = Σ x ∶ ⟨ ℍ ⟩ , Σ y ∶ ℙ⁺ 2 A 𝓊 , {!ℍ→ℙ³ x   !} ≡ y
+  resizeCarrier = Σ x ∶ ⟨ ℍ ⟩ , Σ y ∶ ℙ[ 𝓊 ][ 2 ]⁺ A , {!ℍ→ℙ³ x   !} ≡ y
 ```
 
 回想我们有: 假设 `PR`, 可以将任意 `β : Ord 𝓋` 降级到 `Ord 𝓊` 上, 只要找到一个 `A : Type 𝓊` 满足 `A ≃ ⟨ β ⟩`.
