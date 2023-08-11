@@ -1,20 +1,20 @@
 ---
-title: 泛等结构集合论 (7) 哈特格斯数
+title: 泛等结构集合论 (7) 基数
 zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 ---
 
-# 泛等结构集合论 (7) 哈特格斯数
+# 泛等结构集合论 (7) 基数
 
 > 交流Q群: 893531731  
-> 本文源码: [Cardinal.Hartogs.lagda.md](https://github.com/choukh/USST/blob/main/src/Cardinal/Hartogs.lagda.md)  
-> 高亮渲染: [Cardinal.Hartogs.html](https://choukh.github.io/USST/Cardinal.Hartogs.html)  
+> 本文源码: [Cardinal.Base.lagda.md](https://github.com/choukh/USST/blob/main/src/Cardinal/Base.lagda.md)  
+> 高亮渲染: [Cardinal.Base.html](https://choukh.github.io/USST/Cardinal.Base.html)  
 
 ```agda
 {-# OPTIONS --cubical --safe #-}
 {-# OPTIONS --lossy-unification #-}
 {-# OPTIONS --hidden-argument-puns #-}
 
-module Cardinal.Hartogs where
+module Cardinal.Base where
 open import Preliminary
 open import Ordinal renaming ( _≤_ to _≤ₒ_; ≤-prop to ≤ₒ-prop
                              ; _<_ to _<ₒ_; <-prop to <ₒ-prop)

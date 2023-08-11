@@ -277,7 +277,8 @@ open import Cubical.HITs.SetTruncation public
 
 ```agda
 open import Cubical.Foundations.Prelude public
-  using ( PathP; _≡_; refl; sym; _∙_; cong; cong₂; subst; subst2
+  using ( PathP; _≡_; step-≡; _≡⟨⟩_; _∎
+        ; refl; sym; _∙_; cong; cong₂; subst; subst2
         ; transport; funExt; funExt⁻; isProp→PathP)
 ```
 

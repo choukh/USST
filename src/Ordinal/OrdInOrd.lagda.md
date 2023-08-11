@@ -364,7 +364,7 @@ module _ {𝓊} where
     Acc↓ : (a : ⟨ α ⟩) → Acc (α ↓ a)
 ```
 
-由良基归纳法, 有归纳假设: 对任意 `b ≺ a`, `α ↓ b` 可及. 现在要证 `α ↓ a`, 由可及的构造子 `acc`, 即证对任意 `β < α ↓ a`, `β` 可及.
+由良基消去, 有归纳假设: 对任意 `b ≺ a`, `α ↓ b` 可及. 现在要证 `α ↓ a`, 由可及的构造子 `acc`, 即证对任意 `β < α ↓ a`, `β` 可及.
 
 `β < α ↓ a` 说明有 `b ≺ a` 满足
 
@@ -407,13 +407,6 @@ module _ {𝓊} where
 ```agda
 _ : ⟨ Ω ⟩ ≡ Ord 𝓊
 _ = refl
-```
-
-**定义** `Ω` 底序的良基归纳法 `elim` 叫做超限归纳法.
-
-```agda
-transfiniteInduction : {P : Ord 𝓊 → Type 𝓋} → (∀ α → (∀ β → β < α → P β) → P α) → ∀ α → P α
-transfiniteInduction = OrdStr.elim (str Ω)
 ```
 
 集合论中有结论说"序数是比它小的所有序数所组成的集合", 以下是它在类型论中的对应物.
@@ -469,4 +462,31 @@ Burali-Forti (α , f) = <-irrefl _ Ω<Ω
   eq = ≃ₒ→≡ $ ≃ₒ-trans (≃ₒ-sym α≃Ω↓α) f
   Ω<Ω : Ω < Ω
   Ω<Ω = α , eq
+```
+
+## 超限归纳与超限递归
+
+`Ω` 底序的良基消去规则 `elim` 是超限归纳和超限递归的一般形式, 稍微整形一下就可以得到超限归纳 `ind` 和超限递归 `rec`.
+
+```agda
+ind : {P : Ord 𝓊 → Type 𝓋} → (∀ α → (∀ a → P (α ↓ a)) → P α) → ∀ α → P α
+ind {P} IH = OrdStr.elim (str Ω) IH′ where
+  IH′ : ∀ α → (∀ β → β < α → P β) → P α
+  IH′ α H = IH α λ a → H (α ↓ a) (a , refl)
+
+rec : {A : Type 𝓋} → ((α : Ord 𝓊) → (⟨ α ⟩ → A) → A) → Ord 𝓊 → A
+rec = ind
+```
+
+```agda
+ind-compute : {P : Ord 𝓊 → Type 𝓋} (H : ∀ α → (∀ a → P (α ↓ a)) → P α)
+  (α : Ord 𝓊) → ind H α ≡ H α (λ a → ind H (α ↓ a))
+ind-compute {P} IH = OrdStr.elim (str Ω) {! IH′  !} where
+  IH′ : ∀ α → (∀ β → β < α → P β) → P α
+  IH′ α H = IH α λ a → H (α ↓ a) (a , refl)
+```
+
+```agda
+𝒫 : Type → Type₁
+𝒫 A = A → hProp 𝓊₀
 ```

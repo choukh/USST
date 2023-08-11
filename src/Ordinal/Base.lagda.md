@@ -113,20 +113,13 @@ module BinaryRelation {A : Type 𝓊} (_≺_ : A → A → Type 𝓋) where
     didCollapse x y p q = cong (ext x y) $ funExt λ _ → isProp↔ (prop _ _) (prop _ _) _ _
 ```
 
-### 良基性
+### 可及性
 
 我们说在 `_≺_` 关系下, 一个 `x : A` **可及 (accessible)**, 当且仅当对任意 `y ≺ x`, `y` 也可及.
 
 ```agda
   data Acc (x : A) : Type (𝓊 ⊔ 𝓋) where
     acc : (∀ y → y ≺ x → Acc y) → Acc x
-```
-
-我们说 `_≺_` 是一个 **良基 (well-founded)** 关系, 当且仅当任意 `x : A` 都可及.
-
-```agda
-  WellFounded : Type _
-  WellFounded = ∀ x → Acc x
 ```
 
 可及性是一个命题. 下面的证明中暴露了 cubical 的底层机制, 就是那个间点 `i`, 以使证明更简洁. 也可以不暴露, 只需证 `H₁` 等于 `H₂`, 它们都具有 `∀ y → y ≺ x → Acc y` 类型. 由归纳假设, `Acc y` 是命题, 所以这个Π类型也是命题, 所以它的两个项 `H₁` 与 `H₂` 相等.
@@ -136,6 +129,35 @@ module BinaryRelation {A : Type 𝓊} (_≺_ : A → A → Type 𝓋) where
   isPropAcc x (acc IH₁) (acc IH₂) i = acc λ y y≺x → isPropAcc y (IH₁ y y≺x) (IH₂ y y≺x) i
 ```
 
+可及性的消去规则 `acc-elim` 可以看作是数学归纳法的更一般形式, 它说如果对任意 `x` 我们都能通过证明任意 `y ≺ x` 有 `P y` 来证明 `P x`, 那么任意可及的 `x` 都有 `P x`.
+
+```agda
+  acc-elim : {P : A → Type 𝓌} → (∀ x → (∀ y → y ≺ x → P y) → P x) → ∀ x → Acc x → P x
+  acc-elim {P} H = aux where
+    aux : ∀ x → Acc x → P x
+    aux x (acc IH) = H x λ y y≺x → aux y (IH y y≺x)
+```
+
+有时我们还要用到双参数形式的消去规则.
+
+```agda
+  acc-elim2 : {R : A → A → Type 𝓌}
+    → (∀ x y → (∀ u v → u ≺ x → v ≺ y → R u v) → R x y)
+    → ∀ x y → Acc x → Acc y → R x y
+  acc-elim2 {_} {R} H = aux where
+    aux : ∀ x y → Acc x → Acc y → R x y
+    aux x y (acc IHx) (acc IHy) = H x y λ u v u≺x v≺y → aux u v (IHx u u≺x) (IHy v v≺y)
+```
+
+### 良基性
+
+我们说 `_≺_` 是一个 **良基 (well-founded)** 关系, 当且仅当任意 `x : A` 都可及.
+
+```agda
+  WellFounded : Type _
+  WellFounded = ∀ x → Acc x
+```
+
 良基性也是一个命题.
 
 ```agda
@@ -143,35 +165,40 @@ module BinaryRelation {A : Type 𝓊} (_≺_ : A → A → Type 𝓋) where
   isPropWellFounded = isPropΠ λ _ → isPropAcc _
 ```
 
-### 良基归纳法
-
-良基归纳法是自然数归纳法的更一般形式, 它说如果对任意 `x` 我们都能通过证明任意 `y ≺ x` 有 `P y` 来证明 `P x`, 那么任意 `x` 都有 `P x`.
+在 `acc-elim` 的基础上, 以良基性取代 `x` 的可及条件, 就得到了良基关系的消去规则 `wf-elim`. 注意这里说的 `P` 指任意以 `A` 为索引的类型 `A → Type 𝓌`. 把 `P` 看作谓词, `wf-elim` 可以看作是一种归纳法.
 
 ```agda
-  wf-elim : {P : A → Type 𝓌} → WellFounded →
-    (∀ x → (∀ y → y ≺ x → P y) → P x) → ∀ x → P x
-  wf-elim {_} {P} wf H x = aux x (wf x)
-    where
-    aux : ∀ x → Acc x → P x
-    aux x (acc IH) = H x λ y y≺x → aux y (IH y y≺x)
-```
+  wf-elim : {P : A → Type 𝓌} → WellFounded → (∀ x → (∀ y → y ≺ x → P y) → P x) → ∀ x → P x
+  wf-elim {_} {P} wf H x = acc-elim H x (wf x)
 
-下一章还要用到双参数形式的良基归纳法.
-
-```agda
   wf-elim2 : {R : A → A → Type 𝓌} → WellFounded →
     (∀ x y → (∀ u v → u ≺ x → v ≺ y → R u v) → R x y) → ∀ x y → R x y
-  wf-elim2 {_} {R} wf H x y = aux x y (wf x) (wf y)
-    where
-    aux : ∀ x y → Acc x → Acc y → R x y
-    aux x y (acc IHx) (acc IHy) = H x y λ u v u≺x v≺y → aux u v (IHx u u≺x) (IHy v v≺y)
+  wf-elim2 {_} {R} wf H x y = acc-elim2 H x y (wf x) (wf y)
 ```
 
-由良基归纳法可以立即证明良基性蕴含反自反性.
+用常函数实例化 `P` , `wf-elim` 则可以转化为一种递归原理.
+
+```agda
+  wf-rec : {B : Type 𝓌} → WellFounded → (∀ x → (∀ y → y ≺ x → B) → B) → A → B
+  wf-rec = wf-elim
+```
+
+由良基消去可以立即证明良基性蕴含反自反性.
 
 ```agda
   WellFounded→Irreflexive : WellFounded → Irreflexive
   WellFounded→Irreflexive wf = wf-elim wf λ x IH x≺x → IH x x≺x x≺x
+```
+
+计算规则 TODO
+
+```agda
+  wf-compute : {P : A → Type 𝓌} (wf : WellFounded) (H : ∀ x → (∀ y → y ≺ x → P y) → P x) →
+    ∀ x → wf-elim wf H x ≡ H x λ y y≺x → wf-elim wf H y
+  wf-compute {P} wf H x =
+    wf-elim wf H x ≡⟨ {!   !} ⟩
+    H x (λ y y≺x → acc-elim H y (wf y)) ≡⟨⟩
+    H x (λ y y≺x → wf-elim wf H y) ∎
 ```
 
 ### 良序性
@@ -231,7 +258,7 @@ record OrdStr (A : Type 𝓊) : Type (𝓊 ⁺) where
   open WellOrdered ≺-wo public
 ```
 
-我们有序数底层结构的良基归纳法.
+我们有序数底层结构的良基消去及其计算规则.
 
 ```agda
   elim : {P : A → Type 𝓌} → (∀ x → (∀ y → y ≺ x → P y) → P x) → ∀ x → P x

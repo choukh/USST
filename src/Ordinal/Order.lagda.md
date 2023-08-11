@@ -44,7 +44,7 @@ record IsOrdEmbed {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β ⟩
 ### 单射性
 
 **引理** 序数嵌入是单射.  
-**证明** 用双参数形式的良基归纳法 `elim2`, 拿到归纳假设
+**证明** 用双参数形式的良基消去 `elim2`, 拿到归纳假设
 
 `IH : ∀ u v → u ≺ x → v ≺ y → f u ≡ f v → u ≡ v`,
 
@@ -222,7 +222,7 @@ tieup : EmbedOrd 𝓊 𝓋 → Ord 𝓊
 tieup embedded = carrier , mkOrdStr _≺_ wo
 ```
 
-**证明** 我们用 `f` 表示嵌入映射, `≺-trans` 和 `≺-ext` 指 `target` 底序的传递性和外延性, `elim` 指 `target` 底集的良基归纳法.
+**证明** 我们用 `f` 表示嵌入映射, `≺-trans` 和 `≺-ext` 指 `target` 底序的传递性和外延性, `elim` 指 `target` 底集的良基消去.
 
 ```agda
   where
@@ -276,7 +276,7 @@ tieup embedded = carrier , mkOrdStr _≺_ wo
 
 对于良基性, 需要仔细选取辅助命题 `aux` 的形式. 我们先证任意满足 `f x ≡ y` 的 `x` 可及.
 
-条件 `f x ≡ y` 看似多余, 但其实对于良基归纳法的使用是必须的.
+条件 `f x ≡ y` 看似多余, 但其实对于良基消去的使用是必须的.
 
 一旦此 `aux` 完成, 那么对任意 `x` 令 `y` 为 `f x` 就可以得到 `x` 可及, 也就完成了良基性的证明.
 
@@ -285,7 +285,7 @@ tieup embedded = carrier , mkOrdStr _≺_ wo
     aux : ∀ y {x} (eq : f x ≡ y) → Acc x
 ```
 
-最后我们证 `aux`. 用良基归纳法, 假设任意满足 `f x ≡ y` 的 `x` 和 `y`, 有归纳假设 "对任意 `v ≺ y` , 如果有 `f u ≡ v`, 那么 `u` 可及", 要证 `x` 可及.
+最后我们证 `aux`. 用良基消去, 假设任意满足 `f x ≡ y` 的 `x` 和 `y`, 有归纳假设 "对任意 `v ≺ y` , 如果有 `f u ≡ v`, 那么 `u` 可及", 要证 `x` 可及.
 
 用构造子 `acc`, 我们证任意 `z ≺ x` 可及. 用归纳假设, 令 `u` 为 `z`, `v` 为 `f z`, 只需证 `f z ≺ y`.
 

@@ -11,7 +11,6 @@ zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 
 ```agda
 {-# OPTIONS --cubical --safe #-}
-{-# OPTIONS --hidden-argument-puns #-}
 
 module Preliminary where
 open import Cubical public
@@ -174,18 +173,26 @@ A ⊂ B = A ⊆ B × (∃ x ∶ _ , x ∈ B × x ∉ A)
 ℙ⁺ : ℕ → Type 𝓊 → (𝓋 : Level) → Type (𝓊 ⊔ (𝓋 ⁺))
 ℙ⁺ zero X 𝓋 = X → hProp 𝓋
 ℙ⁺ (suc n) X 𝓋 = ℙ⁺ n X 𝓋 → hProp 𝓋
+```
 
-Morphℙ : ⦃ _ : PR ⦄ → (X → Y) → (X → hProp 𝓊) → (Y → hProp 𝓋)
-Morphℙ f A y = Resize $ (∀ x → f x ≡ y → ⟨ A x ⟩) , isPropΠ2 λ _ _ → str (A _)
+现在, 局部假设 `PR`.
 
-Resizeℙ : ⦃ _ : PR ⦄ → ℙ X → ℙ⁺ 0 X 𝓊
-Resizeℙ = Morphℙ (idfun _)
+```agda
+module _ ⦃ _ : PR ⦄ where
+```
 
-Resizeℙ² : ⦃ _ : PR ⦄ → ℙ (ℙ X) → ℙ⁺ 1 X 𝓊
-Resizeℙ² = Morphℙ Resizeℙ
+```agda
+  Morphℙ : (X → Y) → (X → hProp 𝓊) → (Y → hProp 𝓋)
+  Morphℙ f A y = Resize $ (∀ x → f x ≡ y → ⟨ A x ⟩) , isPropΠ2 λ _ _ → str (A _)
 
-Resizeℙ³ : ⦃ _ : PR ⦄ → ℙ (ℙ (ℙ X)) → ℙ⁺ 2 X 𝓊
-Resizeℙ³ = Morphℙ (Morphℙ Resizeℙ)
+  Resizeℙ : ℙ X → ℙ⁺ 0 X 𝓊
+  Resizeℙ = Morphℙ (idfun _)
+
+  Resizeℙ² : ℙ (ℙ X) → ℙ⁺ 1 X 𝓊
+  Resizeℙ² = Morphℙ Resizeℙ
+
+  Resizeℙ³ : ℙ (ℙ (ℙ X)) → ℙ⁺ 2 X 𝓊
+  Resizeℙ³ = Morphℙ (Morphℙ Resizeℙ)
 ```
 
 ## 非构造性公理

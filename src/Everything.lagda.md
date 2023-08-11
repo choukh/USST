@@ -16,32 +16,44 @@ zhihu-url: https://zhuanlan.zhihu.com/p/646405225
 module Everything where
 ```
 
-[(1) 前置知识](https://zhuanlan.zhihu.com/p/643059692)
+[(1) 泛等基础](https://zhuanlan.zhihu.com/p/643059692)
 
 ```agda
-import Preliminary
+open import Cubical public
 ```
 
-[(2) 开胃菜: CH → LEM](https://zhuanlan.zhihu.com/p/643217740)
+[(2) 前置知识]()
 
 ```agda
-import ReverseMath.CH→LEM
+open import Preliminary public
 ```
 
-[(3) 序数的定义及其泛等原理](https://zhuanlan.zhihu.com/p/643453391)
+[(3) 开胃菜: CH → LEM](https://zhuanlan.zhihu.com/p/643217740)
 
 ```agda
-import Ordinal.Base
+open import ReverseMath.CH→LEM public
 ```
 
-[(4) 序数的序](https://zhuanlan.zhihu.com/p/644984990)
+[(4) 序数的定义及其泛等原理](https://zhuanlan.zhihu.com/p/643453391)
 
 ```agda
-import Ordinal.Order
+open import Ordinal.Base public
 ```
 
-[(5) 吃自己: 序数宇宙也是序数](https://zhuanlan.zhihu.com/p/646397707)
+[(5) 序数的序](https://zhuanlan.zhihu.com/p/644984990)
 
 ```agda
-import Ordinal.OrdInOrd
+open import Ordinal.Order public
+```
+
+[(6) 吃自己: 序数宇宙也是序数](https://zhuanlan.zhihu.com/p/646397707)
+
+```agda
+open import Ordinal.OrdInOrd public
+```
+
+[(7) 基数]()
+
+```agda
+open import Cardinal.Base public
 ```
