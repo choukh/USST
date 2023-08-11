@@ -11,6 +11,7 @@ zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 
 ```agda
 {-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --hidden-argument-puns #-}
 
 module Preliminary where
 open import Cubical public
@@ -18,10 +19,10 @@ open import Cubical public
 
 我们在上一章 [泛等结构集合论 (1) 泛等基础](https://zhuanlan.zhihu.com/p/643059692) 介绍了直接从 Cubical 标准库中导入的概念, 而本章着重介绍泛等结构集合论所需要的但标准库没有的前置知识.
 
-我们约定使用 `A` `B` `C` `X` 表示任意层级的类型.
+我们约定使用 `A` `B` `C` `X` `Y` 表示任意层级的类型.
 
 ```agda
-private variable A B C X : Type 𝓊
+private variable A B C X Y : Type 𝓊
 ```
 
 ## 命题逻辑
@@ -107,13 +108,6 @@ open import Cubical.Foundations.Powerset public
   using (ℙ; _∈_; _⊆_; isSetℙ)
 ```
 
-我们用 `⟦ A ⟧` 表示幂集 `A` 所对应的Σ类型.
-
-```agda
-⟦_⟧ : {X : Type 𝓊} → ℙ X → Type 𝓊
-⟦ A ⟧ = Σ _ (_∈ A)
-```
-
 不属于符号 `_∉_` 定义为 `_∈_` 的否定, 即 `x ∉ A = ¬ x ∈ A`.
 
 ```agda
@@ -128,20 +122,31 @@ _⊂_ : ℙ X → ℙ X → Type _
 A ⊂ B = A ⊆ B × (∃ x ∶ _ , x ∈ B × x ∉ A)
 ```
 
+我们用 `⟦ A ⟧` 表示幂集 `A` 所对应的Σ类型.
+
+```agda
+⟦_⟧ : {X : Type 𝓊} → ℙ X → Type 𝓊
+⟦ A ⟧ = Σ _ (_∈ A)
+```
+
+在非直谓的设定下, 我们可以使用另一种幂集的定义 `ℙ⁺`, 它更接近传统集合论中的幂集. `ℙ⁺` 与 `ℙ` 的区别在于 TODO.
+
 ```agda
 ℙ⁺ : ℕ → Type 𝓊 → (𝓋 : Level) → Type (𝓊 ⊔ (𝓋 ⁺))
-ℙ⁺ zero A 𝓋 = A → hProp 𝓋
-ℙ⁺ (suc n) A 𝓋 = ℙ⁺ n A 𝓋 → hProp 𝓋
+ℙ⁺ zero X 𝓋 = X → hProp 𝓋
+ℙ⁺ (suc n) X 𝓋 = ℙ⁺ n X 𝓋 → hProp 𝓋
 
-Resizeℙ : ⦃ _ : PR ⦄ {A : Type 𝓊} → ℙ⁺ 0 A 𝓊 → ℙ⁺ 0 A 𝓋
-Resizeℙ P x = Resize (P x)
+Morphℙ : ⦃ _ : PR ⦄ → (X → Y) → (X → hProp 𝓊) → (Y → hProp 𝓋)
+Morphℙ f A y = Resize $ (∀ x → f x ≡ y → ⟨ A x ⟩) , isPropΠ2 λ _ _ → str (A _)
 
-Morphℙ : ⦃ _ : PR ⦄ {A : Type 𝓊} {A : Type 𝓋} → (A → B) → ℙ⁺ 0 A 𝓊 → ℙ⁺ 0 B 𝓋
-Morphℙ f P b = Resize $ (∀ a → f a ≡ b → ⟨ P a ⟩) , isPropΠ2 λ _ _ → str (P _)
+Resizeℙ : ⦃ _ : PR ⦄ → ℙ X → ℙ⁺ 0 X 𝓊
+Resizeℙ = Morphℙ (idfun _)
 
---Resizeℙ³ : ⦃ _ : PR ⦄ {A : Type 𝓊} → ℙ (ℙ (ℙ A)) → ℙ⁺ 2 A 𝓊
---Resizeℙ³ P = Morphℙ (λ X → {!   !}) {!   !}
-  --Morphℙ (λ X → Morphℙ (λ X → Resizeℙ X) X) X
+Resizeℙ² : ⦃ _ : PR ⦄ → ℙ (ℙ X) → ℙ⁺ 1 X 𝓊
+Resizeℙ² = Morphℙ Resizeℙ
+
+Resizeℙ³ : ⦃ _ : PR ⦄ → ℙ (ℙ (ℙ X)) → ℙ⁺ 2 X 𝓊
+Resizeℙ³ = Morphℙ (Morphℙ Resizeℙ)
 ```
 
 ## 排中律
