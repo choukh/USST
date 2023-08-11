@@ -14,6 +14,7 @@ zhihu-url: https://zhuanlan.zhihu.com/p/643453391
 
 ```agda
 {-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --lossy-unification #-}
 {-# OPTIONS --hidden-argument-puns #-}
 
 module Ordinal.Base where
@@ -144,9 +145,22 @@ module BinaryRelation {A : Type 𝓊} (_≺_ : A → A → Type 𝓋) where
   acc-elim2 : {R : A → A → Type 𝓌}
     → (∀ x y → (∀ u v → u ≺ x → v ≺ y → R u v) → R x y)
     → ∀ x y → Acc x → Acc y → R x y
-  acc-elim2 {_} {R} H = aux where
+  acc-elim2 {R} H = aux where
     aux : ∀ x y → Acc x → Acc y → R x y
     aux x y (acc IHx) (acc IHy) = H x y λ u v u≺x v≺y → aux u v (IHx u u≺x) (IHy v v≺y)
+```
+
+计算规则 TODO
+
+```agda
+  acc⁻¹ : ∀ {x} → Acc x → ∀ y → y ≺ x → Acc y
+  acc⁻¹ (acc IH) = IH
+```
+
+```agda
+  acc-compute : {P : A → Type 𝓌} (H : ∀ x → (∀ y → y ≺ x → P y) → P x) (x : A) (a : Acc x) →
+    acc-elim H x a ≡ H x λ y y≺x → acc-elim H y (acc⁻¹ a y y≺x)
+  acc-compute _ _ (acc _) = refl
 ```
 
 ### 良基性
@@ -165,18 +179,20 @@ module BinaryRelation {A : Type 𝓊} (_≺_ : A → A → Type 𝓋) where
   isPropWellFounded = isPropΠ λ _ → isPropAcc _
 ```
 
-在 `acc-elim` 的基础上, 以良基性取代 `x` 的可及条件, 就得到了良基关系的消去规则 `wf-elim`. 注意这里说的 `P` 指任意以 `A` 为索引的类型 `A → Type 𝓌`. 把 `P` 看作谓词, `wf-elim` 可以看作是一种归纳法.
+在 `acc-elim` 的基础上, 以良基性取代 `x` 的可及条件, 就得到了良基关系的消去规则 `wf-elim`.
 
 ```agda
   wf-elim : {P : A → Type 𝓌} → WellFounded → (∀ x → (∀ y → y ≺ x → P y) → P x) → ∀ x → P x
-  wf-elim {_} {P} wf H x = acc-elim H x (wf x)
+  wf-elim wf H x = acc-elim H x (wf x)
 
   wf-elim2 : {R : A → A → Type 𝓌} → WellFounded →
     (∀ x y → (∀ u v → u ≺ x → v ≺ y → R u v) → R x y) → ∀ x y → R x y
-  wf-elim2 {_} {R} wf H x y = acc-elim2 H x y (wf x) (wf y)
+  wf-elim2 wf H x y = acc-elim2 H x y (wf x) (wf y)
 ```
 
-用常函数实例化 `P` , `wf-elim` 则可以转化为一种递归原理.
+注意这里说的 `P` 指任意以 `A` 为索引的类型 `A → Type 𝓌`. 把 `P` 看作谓词, `wf-elim` 可以看作是一种归纳法.
+
+用常函数实例化 `P` , `wf-elim` 则可以看作是一种递归原理.
 
 ```agda
   wf-rec : {B : Type 𝓌} → WellFounded → (∀ x → (∀ y → y ≺ x → B) → B) → A → B
@@ -196,9 +212,12 @@ module BinaryRelation {A : Type 𝓊} (_≺_ : A → A → Type 𝓋) where
   wf-compute : {P : A → Type 𝓌} (wf : WellFounded) (H : ∀ x → (∀ y → y ≺ x → P y) → P x) →
     ∀ x → wf-elim wf H x ≡ H x λ y y≺x → wf-elim wf H y
   wf-compute {P} wf H x =
-    wf-elim wf H x ≡⟨ {!   !} ⟩
-    H x (λ y y≺x → acc-elim H y (wf y)) ≡⟨⟩
-    H x (λ y y≺x → wf-elim wf H y) ∎
+    wf-elim wf H x                                    ≡⟨⟩
+    acc-elim H x (wf x)                               ≡⟨ acc-compute H x (wf x) ⟩
+    H x (λ y y≺x → acc-elim H y (acc⁻¹ (wf x) y y≺x)) ≡⟨
+      cong (H x) (funExt λ _ → funExt λ _ → cong (acc-elim H _) (isPropAcc _ _ _)) ⟩
+    H x (λ y y≺x → acc-elim H y (wf y))               ≡⟨⟩
+    H x (λ y y≺x → wf-elim wf H y)                    ∎
 ```
 
 ### 良序性
@@ -266,6 +285,13 @@ record OrdStr (A : Type 𝓊) : Type (𝓊 ⁺) where
 
   elim2 : {R : A → A → Type 𝓌} → (∀ x y → (∀ u v → u ≺ x → v ≺ y → R u v) → R x y) → ∀ x y → R x y
   elim2 = wf-elim2 _≺_ ≺-wf
+
+  rec : {B : Type 𝓌} → (∀ x → (∀ y → y ≺ x → B) → B) → A → B
+  rec = elim
+
+  compute : {P : A → Type 𝓌} (H : ∀ x → (∀ y → y ≺ x → P y) → P x) →
+    ∀ x → elim H x ≡ H x λ y y≺x → elim H y
+  compute = wf-compute _≺_ ≺-wf
 ```
 
 ### 序数宇宙
@@ -399,3 +425,4 @@ OrdPath = ∫ 𝒮ᴰ-Ord .UARel.ua
 ≡→≃ₒ : α ≡ β → α ≃ₒ β
 ≡→≃ₒ = OrdPath _ _ ⁻¹
 ```
+ 
