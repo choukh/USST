@@ -25,9 +25,46 @@ open import Cubical public
 private variable A B C X Y : Type 𝓊
 ```
 
+## 单射性
+
+标准库里对单射的定义是为高阶同伦类型改编过的版本, 叫 `isEmbedding`. 对于集合层面的数学我们用传统的单射性定义就够了.
+
+```agda
+injective : (A → B) → Type _
+injective f = ∀ {x y} → f x ≡ f y → x ≡ y
+```
+
+同构与同伦等价都是单射.
+
+```agda
+open import Cubical.Foundations.Isomorphism public using (isoFunInjective)
+
+equivFunInjective : (f : A ≃ B) → injective (f ⁺¹)
+equivFunInjective f = isoFunInjective (equivToIso f) _ _
+```
+
+我们将 `A` 到 `B` 的单射的全体记作 `A ↪ B`. 注意这里用的是Σ类型, 并没有做命题截断, 有时候延迟截断会更方便处理.
+
+```agda
+_↪_ : Type 𝓊 → Type 𝓋 → Type _
+A ↪ B = Σ (A → B) injective
+```
+
+`↪` 构成一个预序.
+
+```agda
+↪-refl : A ↪ A
+↪-refl = idfun _ , λ refl → refl
+
+↪-trans : A ↪ B → B ↪ C → A ↪ C
+↪-trans (f , f-inj) (g , g-inj) = g ∘ f , f-inj ∘ g-inj
+```
+
+`↪` 的反对称性 (即施罗德-伯恩斯坦定理) 依赖于排中律.
+
 ## 命题逻辑
 
-首先我们来补充泛等基础中对应于直觉主义命题逻辑的相关概念. 以下是无矛盾律在直觉主义中更容易处理的版本. 因为我们无法证明排中律 "`A` 或 `¬ A`", 所以单有 `A → ¬ A → ⊥` 也无法推出矛盾, 必须采用下面的形式才行.
+我们来补充泛等基础中对应于直觉主义命题逻辑的相关概念. 以下是无矛盾律在直觉主义中更容易处理的版本. 因为我们无法证明排中律 "`A` 或 `¬ A`", 所以单有 `A → ¬ A → ⊥` 也无法推出矛盾, 必须采用下面的形式才行.
 
 ```agda
 noncontradiction : (A → ¬ A) → (¬ A → A) → ⊥
@@ -74,9 +111,9 @@ open import CubicalExt.Iff public
 ⟦⊤⟧ = ⊤* , isProp⊤*
 ```
 
-## 命题宇宙调整
+## 命题宇宙降级
 
-我们需要局部假设一个公理, 即**命题宇宙调整 (propositional resizing, 简称PR)**. PR的宣告实际上等于是取消了命题宇宙的分层, 使得它只有一层, 所有命题都位于那一层.
+我们需要局部假设一个公理, 即**命题宇宙降级 (propositional resizing, 简称PR)**. PR的宣告实际上等于是取消了命题宇宙的分层, 使得它只有一层, 所有命题都位于那一层.
 
 如果取消所有类型的分层, 那么将导致罗素悖论, 而只取消命题宇宙的分层则不会. 我们只会进入所谓**非直谓 (impredicative)** 的数学世界, 而经典数学都是这样的.
 
@@ -129,7 +166,9 @@ A ⊂ B = A ⊆ B × (∃ x ∶ _ , x ∈ B × x ∉ A)
 ⟦ A ⟧ = Σ _ (_∈ A)
 ```
 
-在非直谓的设定下, 我们可以使用另一种幂集的定义 `ℙ⁺`, 它更接近传统集合论中的幂集. `ℙ⁺` 与 `ℙ` 的区别在于 TODO.
+### 降级幂集
+
+在非直谓的设定下, 我们可以使用另一种幂集的定义 `ℙ⁺`, 我们称之为降级幂集, 它更接近传统集合论中的幂集. `ℙ⁺` 与 `ℙ` 的区别在于 TODO.
 
 ```agda
 ℙ⁺ : ℕ → Type 𝓊 → (𝓋 : Level) → Type (𝓊 ⊔ (𝓋 ⁺))
@@ -149,7 +188,11 @@ Resizeℙ³ : ⦃ _ : PR ⦄ → ℙ (ℙ (ℙ X)) → ℙ⁺ 2 X 𝓊
 Resizeℙ³ = Morphℙ (Morphℙ Resizeℙ)
 ```
 
-## 排中律
+## 非构造性公理
+
+本文研究的非构造性公理包括排中律, 选择公理, 连续统假设和广义连续统假设.
+
+### 排中律
 
 我们说一个类型 `A` 可判定, 记作 `Dec A`, 当且仅当 `A` 成立或者 `A` 的否定成立.
 
@@ -181,7 +224,7 @@ NonEmptyDec : (A : Type 𝓊) → NonEmpty (Dec A)
 NonEmptyDec _ ¬dec = ¬dec $ no λ a → ¬dec $ yes a
 ```
 
-## 选择公理
+### 选择公理
 
 选择公理是说对于任意集合 `A` 和 `B` 以及它们之间的命题关系 `R`, 如果对任意 `x : A` 都存在一个 `y : B` 使得 `R x y` 成立, 那么存在一个函数 `f : A → B` 使得对任意 `x : A` 有 `R x (f x)` 成立.
 
@@ -199,44 +242,7 @@ isPropAC : (𝓊 𝓋 ℓ′′ : Level) → isProp (AC 𝓊 𝓋 ℓ′′)
 isPropAC 𝓊 𝓋 ℓ′′ = isPropΠ6 λ _ _ _ _ _ _ → isPropΠ λ _ → squash₁
 ```
 
-## 单射
-
-cubical 库里面对单射的定义是为高阶同伦类型改编过的版本, 且相等是用 `Path` 表述的. 对于集合层面的数学我们用传统的单射性定义就够了.
-
-```agda
-injective : (A → B) → Type _
-injective f = ∀ {x y} → f x ≡ f y → x ≡ y
-```
-
-同构与同伦等价都是单射.
-
-```agda
-open import Cubical.Foundations.Isomorphism public using (isoFunInjective)
-
-equivFunInjective : (f : A ≃ B) → injective (f ⁺¹)
-equivFunInjective f = isoFunInjective (equivToIso f) _ _
-```
-
-我们将 `A` 到 `B` 的单射的全体记作 `A ↪ B`. 注意这里用的是Σ类型, 并没有做命题截断, 有时候延迟截断会更方便处理.
-
-```agda
-_↪_ : Type 𝓊 → Type 𝓋 → Type _
-A ↪ B = Σ (A → B) injective
-```
-
-`↪` 构成一个预序.
-
-```agda
-↪-refl : A ↪ A
-↪-refl = idfun _ , λ refl → refl
-
-↪-trans : A ↪ B → B ↪ C → A ↪ C
-↪-trans (f , f-inj) (g , g-inj) = g ∘ f , f-inj ∘ g-inj
-```
-
-`↪` 的反对称性 (即施罗德-伯恩斯坦定理) 依赖于排中律.
-
-## 连续统假设
+### 连续统假设
 
 连续统假设是说如果有单射链 `ℕ ↪ X ↪ ℙ ℕ` 且 `¬ X ↪ ℕ`, 那么 `ℙ ℕ ↪ X`, 也就是说没有一个集合在单射意义上正好卡在自然数集与其幂集之间. 由于没有排中律, 我们采用了这种迂回表达.
 
@@ -255,7 +261,7 @@ isPropCH : (𝓊 : Level) → isProp (CH 𝓊)
 isPropCH 𝓊 = isPropΠ5 λ _ _ _ _ _ → squash₁
 ```
 
-## 广义连续统假设
+### 广义连续统假设
 
 无穷集定义为被自然数集单射的集合.
 

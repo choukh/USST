@@ -79,7 +79,7 @@ module Pre {A : Type 𝓊} (A-set : isSet A) where
   resizeCarrier = Σ x ∶ ⟨ ℍ ⟩ , Σ y ∶ ℙ⁺ 2 A 𝓊 , {!ℍ→ℙ³ x   !} ≡ y
 ```
 
-回想我们有: 假设 `PR`, 可以将任意 `β : Ord 𝓋` 调整到 `Ord 𝓊` 上, 只要找到一个 `A : Type 𝓊` 满足 `A ≃ ⟨ β ⟩`.
+回想我们有: 假设 `PR`, 可以将任意 `β : Ord 𝓋` 降级到 `Ord 𝓊` 上, 只要找到一个 `A : Type 𝓊` 满足 `A ≃ ⟨ β ⟩`.
 
 ```agda
   _ : ⦃ _ : PR ⦄ (A : Type 𝓊) (β : Ord 𝓋) → A ≃ ⟨ β ⟩ → Ord 𝓊
