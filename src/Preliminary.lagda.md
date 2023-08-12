@@ -200,6 +200,19 @@ module _ ⦃ _ : PR ⦄ where
   Resizeℙ³ = Morphℙ (Morphℙ Resizeℙ)
 ```
 
+```agda
+  Morphℙ-inj : (f : X → Y) → injective f → injective (Morphℙ {𝓊 = 𝓊} {𝓋} f)
+  Morphℙ-inj f f-inj {p} {q} eq = funExt λ x → hPropExt $
+      →: (λ Hx → let
+          H : ⟨ Morphℙ f p (f x) ⟩
+          H = resize λ y fy≡fx → subst (λ - → ⟨ p - ⟩) (sym $ f-inj fy≡fx) Hx
+        in unresize (subst (λ - → ⟨ - (f x) ⟩) eq H) x refl)
+      ←: (λ Hx → let
+          H : ⟨ Morphℙ f q (f x) ⟩
+          H = resize λ y fy≡fx → subst (λ - → ⟨ q - ⟩) (sym $ f-inj fy≡fx) Hx
+        in unresize (subst (λ - → ⟨ - (f x) ⟩) (sym eq) H) x refl)
+```
+
 ## 非构造性公理
 
 本文研究的非构造性公理包括排中律, 选择公理, 连续统假设和广义连续统假设.
@@ -302,3 +315,4 @@ GCH→CH 𝓊 gch X X-set ℕ↪X ¬X↪ℕ X↪ℙℕ with gch ℕ X isSetℕ X
 ... | (⊎.inl X↪ℕ)  = ∥∥₁-map (⊥-rec ∘ ¬X↪ℕ) X↪ℕ
 ... | (⊎.inr ℙℕ↪X) = ℙℕ↪X
 ```
+ 

@@ -40,26 +40,6 @@ _≤_ : Card 𝓊 → Card 𝓋 → Type (𝓊 ⊔ 𝓋)
 ≤-prop κ μ = str (κ ≤ₕ μ)
 ```
 
-## 超限归纳与超限递归
-
-`Ω` 底序的良基消去规则 `elim` 是超限归纳和超限递归的一般形式, 稍微整形一下就可以得到超限归纳 `ind` 和超限递归 `rec`.
-
-```agda
-ind : {P : Ord 𝓊 → Type 𝓋} → (∀ α → (∀ a → P (α ↓ a)) → P α) → ∀ α → P α
-ind {P} IH = OrdStr.elim (str Ω) IH′ where
-  IH′ : ∀ α → (∀ β → β <ₒ α → P β) → P α
-  IH′ α H = IH α λ a → H (α ↓ a) (a , refl)
-
-rec : {A : Type 𝓋} → ((α : Ord 𝓊) → (⟨ α ⟩ → A) → A) → Ord 𝓊 → A
-rec = ind
-```
-
-```agda
-ind-compute : {P : Ord 𝓊 → Type 𝓋} (H : ∀ α → (∀ a → P (α ↓ a)) → P α)
-  (α : Ord 𝓊) → ind H α ≡ H α (λ a → ind H (α ↓ a))
-ind-compute {P} IH = {!   !}
-```
-
 ## 哈特格斯数
 
 ```agda
@@ -89,19 +69,49 @@ module PredicativeHartogs {A : Type 𝓊} (A-set : isSet A) where
   ℍ→ℙ³ : ⟨ ℍ ⟩ → ℙ (ℙ (ℙ A))
   ℍ→ℙ³ (β , _) X = Lift ∥ Iso Sub ⟨ β ⟩ ∥₁ , isOfHLevelLift 1 squash₁
     where Sub = Σ (x , _) ∶ ⟦ X ⟧ , Σ (y , _) ∶ ⟦ X ⟧ , x ⊂ y
+```
 
   ℍ→ℙ³-inj : injective ℍ→ℙ³
   ℍ→ℙ³-inj = {!   !}
-```
 
-```agda
   resizeCarrier : ⦃ _ : PR ⦄ → Type (𝓊 ⁺)
   resizeCarrier = Σ x ∶ ⟨ ℍ ⟩ , Σ y ∶ ℙ[ 𝓊 ][ 2 ]⁺ A , {!ℍ→ℙ³ x   !} ≡ y
-```
 
 回想我们有: 假设 `PR`, 可以将任意 `β : Ord 𝓋` 降级到 `Ord 𝓊` 上, 只要找到一个 `A : Type 𝓊` 满足 `A ≃ ⟨ β ⟩`.
 
 ```agda
   _ : ⦃ _ : PR ⦄ (A : Type 𝓊) (β : Ord 𝓋) → A ≃ ⟨ β ⟩ → Ord 𝓊
   _ = ResizeOrd
+```
+
+## 超限归纳与超限递归
+
+`Ω` 底序的良基消去规则 `elim` 是超限归纳和超限递归的一般形式, 稍微整形一下就可以得到超限归纳 `ind` 和超限递归 `rec`.
+
+```agda
+ind : {P : Ord 𝓊 → Type 𝓋} → (∀ α → (∀ a → P (α ↓ a)) → P α) → ∀ α → P α
+ind {P} IH = OrdStr.elim (str Ω) IH′ where
+  IH′ : ∀ α → (∀ β → β <ₒ α → P β) → P α
+  IH′ α H = IH α λ a → H (α ↓ a) (a , refl)
+
+rec : {A : Type 𝓋} → ((α : Ord 𝓊) → (⟨ α ⟩ → A) → A) → Ord 𝓊 → A
+rec = ind
+```
+
+```agda
+ind-compute : {P : Ord 𝓊 → Type 𝓋} (H : ∀ α → (∀ a → P (α ↓ a)) → P α)
+  (α : Ord 𝓊) → ind H α ≡ H α (λ a → ind H (α ↓ a))
+ind-compute {P} IH = OrdStr.compute (str Ω) IH′ where
+  IH′ : ∀ α → (∀ β → β <ₒ α → P β) → P α
+  IH′ α H = IH α λ a → H (α ↓ a) (a , refl)
+
+rec-compute : {A : Type 𝓋} (f : (α : Ord 𝓊) → (⟨ α ⟩ → A) → A)
+  (α : Ord 𝓊) → rec f α ≡ f α λ a → rec f (α ↓ a)
+rec-compute = ind-compute
+```
+
+```agda
+Rec : {A : Type 𝓋} (f : (α : Ord 𝓊) → (⟨ α ⟩ → A) → A) →
+  Σ g ∶ (Ord 𝓊 → A) , ∀ α → g α ≡ f α λ a → g (α ↓ a)
+Rec f = rec f , rec-compute f
 ```
