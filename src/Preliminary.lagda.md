@@ -152,14 +152,29 @@ A ↪ B = Σ (A → B) injective
 
 ## 满射
 
-如果射到集合的函数是单射, 那么它是同伦嵌入.
+满射 `surjective` 的定义与传统的一致. `isEmbedding×isSurjection→isEquiv` 说明一个函数是同伦嵌入且满射, 那么它是同伦等价.
+
+```agda
+open import Cubical.Functions.Surjection public
+  renaming (isSurjection to surjective) using (isEmbedding×isSurjection→isEquiv)
+```
+
+可以证明, 如果一个单射是射到集合的, 那么它是同伦嵌入.
 
 ```agda
 open import Cubical.Functions.Embedding using (hasPropFibers→isEmbedding)
 
-injective→isEmbedding : (f : A → B) → isSet B → injective f → isEmbedding f
-injective→isEmbedding f Bset f-inj = hasPropFibers→isEmbedding
+injective→isEmbedding : {f : A → B} → isSet B → injective f → isEmbedding f
+injective→isEmbedding Bset f-inj = hasPropFibers→isEmbedding
   λ { b (x , fx≡b) (y , fy≡b) → Σ≡Prop (λ _ → Bset _ _) (f-inj $ fx≡b ∙ sym fy≡b) }
+```
+
+所以对射到集合的函数, 可以复刻传统结果: 单射且满射蕴含双射.
+
+```agda
+inj→sur→isEquiv : {f : A → B} → isSet B → injective f → surjective f → isEquiv f
+inj→sur→isEquiv Bset inj sur = isEmbedding×isSurjection→isEquiv $
+  injective→isEmbedding Bset inj , sur
 ```
 
 ## 幂集

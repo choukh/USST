@@ -82,26 +82,28 @@ module _ ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (A-set : isSet A) where
 ```
 
 ```agda
-  ℍ-injected : ℙ[ 𝓊 ][ 2 ]⁺ A → Type 𝓊
-  ℍ-injected y = ⟨ Resize $ (∃ x ∶ ⟨ ℍₚ ⟩ , Resizeℙ³ (ℍ→ℙ³ x) ≡ y) , squash₁ ⟩
+  ℍ-injected : ℙ[ 𝓊 ][ 2 ]⁺ A → hProp 𝓊
+  ℍ-injected y = Resize $ (∃ x ∶ ⟨ ℍₚ ⟩ , Resizeℙ³ (ℍ→ℙ³ x) ≡ y) , squash₁
 
   resizedCarrier : Type (𝓊 ⁺)
-  resizedCarrier = Σ (ℙ[ 𝓊 ][ 2 ]⁺ A) ℍ-injected
+  resizedCarrier = Σ (ℙ[ 𝓊 ][ 2 ]⁺ A) (⟨_⟩ ∘ ℍ-injected)
 ```
 
 ```agda
-  open import Cubical.Functions.Embedding using (isEmbedding)
-  open import Cubical.Functions.Surjection using (isSurjection; isEmbedding×isSurjection→isEquiv)
+  isSetResizedCarrier : isSet resizedCarrier
+  isSetResizedCarrier = isSetΣ (isSetΠ λ _ → isSetHProp) λ x → isProp→isSet (str (ℍ-injected x))
+```
 
+```agda
   carrierMap : ⟨ ℍₚ ⟩ → resizedCarrier
   carrierMap x = Resizeℙ³ (ℍ→ℙ³ x) , resize ∣ x , refl ∣₁
 
   carrierEquiv : ⟨ ℍₚ ⟩ ≃ resizedCarrier
-  carrierEquiv = carrierMap , isEmbedding×isSurjection→isEquiv (emb , sur)
+  carrierEquiv = carrierMap , inj→sur→isEquiv isSetResizedCarrier inj sur
     where
-    emb : isEmbedding carrierMap
-    emb x y = {!   !}
-    sur : isSurjection carrierMap
+    inj : injective carrierMap
+    inj eq = {!   !}
+    sur : surjective carrierMap
     sur = {!   !}
 ```
 
