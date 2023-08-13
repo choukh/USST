@@ -74,7 +74,7 @@ inr x = ∣ ⊎.inr x ∣₁
 
 注意我们不需要对积类型做命题截断以得到合取, 因为当 `_×_` 的两边都是命题的时候, 它的项只有一种构造方式, 所以它们之间的相等是自然成立的.
 
-### 当且仅当
+### 逻辑等价
 
 命题 `A` 与 `B` 逻辑等价 `_↔_` 定义为 `A` 蕴含 `B` 且 `B` 蕴含 `A`, 它有两种构造方式: 先证左边再证右边 `→:_←:_` 或者先证右边再证左边 `←:_→:_`.
 
@@ -88,29 +88,6 @@ open import CubicalExt.Iff public
         ; step-↔; step-↔˘; step-↔≡; step-↔≡˘; _↔⟨⟩_; _↔∎
         ; isProp↔; hPropExt
         )
-```
-
-## 命题宇宙降级
-
-我们需要局部假设一个公理, 即**命题宇宙降级 (propositional resizing, 简称PR)**. PR的宣告实际上等于是取消了命题宇宙的分层, 使得它只有一层, 所有命题都位于那一层.
-
-如果取消所有类型的分层, 那么将导致罗素悖论, 而只取消命题宇宙的分层则不会. 我们只会进入所谓**非直谓 (impredicative)** 的数学世界, 而经典数学都是这样的.
-
-代码工程上, 我们使用了 record 类型, 它可以视作一种带了很多语法糖的Σ类型. 我们定义的 `PropositionalResizing` 包括了一个 `Resize` 函数, 以实现给定的两个命题宇宙的相互转换, 并且它需要满足 `resize` 和 `unresize` 性质, 即转换前后的两个命题逻辑等价.
-
-```agda
-record PropositionalResizing (𝓊 𝓋 : Level) : Type (𝓊 ⁺ ⊔ 𝓋 ⁺) where
-  field
-    Resize : hProp 𝓊 → hProp 𝓋
-    resize : {P : hProp 𝓊} → ⟨ P ⟩ → ⟨ Resize P ⟩
-    unresize : {P : hProp 𝓊} → ⟨ Resize P ⟩ → ⟨ P ⟩
-```
-
-以下代码是 Agda 的一些小技巧, 不熟悉 Agda 可以不用管. 只需知道我们只要在模块声明中以 `⦃ _ : PR ⦄` 的形式声明参数, 那么就等于假设了 PR, 就可以在该模块中尽情地使用上面的三个函数, 而不用显式说明具体是哪两个命题宇宙之间的转换.
-
-```agda
-PR = ∀ {𝓊 𝓋} → PropositionalResizing 𝓊 𝓋
-open PropositionalResizing ⦃...⦄ public
 ```
 
 ## 单射
@@ -209,7 +186,44 @@ A ⊂ B = A ⊆ B × (∃ x ∶ _ , x ∈ B × x ∉ A)
 ⟦ A ⟧ = Σ _ (_∈ A)
 ```
 
-### 降级幂集
+## 命题宇宙降级
+
+我们需要局部假设一个公理, 即**命题宇宙降级 (propositional resizing, 简称PR)**. PR的宣告实际上等于是取消了命题宇宙的分层, 使得它只有一层, 所有命题都位于那一层.
+
+如果取消所有类型的分层, 那么将导致罗素悖论, 而只取消命题宇宙的分层则不会. 我们只会进入所谓**非直谓 (impredicative)** 的数学世界, 而经典数学都是这样的.
+
+代码工程上, 我们使用了 record 类型, 它可以视作一种带了很多语法糖的Σ类型. 我们定义的 `PropositionalResizing` 包括了一个 `Resize` 函数, 以实现给定的两个命题宇宙的相互转换, 并且它需要满足 `resize` 和 `unresize` 性质, 即转换前后的两个命题逻辑等价.
+
+```agda
+record PropositionalResizing (𝓊 𝓋 : Level) : Type (𝓊 ⁺ ⊔ 𝓋 ⁺) where
+  field
+    Resize : hProp 𝓊 → hProp 𝓋
+    resize : {P : hProp 𝓊} → ⟨ P ⟩ → ⟨ Resize P ⟩
+    unresize : {P : hProp 𝓊} → ⟨ Resize P ⟩ → ⟨ P ⟩
+```
+
+对于命题来说, 逻辑等价意味着同伦等价, 也就是说 `resize` 和 `unresize` 都是同伦等价.
+
+```agda
+  module _ {P : hProp 𝓊} where
+    ResizeEquiv : ⟨ P ⟩ ≃ ⟨ Resize P ⟩
+    ResizeEquiv = isoToEquiv $ iso resize unresize (λ _ → (Resize P) .snd _ _) λ _ → P .snd _ _
+
+    isEquivResize : isEquiv (resize {P = P})
+    isEquivResize = ResizeEquiv .snd
+
+    isEquivUnresize : isEquiv (unresize {P = P})
+    isEquivUnresize = invEquiv ResizeEquiv .snd
+```
+
+以下代码是 Agda 的一些小技巧, 不熟悉 Agda 可以不用管. 只需知道我们只要在模块声明中以 `⦃ _ : PR ⦄` 的形式声明参数, 那么就等于假设了 PR, 就可以在该模块中尽情地使用上面的三个函数, 而不用显式说明具体是哪两个命题宇宙之间的转换.
+
+```agda
+PR = ∀ {𝓊 𝓋} → PropositionalResizing 𝓊 𝓋
+open PropositionalResizing ⦃...⦄ public
+```
+
+## 降级幂集
 
 在非直谓的设定下, 我们可以使用另一种幂集的定义 `ℙ[_]`, 我们称之为降级幂集, 它更接近传统集合论中的幂集. `ℙ[_]` 与 `ℙ` 的区别在于, `ℙ` 的迭代会不断提高宇宙层级, 而 `ℙ[_]` 的迭代全都发生在一开始固定下来的层级.
 
@@ -403,3 +417,4 @@ GCH→CH 𝓊 gch X X-set ℕ↪X ¬X↪ℕ X↪ℙℕ with gch ℕ X isSetℕ X
 ```
 
 注意以上概念都没有直接提到基数, 而且我们也避免引入不必要的"势"的概念, 只说单射就够了. 如果你熟悉传统集合论, 可能认为这里不得要领, 但我们认为这才是这些概念原本的样子.
+ 

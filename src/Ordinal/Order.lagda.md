@@ -303,23 +303,32 @@ tieup embedded = carrier , mkOrdStr _≺_ wo
 假设 `PR`, 利用嵌入序数, 我们可以将任意 `β : Ord 𝓋` 降级到 `Ord 𝓊` 上, 只要找到一个 `A : Type 𝓊` 满足 `A ≃ ⟨ β ⟩`.
 
 ```agda
-ResizeOrd : ⦃ _ : PR ⦄ (A : Type 𝓊) (β : Ord 𝓋) → A ≃ ⟨ β ⟩ → Ord 𝓊
-ResizeOrd {𝓊} {𝓋} A β f = tieup emb
-  where
-  open OrdStr (str β)
-  _<ₕ_ : A → A → hProp 𝓊
-  x <ₕ y = Resize ((f ⁺¹) x ≺⟨ β ⟩ (f ⁺¹) y , ≺-prop _ _)
-  emb : EmbedOrd 𝓊 𝓋
-  EmbedOrd.carrier       emb = A
-  EmbedOrd._≺_           emb = fst ∘₂ _<ₕ_
-  EmbedOrd.relation-prop emb = str ∘₂ _<ₕ_
-  EmbedOrd.target        emb = β
-  EmbedOrd.embed         emb = f ⁺¹
-  EmbedOrd.inj           emb = equivFunInjective f
-  EmbedOrd.pres≺         emb _ _ = unresize
-  EmbedOrd.formsInitSeg  emb b a′ b≺fa′ = (f ⁻¹) b , resize H , secIsEq (snd f) b where
-    H : (f ⁺¹ ∘ f ⁻¹) b ≺ (f ⁺¹) a′
-    H = subst (_≺ (f ⁺¹) a′) (sym $ secIsEq (snd f) b) b≺fa′
+module _ ⦃ _ : PR ⦄ (A : Type 𝓊) (β : Ord 𝓋) (f : A ≃ ⟨ β ⟩) where
+
+  ResizeOrd : Ord 𝓊
+  ResizeOrd = tieup emb
+    where
+    open OrdStr (str β)
+    _<ₕ_ : A → A → hProp 𝓊
+    x <ₕ y = Resize ((f ⁺¹) x ≺⟨ β ⟩ (f ⁺¹) y , ≺-prop _ _)
+    emb : EmbedOrd 𝓊 𝓋
+    EmbedOrd.carrier       emb = A
+    EmbedOrd._≺_           emb = fst ∘₂ _<ₕ_
+    EmbedOrd.relation-prop emb = str ∘₂ _<ₕ_
+    EmbedOrd.target        emb = β
+    EmbedOrd.embed         emb = f ⁺¹
+    EmbedOrd.inj           emb = equivFunInjective f
+    EmbedOrd.pres≺         emb _ _ = unresize
+    EmbedOrd.formsInitSeg  emb b a′ b≺fa′ = (f ⁻¹) b , resize H , secIsEq (snd f) b where
+      H : (f ⁺¹ ∘ f ⁻¹) b ≺ (f ⁺¹) a′
+      H = subst (_≺ (f ⁺¹) a′) (sym $ secIsEq (snd f) b) b≺fa′
+```
+
+降级后的序数与原序数等价, 因为反降级函数 `unresize` 是同伦等价.
+
+```agda
+  ResizeOrd≃ : ResizeOrd ≃ₒ β
+  ResizeOrd≃ = f , mkIsOrderEquiv λ _ _ → unresize , isEquivUnresize
 ```
 
 ## 非严格序
@@ -398,3 +407,4 @@ _≤_ : Ord 𝓊 → Ord 𝓋 → Type (𝓊 ⊔ 𝓋)
 ≤-antisym : α ≤ β → β ≤ α → α ≡ β
 ≤-antisym α≤β β≤α = OrdPath _ _ ⁺¹ $ ≤-antisym-≃ₒ α≤β β≤α
 ```
+ 
