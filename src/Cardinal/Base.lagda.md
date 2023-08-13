@@ -90,11 +90,22 @@ module _ ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (A-set : isSet A) where
 ```
 
 ```agda
-  carrierEquiv : resizedCarrier ≃ ⟨ ℍₚ ⟩
-  carrierEquiv = {!   !}
+  open import Cubical.Functions.Embedding using (isEmbedding)
+  open import Cubical.Functions.Surjection using (isSurjection; isEmbedding×isSurjection→isEquiv)
+
+  carrierMap : ⟨ ℍₚ ⟩ → resizedCarrier
+  carrierMap x = Resizeℙ³ (ℍ→ℙ³ x) , resize ∣ x , refl ∣₁
+
+  carrierEquiv : ⟨ ℍₚ ⟩ ≃ resizedCarrier
+  carrierEquiv = carrierMap , isEmbedding×isSurjection→isEquiv (emb , sur)
+    where
+    emb : isEmbedding carrierMap
+    emb x y = {!   !}
+    sur : isSurjection carrierMap
+    sur = {!   !}
 ```
 
-回想我们有: 假设 `PR`, 可以将任意 `β : Ord 𝓋` 降级到 `Ord 𝓊` 上, 只要找到一个 `A : Type 𝓊` 满足 `A ≃ ⟨ β ⟩`.
+回想我们有序数降级: 假设 `PR`, 可以将任意 `β : Ord 𝓋` 降级到 `Ord 𝓊` 上, 只要找到一个 `A : Type 𝓊` 满足 `A ≃ ⟨ β ⟩`.
 
 ```agda
   _ : (A : Type 𝓊) (β : Ord 𝓋) → A ≃ ⟨ β ⟩ → Ord 𝓊
@@ -103,5 +114,5 @@ module _ ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (A-set : isSet A) where
 
 ```agda
   ℍ : Ord (𝓊 ⁺)
-  ℍ = ResizeOrd resizedCarrier ℍₚ carrierEquiv
+  ℍ = ResizeOrd resizedCarrier ℍₚ (invEquiv carrierEquiv)
 ```

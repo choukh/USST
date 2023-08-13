@@ -25,46 +25,9 @@ open import Cubical public
 private variable A B C X Y : Type 𝓊
 ```
 
-## 单射性
-
-标准库里对单射的定义是为高阶同伦类型改编过的版本, 叫 `isEmbedding`. 对于集合层面的数学我们用传统的单射性定义就够了.
-
-```agda
-injective : (A → B) → Type _
-injective f = ∀ {x y} → f x ≡ f y → x ≡ y
-```
-
-同构与同伦等价都是单射.
-
-```agda
-open import Cubical.Foundations.Isomorphism public using (isoFunInjective)
-
-equivFunInjective : (f : A ≃ B) → injective (f ⁺¹)
-equivFunInjective f = isoFunInjective (equivToIso f) _ _
-```
-
-我们将 `A` 到 `B` 的单射的全体记作 `A ↪ B`. 注意这里用的是Σ类型, 并没有做命题截断, 有时候延迟截断会更方便处理.
-
-```agda
-_↪_ : Type 𝓊 → Type 𝓋 → Type _
-A ↪ B = Σ (A → B) injective
-```
-
-`↪` 构成一个预序.
-
-```agda
-↪-refl : A ↪ A
-↪-refl = idfun _ , λ refl → refl
-
-↪-trans : A ↪ B → B ↪ C → A ↪ C
-↪-trans (f , f-inj) (g , g-inj) = g ∘ f , f-inj ∘ g-inj
-```
-
-`↪` 的反对称性 (即施罗德-伯恩斯坦定理) 依赖于排中律.
-
 ## 命题逻辑
 
-我们来补充泛等基础中对应于直觉主义命题逻辑的相关概念.
+首先我们来补充泛等基础中对应于直觉主义命题逻辑的相关概念.
 
 ### 真值
 
@@ -148,6 +111,55 @@ record PropositionalResizing (𝓊 𝓋 : Level) : Type (𝓊 ⁺ ⊔ 𝓋 ⁺) 
 ```agda
 PR = ∀ {𝓊 𝓋} → PropositionalResizing 𝓊 𝓋
 open PropositionalResizing ⦃...⦄ public
+```
+
+## 单射
+
+标准库里对单射的定义是为高阶同伦类型改编过的版本, 叫同伦嵌入 `isEmbedding`. 对于集合层面的数学我们用传统的单射性定义就够了.
+
+```agda
+injective : (A → B) → Type _
+injective f = ∀ {x y} → f x ≡ f y → x ≡ y
+```
+
+`isEquiv→isEmbedding` 说同伦等价都是同伦嵌入, 又 `isEmbedding→Inj` 说同伦嵌入都是单射, 所以同伦等价都是单射.
+
+```agda
+open import Cubical.Functions.Embedding using (isEmbedding; isEquiv→isEmbedding; isEmbedding→Inj)
+
+equivFunInjective : (f : A ≃ B) → injective (f ⁺¹)
+equivFunInjective f = isEmbedding→Inj (isEquiv→isEmbedding (snd f)) _ _
+```
+
+我们将 `A` 到 `B` 的单射的全体记作 `A ↪ B`. 注意这里用的是Σ类型, 并没有做命题截断, 有时候延迟截断会更方便处理.
+
+```agda
+_↪_ : Type 𝓊 → Type 𝓋 → Type _
+A ↪ B = Σ (A → B) injective
+```
+
+`↪` 构成一个预序.
+
+```agda
+↪-refl : A ↪ A
+↪-refl = idfun _ , λ refl → refl
+
+↪-trans : A ↪ B → B ↪ C → A ↪ C
+↪-trans (f , f-inj) (g , g-inj) = g ∘ f , f-inj ∘ g-inj
+```
+
+`↪` 的反对称性 (即施罗德-伯恩斯坦定理) 依赖于排中律.
+
+## 满射
+
+如果射到集合的函数是单射, 那么它是同伦嵌入.
+
+```agda
+open import Cubical.Functions.Embedding using (hasPropFibers→isEmbedding)
+
+injective→isEmbedding : (f : A → B) → isSet B → injective f → isEmbedding f
+injective→isEmbedding f Bset f-inj = hasPropFibers→isEmbedding
+  λ { b (x , fx≡b) (y , fy≡b) → Σ≡Prop (λ _ → Bset _ _) (f-inj $ fx≡b ∙ sym fy≡b) }
 ```
 
 ## 幂集
