@@ -40,13 +40,13 @@ _≤_ : Card 𝓊 → Card 𝓋 → Type (𝓊 ⊔ 𝓋)
 ≤-prop κ μ = str (κ ≤ₕ μ)
 ```
 
-## 哈特格斯数
+## 直谓哈特格斯数
 
 ```agda
-module PredicativeHartogs {A : Type 𝓊} (A-set : isSet A) where
+module PredicativeHartogs {A : Type 𝓊} (Aset : isSet A) where
 
   hartogs : EmbedOrd (𝓊 ⁺) (𝓊 ⁺)
-  EmbedOrd.carrier       hartogs = Σ (B , strB) ∶ Ord 𝓊 , ∣ B , OrdStr.underlying-set strB ∣₂ ≤ ∣ A , A-set ∣₂
+  EmbedOrd.carrier       hartogs = Σ (B , strB) ∶ Ord 𝓊 , ∣ B , OrdStr.underlying-set strB ∣₂ ≤ ∣ A , Aset ∣₂
   EmbedOrd._≺_           hartogs (α , _) (β , _) = α <ₒ β
   EmbedOrd.relation-prop hartogs _ _ = <ₒ-prop _ _
   EmbedOrd.target        hartogs = Ω
@@ -81,10 +81,12 @@ module PredicativeHartogs {A : Type 𝓊} (A-set : isSet A) where
   ℍ↪ℙ³ = ℍ→ℙ³ , ℍ→ℙ³-inj
 ```
 
+## 非直谓哈特格斯数
+
 现在假设 `PR`.
 
 ```agda
-module _ ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (Aset : isSet A) where
+module ImpredicativeHartogs ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (Aset : isSet A) where
   open PredicativeHartogs Aset renaming (ℍ to ℍₚ; ℍ↪ℙ³ to ℍₚ↪ℙ³)
 ```
 
@@ -96,6 +98,29 @@ module _ ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (Aset : isSet A) where
   isPropℍInjected = ℍ-injected _ .snd
 ```
 
+```agda
+  carrier : Type (𝓊 ⁺)
+  carrier = Σ (ℙ[ 𝓊 ][ 2 ]⁺ A) (⟨_⟩ ∘ ℍ-injected)
+```
+
+```agda
+  isSetCarrier : isSet carrier
+  isSetCarrier = isSetΣ (isSetΠ λ _ → isSetHProp) λ x → isProp→isSet isPropℍInjected
+```
+
+```agda
+  carrierMap : ⟨ ℍₚ ⟩ → carrier
+  carrierMap x = Resizeℙ³ (ℍ→ℙ³ x) , resize ∣ x , refl ∣₁
+
+  carrierEquiv : carrier ≃ ⟨ ℍₚ ⟩
+  carrierEquiv = invEquiv $ carrierMap , inj→sur→isEquiv isSetCarrier inj sur
+    where
+    inj : injective carrierMap
+    inj = ℍ→ℙ³-inj ∘ Resizeℙ³-inj ∘ cong fst
+    sur : surjective carrierMap
+    sur (y , H) = ∥∥₁-map (λ (x , fx≡y) → x , Σ≡Prop (λ _ → isPropℍInjected) fx≡y) (unresize H)
+```
+
 回想我们有序数降级: 任意 `β : Ord 𝓋` 可以降级到 `Ord 𝓊` 上, 只要找到一个 `A : Type 𝓊` 满足 `A ≃ ⟨ β ⟩`.
 
 ```agda
@@ -105,28 +130,10 @@ module _ ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (Aset : isSet A) where
 
 ```agda
   ℍ : Ord (𝓊 ⁺)
-  ℍ = ResizeOrd resizedCarrier ℍₚ (invEquiv carrierEquiv)
-    where
-    resizedCarrier : Type (𝓊 ⁺)
-    resizedCarrier = Σ (ℙ[ 𝓊 ][ 2 ]⁺ A) (⟨_⟩ ∘ ℍ-injected)
-```
+  ℍ = ResizeOrd carrier ℍₚ carrierEquiv
 
-```agda
-    isSetResizedCarrier : isSet resizedCarrier
-    isSetResizedCarrier = isSetΣ (isSetΠ λ _ → isSetHProp) λ x → isProp→isSet isPropℍInjected
-```
-
-```agda
-    carrierMap : ⟨ ℍₚ ⟩ → resizedCarrier
-    carrierMap x = Resizeℙ³ (ℍ→ℙ³ x) , resize ∣ x , refl ∣₁
-
-    carrierEquiv : ⟨ ℍₚ ⟩ ≃ resizedCarrier
-    carrierEquiv = carrierMap , inj→sur→isEquiv isSetResizedCarrier inj sur
-      where
-      inj : injective carrierMap
-      inj = ℍ→ℙ³-inj ∘ Resizeℙ³-inj ∘ cong fst
-      sur : surjective carrierMap
-      sur (y , H) = ∥∥₁-map (λ (x , fx≡y) → x , Σ≡Prop (λ _ → isPropℍInjected) fx≡y) (unresize H)
+  ℍ≃ℍₚ : ℍ ≃ₒ ℍₚ
+  ℍ≃ℍₚ = ResizeOrdEquiv _ _ carrierEquiv
 ```
 
 ```agda
@@ -144,5 +151,7 @@ module _ ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (Aset : isSet A) where
     a : ⟨ ℍₚ ⟩
     a = ℍ , ∣ℍ∣≤∣A∣
     H : ℍₚ ≃ₒ ℍₚ ↓ a
-    H = {!   !}
+    H = ≃ₒ-trans (≃ₒ-sym ℍ≃ℍₚ) {!   !}
+    H' : ℍ ≃ₒ ℍₚ ↓ a
+    H' = {!   !}
 ```

@@ -327,8 +327,8 @@ module _ ⦃ _ : PR ⦄ (A : Type 𝓊) (β : Ord 𝓋) (f : A ≃ ⟨ β ⟩) w
 降级后的序数与原序数等价, 因为反降级函数 `unresize` 是同伦等价.
 
 ```agda
-  ResizeOrd≃ : ResizeOrd ≃ₒ β
-  ResizeOrd≃ = f , mkIsOrderEquiv λ _ _ → unresize , isEquivUnresize
+  ResizeOrdEquiv : ResizeOrd ≃ₒ β
+  ResizeOrdEquiv = f , mkIsOrderEquiv λ _ _ → unresize , isEquivUnresize
 ```
 
 ## 非严格序
