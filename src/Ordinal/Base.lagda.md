@@ -150,19 +150,6 @@ module BinaryRelation {A : Type 𝓊} (_≺_ : A → A → Type 𝓋) where
     aux x y (acc IHx) (acc IHy) = H x y λ u v u≺x v≺y → aux u v (IHx u u≺x) (IHy v v≺y)
 ```
 
-计算规则 TODO
-
-```agda
-  acc⁻¹ : ∀ {x} → Acc x → ∀ y → y ≺ x → Acc y
-  acc⁻¹ (acc IH) = IH
-```
-
-```agda
-  acc-compute : {P : A → Type 𝓌} (H : ∀ x → (∀ y → y ≺ x → P y) → P x) (x : A) (a : Acc x) →
-    acc-elim H x a ≡ H x λ y y≺x → acc-elim H y (acc⁻¹ a y y≺x)
-  acc-compute _ _ (acc _) = refl
-```
-
 ### 良基性
 
 我们说 `_≺_` 是一个 **良基 (well-founded)** 关系, 当且仅当任意 `x : A` 都可及.
@@ -204,20 +191,6 @@ module BinaryRelation {A : Type 𝓊} (_≺_ : A → A → Type 𝓋) where
 ```agda
   WellFounded→Irreflexive : WellFounded → Irreflexive
   WellFounded→Irreflexive wf = wf-elim wf λ x IH x≺x → IH x x≺x x≺x
-```
-
-计算规则 TODO
-
-```agda
-  wf-compute : {P : A → Type 𝓌} (wf : WellFounded) (H : ∀ x → (∀ y → y ≺ x → P y) → P x) →
-    ∀ x → wf-elim wf H x ≡ H x λ y y≺x → wf-elim wf H y
-  wf-compute {P} wf H x =
-    wf-elim wf H x                                    ≡⟨⟩
-    acc-elim H x (wf x)                               ≡⟨ acc-compute H x (wf x) ⟩
-    H x (λ y y≺x → acc-elim H y (acc⁻¹ (wf x) y y≺x)) ≡⟨
-      cong (H x) (funExt λ _ → funExt λ _ → cong (acc-elim H _) (isPropAcc _ _ _)) ⟩
-    H x (λ y y≺x → acc-elim H y (wf y))               ≡⟨⟩
-    H x (λ y y≺x → wf-elim wf H y)                    ∎
 ```
 
 ### 良序性
@@ -288,10 +261,6 @@ record OrdStr (A : Type 𝓊) : Type (𝓊 ⁺) where
 
   rec : {B : Type 𝓌} → (∀ x → (∀ y → y ≺ x → B) → B) → A → B
   rec = elim
-
-  compute : {P : A → Type 𝓌} (H : ∀ x → (∀ y → y ≺ x → P y) → P x) →
-    ∀ x → elim H x ≡ H x λ y y≺x → elim H y
-  compute = wf-compute _≺_ ≺-wf
 ```
 
 ### 序数宇宙
