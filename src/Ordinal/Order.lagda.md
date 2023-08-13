@@ -21,7 +21,9 @@ open import Ordinal.Base
 
 ## 序数嵌入
 
-我们说序数底集间的一个映射是序数嵌入 (在 HoTT Book 上又叫 simulation), 当且仅当它保序, 且它的像向下封闭, 或者说, 能形成一个前段.
+现在考虑序数底集间的一种特殊的嵌入, 由于它如此特殊以至于对于序数我们只会谈论这一种嵌入, 我们就用"序数嵌入"作为正式术语 (在 HoTT Book 上叫 simulation).
+
+序数嵌入要求两个条件, 一是保序, 二是它的像向下封闭, 或者说, 能形成一个前段.
 
 ```agda
 record IsOrdEmbed {α : Ord 𝓊} {β : Ord 𝓋} (f : ⟨ α ⟩ → ⟨ β ⟩) : Type (𝓊 ⊔ 𝓋) where
