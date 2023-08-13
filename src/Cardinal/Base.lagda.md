@@ -71,15 +71,37 @@ module PredicativeHartogs {A : Type 𝓊} (A-set : isSet A) where
     where Sub = Σ (x , _) ∶ ⟦ X ⟧ , Σ (y , _) ∶ ⟦ X ⟧ , x ⊂ y
 ```
 
+```agda
   ℍ→ℙ³-inj : injective ℍ→ℙ³
   ℍ→ℙ³-inj = {!   !}
+```
 
-  resizeCarrier : ⦃ _ : PR ⦄ → Type (𝓊 ⁺)
-  resizeCarrier = Σ x ∶ ⟨ ℍ ⟩ , Σ y ∶ ℙ[ 𝓊 ][ 2 ]⁺ A , {!ℍ→ℙ³ x   !} ≡ y
+```agda
+module _ ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (A-set : isSet A) where
+  open PredicativeHartogs A-set renaming (ℍ to ℍₚ)
+```
+
+```agda
+  ℍ-injected : ℙ[ 𝓊 ][ 2 ]⁺ A → Type 𝓊
+  ℍ-injected y = ⟨ Resize $ (∃ x ∶ ⟨ ℍₚ ⟩ , Resizeℙ³ (ℍ→ℙ³ x) ≡ y) , squash₁ ⟩
+
+  resizedCarrier : Type (𝓊 ⁺)
+  resizedCarrier = Σ (ℙ[ 𝓊 ][ 2 ]⁺ A) ℍ-injected
+```
+
+```agda
+  carrierEquiv : resizedCarrier ≃ ⟨ ℍₚ ⟩
+  carrierEquiv = {!   !}
+```
 
 回想我们有: 假设 `PR`, 可以将任意 `β : Ord 𝓋` 降级到 `Ord 𝓊` 上, 只要找到一个 `A : Type 𝓊` 满足 `A ≃ ⟨ β ⟩`.
 
 ```agda
-  _ : ⦃ _ : PR ⦄ (A : Type 𝓊) (β : Ord 𝓋) → A ≃ ⟨ β ⟩ → Ord 𝓊
+  _ : (A : Type 𝓊) (β : Ord 𝓋) → A ≃ ⟨ β ⟩ → Ord 𝓊
   _ = ResizeOrd
+```
+
+```agda
+  ℍ : Ord (𝓊 ⁺)
+  ℍ = ResizeOrd resizedCarrier ℍₚ carrierEquiv
 ```
