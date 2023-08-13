@@ -19,41 +19,41 @@ module Everything where
 [(1) 泛等基础](https://zhuanlan.zhihu.com/p/643059692)
 
 ```agda
-open import Cubical public
+import Cubical
 ```
 
 [(2) 前置知识]()
 
 ```agda
-open import Preliminary public
+import Preliminary
 ```
 
 [(3) 开胃菜: CH → LEM](https://zhuanlan.zhihu.com/p/643217740)
 
 ```agda
-open import ReverseMath.CH→LEM public
+import ReverseMath.CH→LEM
 ```
 
 [(4) 序数的定义及其泛等原理](https://zhuanlan.zhihu.com/p/643453391)
 
 ```agda
-open import Ordinal.Base public
+import Ordinal.Base
 ```
 
 [(5) 序数的序](https://zhuanlan.zhihu.com/p/644984990)
 
 ```agda
-open import Ordinal.Order public
+import Ordinal.Order
 ```
 
 [(6) 吃自己: 序数宇宙也是序数](https://zhuanlan.zhihu.com/p/646397707)
 
 ```agda
-open import Ordinal.OrdInOrd public
+import Ordinal.OrdInOrd
 ```
 
 [(7) 基数]()
 
 ```agda
-open import Cardinal.Base public
+import Cardinal.Base
 ```
