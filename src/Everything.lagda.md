@@ -22,7 +22,7 @@ module Everything where
 import Cubical
 ```
 
-[(2) 前置知识]()
+[(2) 前置知识](https://zhuanlan.zhihu.com/p/649742992)
 
 ```agda
 import Preliminary
