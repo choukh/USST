@@ -14,7 +14,7 @@ zhihu-url: https://zhuanlan.zhihu.com/p/643059692
 
 **泛等基础 (univalent foundations, 简称 UF)** 中有原生的集合概念 `hSet`, 叫做**同伦集 (homotopy-sets)**. 我们决定尽量避免提到同伦的概念, 所以这里叫它**泛等结构集 (univalent structural sets)**, 由于它是一种**结构集合论 (structural set theory)**. 我们尝试在其中复刻传统质料集合论 (material set theory) 的基本概念, 如序数, 基数, 连续统假设 (CH), 广义连续统假设 (GCH) 等, 并研究它们与排中律 (LEM) 和选择公理 (AC) 之间的反推事实. 这得益于 UF 是一种**中性数学基础 (foundation of neutral constructive mathematics)**. 本文是这一系列的第一篇, 主要介绍泛等基础的一些基本概念.
 
-所谓泛等基础, 简单来说就是在 Martin-Löf 类型论 (MTLL) 的基础上加上泛等公理 (UA) 所得到的扩展, 它解决了 MLTT 的一些问题, 从而足够作为一种数学基础. 本文中我们使用 [Cubical Agda](https://agda.readthedocs.io/en/v2.6.3/language/cubical.html) 立方类型论来作为泛等基础的具体实现.
+所谓泛等基础, 简单来说就是在 Martin-Löf 类型论 (MLTT) 的基础上加上泛等公理 (UA) 所得到的扩展, 它解决了 MLTT 的一些问题, 从而足够作为一种数学基础. 本文中我们使用 [Cubical Agda](https://agda.readthedocs.io/en/v2.6.3/language/cubical.html) 立方类型论来作为泛等基础的具体实现.
 
 ```agda
 {-# OPTIONS --cubical --safe #-}
