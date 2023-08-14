@@ -210,7 +210,7 @@ open import Cubical.Data.Nat public using (isSetℕ)
 open import Cubical.Foundations.HLevels public
   using ( isPropΠ; isPropΠ2; isPropΠ3; isPropΠ4; isPropΠ5; isPropΠ6; isProp→
         ; isProp×; isProp×2; isProp×3; isProp×4; isProp×5; isPropΣ
-        ; isSetΠ; isSetΣ; isOfHLevelLift)
+        ; isSetΠ; isSetΠ2; isSetΠ3; isSetΣ; isOfHLevelLift)
 ```
 
 命题宇宙 `hProp 𝓊` 定义为 `Type 𝓊` 配备上结构 `isProp`, 即 `hProp 𝓊 = Σ (Type 𝓊) isProp`. 出乎意料的是, 命题宇宙 `hProp 𝓊` 也是一个集合. 在传统基础中所有命题不可能组成集合, 因为太大了. 但泛等基础中说的集合不关乎大小, 大小已经由宇宙层级处理了.
@@ -244,11 +244,13 @@ open import Cubical.HITs.PropositionalTruncation public
 我们有引理 `∥∥₁-rec`, 它说如果目标 `P` 是命题, 那么我们可以通过证明 `A → P` 来证明 `∥ A ∥₁ → P`.  
 我们有引理 `∥∥₁-rec2`, 它说如果目标 `P` 是命题, 那么我们可以通过证明 `A → B → P` 来证明 `∥ A ∥₁ → ∥ B ∥₁ → P`.  
 我们有引理 `∥∥₁-map`, 它说可以通过证明 `A → B` 来证明 `∥ A ∥₁ → ∥ B ∥₁`.  
-我们有引理 `∥∥₁-map2`, 它说可以通过证明 `A → B → C` 来证明 `∥ A ∥₁ → ∥ B ∥₁ → ∥ C ∥₁`.
+我们有引理 `∥∥₁-map2`, 它说可以通过证明 `A → B → C` 来证明 `∥ A ∥₁ → ∥ B ∥₁ → ∥ C ∥₁`.  
+最后, 我们有 `∥∥₁-elim` 和 `∥∥₁-elim2`, 分别是 `∥∥₁-rec` 和 `∥∥₁-rec2` 的依值版本.
 
 ```agda
-  renaming ( rec to ∥∥₁-rec; rec2 to ∥∥₁-rec2
-           ; map to ∥∥₁-map; map2 to ∥∥₁-map2)
+  renaming ( rec to ∥∥₁-rec; rec2 to ∥∥₁-rec2; rec3 to ∥∥₁-rec3
+           ; map to ∥∥₁-map; map2 to ∥∥₁-map2
+           ; elim to ∥∥₁-elim; elim2 to ∥∥₁-elim2; elim3 to ∥∥₁-elim3)
 ```
 
 Σ类型的命题截断完全对应了逻辑上的存在量化命题.
@@ -268,7 +270,8 @@ syntax ∃-syntax A (λ x → B) = ∃ x ∶ A , B
 ```agda
 open import Cubical.HITs.SetTruncation public
   using (∥_∥₂; ∣_∣₂; squash₂)
-  renaming (rec to ∥∥₂-rec; rec2 to ∥∥₂-rec2 ; map to ∥∥₂-map)
+  renaming ( rec to ∥∥₂-rec; rec2 to ∥∥₂-rec2; map to ∥∥₂-map
+           ; elim to ∥∥₂-elim; elim2 to ∥∥₂-elim2; elim3 to ∥∥₂-elim3)
 ```
 
 ## 相等类型

@@ -10,14 +10,16 @@ zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 > 高亮渲染: [Cardinal.Base.html](https://choukh.github.io/USST/Cardinal.Base.html)  
 
 ```agda
-{-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --cubical --allow-unsolved-metas #-}
 {-# OPTIONS --lossy-unification #-}
 {-# OPTIONS --hidden-argument-puns #-}
 
 module Cardinal.Base where
 open import Preliminary
-open import Ordinal renaming ( _≤_ to _≤ₒ_; ≤-prop to ≤ₒ-prop
-                             ; _<_ to _<ₒ_; <-prop to <ₒ-prop)
+open import Ordinal hiding (≤-refl; ≤-trans)
+  renaming ( _≤_ to _≤ₒ_; ≤-prop to ≤ₒ-prop
+           ; _<_ to _<ₒ_; <-prop to <ₒ-prop)
+open BinaryRelation
 ```
 
 ## 基数
@@ -38,6 +40,19 @@ _≤_ : Card 𝓊 → Card 𝓋 → Type (𝓊 ⊔ 𝓋)
 
 ≤-prop : (κ : Card 𝓊) (μ : Card 𝓋) → isProp (κ ≤ μ)
 ≤-prop κ μ = str (κ ≤ₕ μ)
+
+≤-set : (κ : Card 𝓊) (μ : Card 𝓋) → isSet (κ ≤ μ)
+≤-set κ μ = isProp→isSet (≤-prop κ μ)
+```
+
+```agda
+≤-refl : (κ : Card 𝓊) → κ ≤ κ
+≤-refl = ∥∥₂-elim (λ _ → ≤-set _ _) λ _ → ∣ ↪-refl ∣₁
+```
+
+```agda
+≤-trans : (κ μ ν : Card 𝓊) → κ ≤ μ → μ ≤ ν → κ ≤ ν
+≤-trans = ∥∥₂-elim3 (λ _ _ _ → isSetΠ2 λ _ _ → ≤-set _ _) λ _ _ _ → ∥∥₁-map2 ↪-trans
 ```
 
 ## 直谓哈特格斯数
@@ -143,15 +158,15 @@ module ImpredicativeHartogs ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (Aset : isSet A
 
 ```agda
   ¬ℍ↪ : ¬ ⟨ ℍ ⟩ ↪ A
-  ¬ℍ↪ Inj@(f , f-inj) = ¬α≃ₒα↓a ℍₚ a H
+  ¬ℍ↪ Inj@(f , f-inj) = ¬α≃ₒα↓a ℍₚ a H₂
     where
     open OrdStr (str ℍ)
     ∣ℍ∣≤∣A∣ : ∣ ⟨ ℍ ⟩ , underlying-set ∣₂ ≤ ∣ A , Aset ∣₂
     ∣ℍ∣≤∣A∣ = ∣ Inj ∣₁
     a : ⟨ ℍₚ ⟩
     a = ℍ , ∣ℍ∣≤∣A∣
-    H : ℍₚ ≃ₒ ℍₚ ↓ a
-    H = ≃ₒ-trans (≃ₒ-sym ℍ≃ℍₚ) {!   !}
-    H' : ℍ ≃ₒ ℍₚ ↓ a
-    H' = {!   !}
+    H₁ : Ω ↓ ℍ ≃ₒ ℍₚ ↓ a
+    H₁ = ((λ { (x , x≺ℍ) → (x , {!   !}) , {!   !} }) , {!   !}) , {!   !}
+    H₂ : ℍₚ ≃ₒ ℍₚ ↓ a
+    H₂ = ≃ₒ-trans (≃ₒ-sym ℍ≃ℍₚ) (≃ₒ-trans α≃Ω↓α H₁)
 ```
