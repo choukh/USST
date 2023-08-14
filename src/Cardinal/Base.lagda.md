@@ -70,7 +70,7 @@ _≤_ : Card 𝓊 → Card 𝓋 → Type (𝓊 ⊔ 𝓋)
 module PredicativeHartogs {A : Type 𝓊} (Aset : isSet A) where
 
   hartogs : EmbedOrd (𝓊 ⁺) (𝓊 ⁺)
-  EmbedOrd.carrier       hartogs = Σ β ∶ Ord 𝓊 , ∣⟨ β ⟩∣ ≤ ∣ A , Aset ∣₂
+  EmbedOrd.carrier       hartogs = Σ α ∶ Ord 𝓊 , ∣⟨ α ⟩∣ ≤ ∣ A , Aset ∣₂
   EmbedOrd._≺_           hartogs (α , _) (β , _) = α <ₒ β
   EmbedOrd.relation-prop hartogs _ _ = <ₒ-prop _ _
   EmbedOrd.target        hartogs = Ω
@@ -170,19 +170,20 @@ module ImpredicativeHartogs ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (Aset : isSet A
   ¬ℍ↪ Inj@(f , f-inj) = ¬α≃ₒα↓a ℍₚ (ℍ , ∣ℍ∣≤∣A∣) $
     ℍₚ                  ≃ₒ˘⟨ ℍ≃ℍₚ ⟩
     ℍ                   ≃ₒ⟨ α≃Ω↓α ⟩
-    Ω ↓ ℍ               ≃ₒ⟨ (g , g-equiv) , mkIsOrderEquiv g-ordEquiv ⟩
+    Ω ↓ ℍ               ≃ₒ⟨ isoToEquiv i , mkIsOrderEquiv ordEquiv ⟩
     ℍₚ ↓ (ℍ , ∣ℍ∣≤∣A∣)  ≃ₒ∎
     where
     ∣ℍ∣≤∣A∣ : ∣⟨ ℍ ⟩∣ ≤ ∣ A , Aset ∣₂
     ∣ℍ∣≤∣A∣ = ∣ Inj ∣₁
-    g : ⟨ Ω ↓ ℍ ⟩ → ⟨ ℍₚ ↓ (ℍ , ∣ℍ∣≤∣A∣) ⟩
-    g (α , α≺ℍ) = (α , H₁) , H₂ where
+    i : Iso ⟨ Ω ↓ ℍ ⟩ ⟨ ℍₚ ↓ (ℍ , ∣ℍ∣≤∣A∣) ⟩
+    Iso.fun i (α , α≺ℍ) = (α , H₁) , H₂ where
       H₁ : ∣⟨ α ⟩∣ ≤ ∣ A , Aset ∣₂
       H₁ = ≤-trans ∣⟨ α ⟩∣ ∣⟨ ℍ ⟩∣ ∣ A , Aset ∣₂ (<ₒ→≤ α≺ℍ) ∣ℍ∣≤∣A∣
       H₂ : (α , H₁) ≺⟨ ℍₚ ⟩ (ℍ , ∣ℍ∣≤∣A∣)
-      H₂ = unresize {𝓋 = 𝓊 ⁺ ⁺} $ resize {P = _ , <ₒ-prop _ _} α≺ℍ
-    g-equiv : isEquiv g
-    g-equiv = inj→sur→isEquiv ordSet {!   !} {!   !}
-    g-ordEquiv : ∀ x y → x ≺⟨ Ω ↓ ℍ ⟩ y ≃ g x ≺⟨ ℍₚ ↓ (ℍ , ∣ℍ∣≤∣A∣) ⟩ g y
-    g-ordEquiv x y = {!   !}
+      H₂ = unresize {𝓋 = 𝓊 ⁺ ⁺} (resize {P = _ , <ₒ-prop _ _} α≺ℍ)
+    Iso.inv i ((α , _) , α≺ℍ) = α , unresize {𝓋 = 𝓊 ⁺ ⁺} (resize {P = _ , <ₒ-prop _ _} α≺ℍ)
+    Iso.rightInv i _ = Σ≡Prop (λ _ → <ₒ-prop _ _) (Σ≡Prop (λ _ → ≤-prop _ _) refl)
+    Iso.leftInv i _ = Σ≡Prop (λ _ → <ₒ-prop _ _) refl
+    ordEquiv : ∀ x y → x ≺⟨ Ω ↓ ℍ ⟩ y ≃ (Iso.fun i) x ≺⟨ ℍₚ ↓ (ℍ , ∣ℍ∣≤∣A∣) ⟩ (Iso.fun i) y
+    ordEquiv _ _ = idEquiv _
 ```
