@@ -10,7 +10,7 @@ zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 > 高亮渲染: [Cardinal.Base.html](https://choukh.github.io/USST/Cardinal.Base.html)  
 
 ```agda
-{-# OPTIONS --cubical --allow-unsolved-metas #-}
+{-# OPTIONS --cubical --safe #-}
 {-# OPTIONS --lossy-unification #-}
 {-# OPTIONS --hidden-argument-puns #-}
 
@@ -55,13 +55,21 @@ _≤_ : Card 𝓊 → Card 𝓋 → Type (𝓊 ⊔ 𝓋)
 ≤-trans = ∥∥₂-elim3 (λ _ _ _ → isSetΠ2 λ _ _ → ≤-set _ _) λ _ _ _ → ∥∥₁-map2 ↪-trans
 ```
 
+```agda
+⟨_⟩₂ : Ord 𝓊 → hSet 𝓊
+⟨ α ⟩₂ = ⟨ α ⟩ , OrdStr.underlying-set (str α)
+
+<ₒ→≤ : α <ₒ β → ∣ ⟨ α ⟩₂ ∣₂ ≤ ∣ ⟨ β ⟩₂ ∣₂
+<ₒ→≤ {β} (a , β↓a≡α) = subst (λ - → ∣ ⟨ - ⟩₂ ∣₂ ≤ ∣ ⟨ β ⟩₂ ∣₂) β↓a≡α ∣ ↑ , ↑-inj ∣₁
+```
+
 ## 直谓哈特格斯数
 
 ```agda
 module PredicativeHartogs {A : Type 𝓊} (Aset : isSet A) where
 
   hartogs : EmbedOrd (𝓊 ⁺) (𝓊 ⁺)
-  EmbedOrd.carrier       hartogs = Σ (B , strB) ∶ Ord 𝓊 , ∣ B , OrdStr.underlying-set strB ∣₂ ≤ ∣ A , Aset ∣₂
+  EmbedOrd.carrier       hartogs = Σ β ∶ Ord 𝓊 , ∣ ⟨ β ⟩₂ ∣₂ ≤ ∣ A , Aset ∣₂
   EmbedOrd._≺_           hartogs (α , _) (β , _) = α <ₒ β
   EmbedOrd.relation-prop hartogs _ _ = <ₒ-prop _ _
   EmbedOrd.target        hartogs = Ω
