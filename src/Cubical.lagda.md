@@ -108,7 +108,7 @@ _ = λ A B → ∀ x → B x
 
 ```agda
 open import Cubical.Foundations.Function public
-  using (_$_; _∘_; idfun; uncurry)
+  using (_$_; _∘_; idfun; flip; curry; uncurry)
 open import Function public using (_∘₂_)
 ```
 

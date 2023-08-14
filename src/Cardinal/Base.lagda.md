@@ -11,8 +11,7 @@ zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 
 ```agda
 {-# OPTIONS --cubical --safe #-}
-{-# OPTIONS --lossy-unification #-}
-{-# OPTIONS --hidden-argument-puns #-}
+{-# OPTIONS --lossy-unification --hidden-argument-puns #-}
 
 module Cardinal.Base where
 open import Preliminary
@@ -56,11 +55,13 @@ _≤_ : Card 𝓊 → Card 𝓋 → Type (𝓊 ⊔ 𝓋)
 ```
 
 ```agda
-⟨_⟩₂ : Ord 𝓊 → hSet 𝓊
-⟨ α ⟩₂ = ⟨ α ⟩ , OrdStr.underlying-set (str α)
+∣⟨_⟩∣ : Ord 𝓊 → Card 𝓊
+∣⟨ α ⟩∣ = ∣ ⟨ α ⟩ , OrdStr.underlying-set (str α) ∣₂
+```
 
-<ₒ→≤ : α <ₒ β → ∣ ⟨ α ⟩₂ ∣₂ ≤ ∣ ⟨ β ⟩₂ ∣₂
-<ₒ→≤ {β} (a , β↓a≡α) = subst (λ - → ∣ ⟨ - ⟩₂ ∣₂ ≤ ∣ ⟨ β ⟩₂ ∣₂) β↓a≡α ∣ ↑ , ↑-inj ∣₁
+```agda
+<ₒ→≤ : α <ₒ β → ∣⟨ α ⟩∣ ≤ ∣⟨ β ⟩∣
+<ₒ→≤ {β} (a , β↓a≡α) = subst (λ - → ∣⟨ - ⟩∣ ≤ ∣⟨ β ⟩∣) β↓a≡α ∣ ↑ , ↑-inj ∣₁
 ```
 
 ## 直谓哈特格斯数
@@ -69,7 +70,7 @@ _≤_ : Card 𝓊 → Card 𝓋 → Type (𝓊 ⊔ 𝓋)
 module PredicativeHartogs {A : Type 𝓊} (Aset : isSet A) where
 
   hartogs : EmbedOrd (𝓊 ⁺) (𝓊 ⁺)
-  EmbedOrd.carrier       hartogs = Σ β ∶ Ord 𝓊 , ∣ ⟨ β ⟩₂ ∣₂ ≤ ∣ A , Aset ∣₂
+  EmbedOrd.carrier       hartogs = Σ β ∶ Ord 𝓊 , ∣⟨ β ⟩∣ ≤ ∣ A , Aset ∣₂
   EmbedOrd._≺_           hartogs (α , _) (β , _) = α <ₒ β
   EmbedOrd.relation-prop hartogs _ _ = <ₒ-prop _ _
   EmbedOrd.target        hartogs = Ω
@@ -166,15 +167,24 @@ module ImpredicativeHartogs ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (Aset : isSet A
 
 ```agda
   ¬ℍ↪ : ¬ ⟨ ℍ ⟩ ↪ A
-  ¬ℍ↪ Inj@(f , f-inj) = ¬α≃ₒα↓a ℍₚ a H₂
+  ¬ℍ↪ Inj@(f , f-inj) = ¬α≃ₒα↓a ℍₚ a $
+    ℍₚ      ≃ₒ˘⟨ ℍ≃ℍₚ ⟩
+    ℍ       ≃ₒ⟨ α≃Ω↓α ⟩
+    Ω ↓ ℍ   ≃ₒ⟨ (g , g-equiv) , mkIsOrderEquiv g-ordEquiv ⟩
+    ℍₚ ↓ a  ≃ₒ∎
     where
-    open OrdStr (str ℍ)
-    ∣ℍ∣≤∣A∣ : ∣ ⟨ ℍ ⟩ , underlying-set ∣₂ ≤ ∣ A , Aset ∣₂
+    ∣ℍ∣≤∣A∣ : ∣⟨ ℍ ⟩∣ ≤ ∣ A , Aset ∣₂
     ∣ℍ∣≤∣A∣ = ∣ Inj ∣₁
     a : ⟨ ℍₚ ⟩
     a = ℍ , ∣ℍ∣≤∣A∣
-    H₁ : Ω ↓ ℍ ≃ₒ ℍₚ ↓ a
-    H₁ = ((λ { (x , x≺ℍ) → (x , {!   !}) , {!   !} }) , {!   !}) , {!   !}
-    H₂ : ℍₚ ≃ₒ ℍₚ ↓ a
-    H₂ = ≃ₒ-trans (≃ₒ-sym ℍ≃ℍₚ) (≃ₒ-trans α≃Ω↓α H₁)
+    g : ⟨ Ω ↓ ℍ ⟩ → ⟨ ℍₚ ↓ a ⟩
+    g (α , α≺ℍ) = (α , H₁) , H₂ where
+      H₁ : ∣⟨ α ⟩∣ ≤ ∣ A , Aset ∣₂
+      H₁ = ≤-trans ∣⟨ α ⟩∣ ∣⟨ ℍ ⟩∣ ∣ A , Aset ∣₂ (<ₒ→≤ α≺ℍ) ∣ℍ∣≤∣A∣
+      H₂ : (α , H₁) ≺⟨ ℍₚ ⟩ a
+      H₂ = {!   !}
+    g-equiv : isEquiv g
+    g-equiv = {!   !}
+    g-ordEquiv : ∀ x y → x ≺⟨ Ω ↓ ℍ ⟩ y ≃ g x ≺⟨ ℍₚ ↓ a ⟩ g y
+    g-ordEquiv x y = {!   !}
 ```
