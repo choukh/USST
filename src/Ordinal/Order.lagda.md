@@ -336,7 +336,7 @@ module _ ⦃ _ : PR ⦄ (A : Type 𝓊) (β : Ord 𝓋) (f : A ≃ ⟨ β ⟩) w
 序数宇宙提升的方法也类似, 而且更为简单, 直接用 `Lift` 即可.
 
 ```agda
-module _ {𝓋 : Level} (α : Ord 𝓊) where
+module _ (α : Ord 𝓊) {𝓋 : Level} where
 
   LiftOrd : Ord (𝓊 ⊔ 𝓋)
   LiftOrd = tieup emb
@@ -355,11 +355,52 @@ module _ {𝓋 : Level} (α : Ord 𝓊) where
     EmbedOrd.formsInitSeg  emb b (lift a′) b≺fa′ = lift b , lift b≺fa′ , refl
 ```
 
-提升后的序数与原序数等价.
+序数与提升后的序数等价.
 
 ```agda
-  LiftOrdEquiv : LiftOrd ≃ₒ α
-  LiftOrdEquiv = ≃ₒ-sym $ LiftEquiv , mkIsOrderEquiv λ x y → lift , LiftEquiv .snd
+  LiftOrdEquiv : α ≃ₒ LiftOrd
+  LiftOrdEquiv = LiftEquiv , mkIsOrderEquiv λ x y → lift , LiftEquiv .snd
+```
+
+序数宇宙提升的用处之一是我们可以对实例化到不同宇宙的宇宙多态关系建立等价, 只要它们谈论的序数分别等价. 这会在后面几章用到.
+
+```agda
+cong≃ₒ : {α : Ord 𝓊} {β : Ord 𝓋} (P : {𝓊 : Level} → Ord 𝓊 → Type (𝓊 ⊔ 𝓌)) →
+  α ≃ₒ β → P α ≃ P β
+cong≃ₒ {𝓊} {𝓋} {α} {β} P α≃ₒβ =
+  P α           ≃⟨ {!   !} ⟩
+  P (LiftOrd α) ≃⟨ pathToEquiv (cong P Lα≡Lβ) ⟩
+  P (LiftOrd β) ≃⟨ {!   !} ⟩
+  P β           ≃∎
+  where
+  Lα≡Lβ : LiftOrd α {𝓋} ≡ LiftOrd β {𝓊}
+  Lα≡Lβ = ≃ₒ→≡ $
+    LiftOrd α ≃ₒ˘⟨ LiftOrdEquiv α ⟩
+    α         ≃ₒ⟨ α≃ₒβ ⟩
+    β         ≃ₒ⟨ LiftOrdEquiv β ⟩
+    LiftOrd β ≃ₒ∎
+
+cong≃ₒ₂ : {α β : Ord 𝓊} {γ δ : Ord 𝓋} (R : {𝓊 𝓋 : Level} → Ord 𝓊 → Ord 𝓋 → Type (𝓊 ⊔ 𝓋)) →
+  α ≃ₒ γ → β ≃ₒ δ → R α β ≃ R γ δ
+cong≃ₒ₂ {𝓊} {𝓋} {α} {β} {γ} {δ} R α≃ₒγ β≃ₒδ =
+  R α β                     ≃⟨ cong≃ₒ {𝓌 = 𝓊} (λ α → R α β) (LiftOrdEquiv α) ⟩
+  R (LiftOrd α) β           ≃⟨ cong≃ₒ {𝓌 = 𝓊 ⊔ 𝓋} (R (LiftOrd α)) (LiftOrdEquiv β) ⟩
+  R (LiftOrd α) (LiftOrd β) ≃⟨ pathToEquiv $ cong₂ R Lα≡Lγ Lβ≡Lδ ⟩
+  R (LiftOrd γ) (LiftOrd δ) ≃⟨ {!   !} ⟩
+  R γ δ                     ≃∎
+  where
+  Lα≡Lγ : LiftOrd α {𝓋} ≡ LiftOrd γ {𝓊}
+  Lα≡Lγ = ≃ₒ→≡ $
+    LiftOrd α ≃ₒ˘⟨ LiftOrdEquiv α ⟩
+    α         ≃ₒ⟨ α≃ₒγ ⟩
+    γ         ≃ₒ⟨ LiftOrdEquiv γ ⟩
+    LiftOrd γ ≃ₒ∎
+  Lβ≡Lδ : LiftOrd β {𝓋} ≡ LiftOrd δ {𝓊}
+  Lβ≡Lδ = ≃ₒ→≡ $
+    LiftOrd β ≃ₒ˘⟨ LiftOrdEquiv β ⟩
+    β         ≃ₒ⟨ β≃ₒδ ⟩
+    δ         ≃ₒ⟨ LiftOrdEquiv δ ⟩
+    LiftOrd δ ≃ₒ∎
 ```
 
 ## 非严格序
@@ -438,3 +479,4 @@ _≤_ : Ord 𝓊 → Ord 𝓋 → Type (𝓊 ⊔ 𝓋)
 ≤-antisym : α ≤ β → β ≤ α → α ≡ β
 ≤-antisym α≤β β≤α = OrdPath _ _ ⁺¹ $ ≤-antisym-≃ₒ α≤β β≤α
 ```
+    

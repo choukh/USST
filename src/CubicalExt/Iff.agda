@@ -64,28 +64,20 @@ infix 9 →:_←:_ ←:_→:_
 --------------------------------------------------------------------------------
 -- Syntax for chains of iff reasoning
 
-infixr 2 step-↔ step-↔˘ step-↔≡ step-↔≡˘ _↔⟨⟩_
+infixr 2 _↔⟨_⟩_ _↔˘⟨_⟩_ _↔≡⟨_⟩_ _↔≡˘⟨_⟩_ _↔⟨⟩_
 infix  3 _↔∎
 
-step-↔ : (A : Type ℓ) → B ↔ C → A ↔ B → A ↔ C
-step-↔ _ = flip ↔-trans
+_↔⟨_⟩_ : (A : Type ℓ) → A ↔ B → B ↔ C → A ↔ C
+_ ↔⟨ A↔B ⟩ B↔C = ↔-trans A↔B B↔C
 
-syntax step-↔ A B p = A ↔⟨ p ⟩ B
+_↔˘⟨_⟩_ : (A : Type ℓ) → B ↔ A → B ↔ C → A ↔ C
+_ ↔˘⟨ B↔A ⟩ B↔C = ↔-trans (↔-sym B↔A) B↔C
 
-step-↔˘ : (A : Type ℓ) → B ↔ C → B ↔ A → A ↔ C
-step-↔˘ _ = flip (↔-trans ∘ ↔-sym)
+_↔≡⟨_⟩_ : (A : Type ℓ) → A ≡ B → B ↔ C → A ↔ C
+_ ↔≡⟨ A≡B ⟩ B↔C = ≡-↔-trans A≡B B↔C
 
-syntax step-↔˘ A B p = A ↔˘⟨ p ⟩ B
-
-step-↔≡ : (A : Type ℓ) → B ↔ C → A ≡ B → A ↔ C
-step-↔≡ _ = flip ≡-↔-trans
-
-syntax step-↔≡ A B p = A ↔≡⟨ p ⟩ B
-
-step-↔≡˘ : (A : Type ℓ) → B ↔ C → B ≡ A → A ↔ C
-step-↔≡˘ _ = flip (≡-↔-trans ∘ sym)
-
-syntax step-↔≡˘ A B p = A ↔≡˘⟨ p ⟩ B
+_↔≡˘⟨_⟩_ : (A : Type ℓ) → B ≡ A → B ↔ C → A ↔ C
+_ ↔≡˘⟨ B≡A ⟩ B↔C = ≡-↔-trans (sym B≡A) B↔C
 
 _↔⟨⟩_ : (A : Type ℓ) → A ↔ B → A ↔ B
 _ ↔⟨⟩ A↔B = A↔B

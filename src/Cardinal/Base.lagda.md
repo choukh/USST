@@ -242,5 +242,8 @@ module ImpredicativeHartogs ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (Aset : isSet A
 
 ```agda
   <ℍ→≲A : ∀ α → α <ₒ ℍ → ⟨ α ⟩ ≲ A
-  <ℍ→≲A α ((p , Hp) , eq) = ≲-trans {!   !} (<ℍₚ→≲A (LiftOrd α) {!   !})
+  <ℍ→≲A α ((p , Hp) , eq) = ≈-≲-trans ∣ LiftOrdEquiv α .fst ∣₁ $ <ℍₚ→≲A (LiftOrd α) H
+    where
+    H : LiftOrd α <ₒ ℍₚ
+    H = {!   !}
 ```
