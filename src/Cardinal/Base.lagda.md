@@ -51,6 +51,19 @@ cardEqToEquip : {a b : hSet 𝓊} → ∣ a ∣ ≡ ∣ b ∣ → ⟨ a ⟩ ≈ 
 cardEqToEquip eq = ∥∥₁-map (λ x → subst (λ - → _ ≃ ⟨ - ⟩) x (idEquiv _)) (Iso.fun cardEqIso∥Eq∥ eq)
 ```
 
+```agda
+cardEqIsoEquip : {a b : hSet 𝓊} → Iso (∣ a ∣ ≡ ∣ b ∣) (⟨ a ⟩ ≈ ⟨ b ⟩)
+Iso.fun       cardEqIsoEquip = cardEqToEquip
+Iso.inv       cardEqIsoEquip = ∥∥₁-rec (squash₂ _ _) equivToCardEq
+Iso.rightInv  cardEqIsoEquip _ = squash₁ _ _
+Iso.leftInv   cardEqIsoEquip _ = squash₂ _ _ _ _
+```
+
+```agda
+cardEq≃Equip : {a b : hSet 𝓊} → (∣ a ∣ ≡ ∣ b ∣) ≃ (⟨ a ⟩ ≈ ⟨ b ⟩)
+cardEq≃Equip = isoToEquiv cardEqIsoEquip
+```
+
 ## 基数的序
 
 ```agda
