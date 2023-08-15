@@ -263,6 +263,12 @@ infix 2 ∃-syntax
 syntax ∃-syntax A (λ x → B) = ∃ x ∶ A , B
 ```
 
+有时候我们希望直接处理命题截断后的命题本身, 即具有 `hProp 𝓊` 类型的项, 而不是一个类型配上"是命题"的证据, 这时就可以用 `∥_∥ₚ`.
+
+```agda
+open import Cubical.Functions.Logic public using (∥_∥ₚ)
+```
+
 ## 集合截断
 
 与命题截断类似的, 我们有集合截断 `∥_∥₂`, 它将高阶群胚截断为集合.

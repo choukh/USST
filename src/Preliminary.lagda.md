@@ -127,6 +127,39 @@ A ↪ B = Σ (A → B) injective
 
 `↪` 的反对称性 (即施罗德-伯恩斯坦定理) 依赖于排中律.
 
+### 势
+
+单射的命题截断叫做**势**. 我们说类型 A 的势小于等于 B, 记作 A ≲ B, 当且仅当有 `∥ A ↪ B ∥₁`. 命题截断表示我们并不关系具体是哪个单射, 只要有单射就行.
+
+```agda
+infix 21 _≲_
+_≲_ : Type 𝓊 → Type 𝓋 → Type _
+A ≲ B = ∥ A ↪ B ∥₁
+
+_≳_ : Type 𝓊 → Type 𝓋 → Type _
+A ≳ B = B ≲ A
+
+_≴_ : Type 𝓊 → Type 𝓋 → Type _
+A ≴ B = ¬ A ≲ B
+```
+
+我们说 A 的势严格小于 B, 当且仅当 A 的势小于等于 B 且 B 的势不小于等于 A.
+
+```agda
+_⋨_ : Type 𝓊 → Type 𝓋 → Type _
+A ⋨ B = A ≲ B × B ≴ A
+```
+
+由单射的预序性立即有势的预序性.
+
+```agda
+≲-refl : A ≲ A
+≲-refl = ∣ ↪-refl ∣₁
+
+≲-trans : A ≲ B → B ≲ C → A ≲ C
+≲-trans = ∥∥₁-map2 ↪-trans
+```
+
 ## 满射
 
 满射 `surjective` 的定义与传统的一致. `isEmbedding×isSurjection→isEquiv` 说明一个函数是同伦嵌入且满射, 那么它是同伦等价.
@@ -369,11 +402,11 @@ isPropAC 𝓊 𝓋 ℓ′′ = isPropΠ6 λ _ _ _ _ _ _ → isPropΠ λ _ → sq
 
 ### 连续统假设
 
-连续统假设是说如果有单射链 `ℕ ↪ X ↪ ℙ ℕ` 且 `¬ X ↪ ℕ`, 那么 `ℙ ℕ ↪ X`, 也就是说没有一个集合在单射意义上正好卡在自然数集与其幂集之间.
+连续统假设是说如果有单射链 `ℕ ↪ X ↪ ℙ ℕ` 且 `¬ X ↪ ℕ`, 那么 `ℙ ℕ ≲ X`, 也就是说没有一个集合在势的意义上正好卡在自然数集及其幂集之间.
 
 ```agda
 isCHType : Type 𝓊 → Type 𝓋 → Type _
-isCHType N X = N ↪ X → (¬ X ↪ N) → X ↪ ℙ N → ∥ ℙ N ↪ X ∥₁
+isCHType N X = N ↪ X → (¬ X ↪ N) → X ↪ ℙ N → ℙ N ≲ X
 
 CH : (𝓊 : Level) → Type _
 CH 𝓊 = (X : Type 𝓊) → isSet X → isCHType ℕ X
@@ -395,11 +428,11 @@ infinite : Type 𝓊 → Type _
 infinite X = ℕ ↪ X
 ```
 
-广义连续统假设是说, 对任意无穷集和它的幂集, 都没有一个集合在单射意义上正好卡在它们中间.
+广义连续统假设是说, 对任意无穷集和它的幂集, 都没有一个集合在势的意义上正好卡在它们中间.
 
 ```agda
 isGCHType : Type 𝓊 → Type 𝓋 → Type _
-isGCHType X Y = infinite X → X ↪ Y → Y ↪ ℙ X → ∥ Y ↪ X ∥₁ ⊎ ∥ ℙ X ↪ Y ∥₁
+isGCHType X Y = infinite X → X ↪ Y → Y ↪ ℙ X → Y ≲ X ⊎ ℙ X ≲ Y
 
 GCH : (𝓊 𝓋 : Level) → Type _
 GCH 𝓊 𝓋 = (X : Type 𝓊) (Y : Type 𝓋) → isSet X → isSet Y → isGCHType X Y
@@ -415,6 +448,3 @@ GCH→CH 𝓊 gch X X-set ℕ↪X ¬X↪ℕ X↪ℙℕ with gch ℕ X isSetℕ X
 ... | (⊎.inl X↪ℕ)  = ∥∥₁-map (⊥-rec ∘ ¬X↪ℕ) X↪ℕ
 ... | (⊎.inr ℙℕ↪X) = ℙℕ↪X
 ```
-
-注意以上概念都没有直接提到基数, 而且我们也避免引入不必要的"势"的概念, 只说单射就够了. 如果你熟悉传统集合论, 可能认为这里不得要领, 但我们认为这才是这些概念原本的样子.
- 
