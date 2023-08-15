@@ -116,7 +116,12 @@ module PredicativeHartogs {A : Type 𝓊} (Aset : isSet A) where
 
 ```agda
   ℍ-least : ∀ α → α <ₒ ℍ → ⟨ α ⟩ ≲ A
-  ℍ-least α ((β , β≤A) , snd₁) = {!   !}
+  ℍ-least α ((β , le) , eq) = ∥∥₁-map
+    (↪-trans (subst (λ α → ⟨ α ⟩ ↪ ⟨ β ⟩) eq {!   !}))
+    le
+    where
+    H : ⟨ ℍ ↓ (β , le) ⟩ → ⟨ β ⟩
+    H = {!   le!}
 ```
 
 ```agda
