@@ -127,39 +127,6 @@ A ↪ B = Σ (A → B) injective
 
 `↪` 的反对称性 (即施罗德-伯恩斯坦定理) 依赖于排中律.
 
-### 势
-
-单射的命题截断叫做**势**. 我们说类型 A 的势小于等于 B, 记作 A ≲ B, 当且仅当有 `∥ A ↪ B ∥₁`. 命题截断表示我们并不关系具体是哪个单射, 只要有单射就行.
-
-```agda
-infix 21 _≲_
-_≲_ : Type 𝓊 → Type 𝓋 → Type _
-A ≲ B = ∥ A ↪ B ∥₁
-
-_≳_ : Type 𝓊 → Type 𝓋 → Type _
-A ≳ B = B ≲ A
-
-_≴_ : Type 𝓊 → Type 𝓋 → Type _
-A ≴ B = ¬ A ≲ B
-```
-
-我们说 A 的势严格小于 B, 当且仅当 A 的势小于等于 B 且 B 的势不小于等于 A.
-
-```agda
-_⋨_ : Type 𝓊 → Type 𝓋 → Type _
-A ⋨ B = A ≲ B × B ≴ A
-```
-
-由单射的预序性立即有势的预序性.
-
-```agda
-≲-refl : A ≲ A
-≲-refl = ∣ ↪-refl ∣₁
-
-≲-trans : A ≲ B → B ≲ C → A ≲ C
-≲-trans = ∥∥₁-map2 ↪-trans
-```
-
 ## 满射
 
 满射 `surjective` 的定义与传统的一致. `isEmbedding×isSurjection→isEquiv` 说明一个函数是同伦嵌入且满射, 那么它是同伦等价.
@@ -344,6 +311,46 @@ module _ ⦃ _ : PR ⦄ where
 
   Resizeℙ³-inj : injective (Resizeℙ³ {X = X} {𝓊})
   Resizeℙ³-inj = Morphℙ-inj Resizeℙ² Resizeℙ²-inj
+```
+
+## 势
+
+我们说类型 `A` 与 `B` **等势 (equipotent)**, 记作 `A ≈ B`, 当且仅当有 `∥ A ≃ B ∥₁`. 命题截断表示我们并不关系具体是哪个等价, 只要有等价就行.
+
+```agda
+_≈_ : Type 𝓊 → Type 𝓋 → Type _
+A ≈ B = ∥ A ≃ B ∥₁
+```
+
+我们说类型 `A` 的势小于等于 `B`, 记作 `A ≲ B`, 当且仅当有 `∥ A ↪ B ∥₁`. 命题截断表示我们并不关系具体是哪个单射, 只要有单射就行.
+
+```agda
+infix 21 _≲_
+_≲_ : Type 𝓊 → Type 𝓋 → Type _
+A ≲ B = ∥ A ↪ B ∥₁
+
+_≳_ : Type 𝓊 → Type 𝓋 → Type _
+A ≳ B = B ≲ A
+
+_≴_ : Type 𝓊 → Type 𝓋 → Type _
+A ≴ B = ¬ A ≲ B
+```
+
+我们说 A 的势严格小于 B, 当且仅当 A 的势小于等于 B 且 B 的势不小于等于 A.
+
+```agda
+_⋨_ : Type 𝓊 → Type 𝓋 → Type _
+A ⋨ B = A ≲ B × B ≴ A
+```
+
+由单射的预序性立即有势的预序性.
+
+```agda
+≲-refl : A ≲ A
+≲-refl = ∣ ↪-refl ∣₁
+
+≲-trans : A ≲ B → B ≲ C → A ≲ C
+≲-trans = ∥∥₁-map2 ↪-trans
 ```
 
 ## 非构造性公理

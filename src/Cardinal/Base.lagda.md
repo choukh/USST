@@ -14,7 +14,7 @@ zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 {-# OPTIONS --lossy-unification --hidden-argument-puns #-}
 
 module Cardinal.Base where
-open import Preliminary
+open import Preliminary renaming (∣_∣₂ to ∣_∣)
 open import Ordinal hiding (≤-refl; ≤-trans)
   renaming ( _≤_ to _≤ₒ_; ≤-prop to ≤ₒ-prop
            ; _<_ to _<ₒ_; <-prop to <ₒ-prop)
@@ -34,21 +34,21 @@ cardRec P = ∥∥₂-rec {B = hProp _} isSetHProp P
 ```
 
 ```agda
-cardEqIso∥Eq∥ : {a b : hSet 𝓊} → Iso (∣ a ∣₂ ≡ ∣ b ∣₂) ∥ a ≡ b ∥₁
+cardEqIso∥Eq∥ : {a b : hSet 𝓊} → Iso (∣ a ∣ ≡ ∣ b ∣) ∥ a ≡ b ∥₁
 Iso.fun (cardEqIso∥Eq∥ {𝓊} {b}) p = subst (λ κ → cardRec (λ a → ∥ a ≡ b ∥ₚ) κ .fst) (sym p) ∣ refl ∣₁
-Iso.inv       cardEqIso∥Eq∥ = ∥∥₁-rec (squash₂ _ _) (cong ∣_∣₂)
+Iso.inv       cardEqIso∥Eq∥ = ∥∥₁-rec (squash₂ _ _) (cong ∣_∣)
 Iso.rightInv  cardEqIso∥Eq∥ _ = squash₁ _ _
 Iso.leftInv   cardEqIso∥Eq∥ _ = squash₂ _ _ _ _
 ```
 
 ```agda
-equivToCardEq : {a b : hSet 𝓊} → ⟨ a ⟩ ≃ ⟨ b ⟩ → ∣ a ∣₂ ≡ ∣ b ∣₂
-equivToCardEq eqv = cong ∣_∣₂ $ Σ≡Prop (λ _ → isPropΠ2 λ _ _ → isPropIsProp) (ua eqv)
+equivToCardEq : {a b : hSet 𝓊} → ⟨ a ⟩ ≃ ⟨ b ⟩ → ∣ a ∣ ≡ ∣ b ∣
+equivToCardEq eqv = cong ∣_∣ $ Σ≡Prop (λ _ → isPropΠ2 λ _ _ → isPropIsProp) (ua eqv)
 ```
 
 ```agda
-cardEqTo∥Equiv∥ : {a b : hSet 𝓊} → ∣ a ∣₂ ≡ ∣ b ∣₂ → ∥ ⟨ a ⟩ ≃ ⟨ b ⟩ ∥₁
-cardEqTo∥Equiv∥ eq = ∥∥₁-map (λ x → subst (λ - → _ ≃ ⟨ - ⟩) x (idEquiv _)) (Iso.fun cardEqIso∥Eq∥ eq)
+cardEqToEquip : {a b : hSet 𝓊} → ∣ a ∣ ≡ ∣ b ∣ → ⟨ a ⟩ ≈ ⟨ b ⟩
+cardEqToEquip eq = ∥∥₁-map (λ x → subst (λ - → _ ≃ ⟨ - ⟩) x (idEquiv _)) (Iso.fun cardEqIso∥Eq∥ eq)
 ```
 
 ## 基数的序
@@ -81,7 +81,7 @@ _≤_ : Card 𝓊 → Card 𝓋 → Type (𝓊 ⊔ 𝓋)
 
 ```agda
 ∣⟨_⟩∣ : Ord 𝓊 → Card 𝓊
-∣⟨ α ⟩∣ = ∣ ⟨ α ⟩ , ordSet ∣₂
+∣⟨ α ⟩∣ = ∣ ⟨ α ⟩ , ordSet ∣
 ```
 
 ```agda
@@ -95,7 +95,7 @@ _≤_ : Card 𝓊 → Card 𝓋 → Type (𝓊 ⊔ 𝓋)
 module PredicativeHartogs {A : Type 𝓊} (Aset : isSet A) where
 
   hartogs : EmbedOrd (𝓊 ⁺) (𝓊 ⁺)
-  EmbedOrd.carrier       hartogs = Σ α ∶ Ord 𝓊 , ∣⟨ α ⟩∣ ≤ ∣ A , Aset ∣₂
+  EmbedOrd.carrier       hartogs = Σ α ∶ Ord 𝓊 , ∣⟨ α ⟩∣ ≤ ∣ A , Aset ∣
   EmbedOrd._≺_           hartogs (α , _) (β , _) = α <ₒ β
   EmbedOrd.relation-prop hartogs _ _ = <ₒ-prop _ _
   EmbedOrd.target        hartogs = Ω
@@ -139,18 +139,13 @@ module PredicativeHartogs {A : Type 𝓊} (Aset : isSet A) where
   ℍ→ℙ³-inj = {!   !}
 ```
 
-```agda
-  ℍ↪ℙ³ : ⟨ ℍ ⟩ ↪ ℙ (ℙ (ℙ A))
-  ℍ↪ℙ³ = ℍ→ℙ³ , ℍ→ℙ³-inj
-```
-
 ## 非直谓哈特格斯数
 
 现在假设 `PR`.
 
 ```agda
 module ImpredicativeHartogs ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (Aset : isSet A) where
-  open PredicativeHartogs Aset renaming (ℍ to ℍₚ; ℍ↪ℙ³ to ℍₚ↪ℙ³)
+  open PredicativeHartogs Aset renaming (ℍ to ℍₚ; <ℍ→≲A to <ℍₚ→≲A)
 ```
 
 ```agda
@@ -212,12 +207,12 @@ module ImpredicativeHartogs ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (Aset : isSet A
     Ω ↓ ℍ               ≃ₒ⟨ isoToEquiv i , mkIsOrderEquiv ordEquiv ⟩
     ℍₚ ↓ (ℍ , ∣ℍ∣≤∣A∣)  ≃ₒ∎
     where
-    ∣ℍ∣≤∣A∣ : ∣⟨ ℍ ⟩∣ ≤ ∣ A , Aset ∣₂
+    ∣ℍ∣≤∣A∣ : ∣⟨ ℍ ⟩∣ ≤ ∣ A , Aset ∣
     ∣ℍ∣≤∣A∣ = ∣ Inj ∣₁
     i : Iso ⟨ Ω ↓ ℍ ⟩ ⟨ ℍₚ ↓ (ℍ , ∣ℍ∣≤∣A∣) ⟩
     Iso.fun i (α , α≺ℍ) = (α , H₁) , H₂ where
-      H₁ : ∣⟨ α ⟩∣ ≤ ∣ A , Aset ∣₂
-      H₁ = ≤-trans ∣⟨ α ⟩∣ ∣⟨ ℍ ⟩∣ ∣ A , Aset ∣₂ (<ₒ→≤ α≺ℍ) ∣ℍ∣≤∣A∣
+      H₁ : ∣⟨ α ⟩∣ ≤ ∣ A , Aset ∣
+      H₁ = ≤-trans ∣⟨ α ⟩∣ ∣⟨ ℍ ⟩∣ ∣ A , Aset ∣ (<ₒ→≤ α≺ℍ) ∣ℍ∣≤∣A∣
       H₂ : (α , H₁) ≺⟨ ℍₚ ⟩ (ℍ , ∣ℍ∣≤∣A∣)
       H₂ = unresize {𝓋 = 𝓊 ⁺ ⁺} (resize {P = _ , <ₒ-prop _ _} α≺ℍ)
     Iso.inv i ((α , _) , α≺ℍ) = α , unresize {𝓋 = 𝓊 ⁺ ⁺} (resize {P = _ , <ₒ-prop _ _} α≺ℍ)
@@ -225,4 +220,12 @@ module ImpredicativeHartogs ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (Aset : isSet A
     Iso.leftInv i _ = Σ≡Prop (λ _ → <ₒ-prop _ _) refl
     ordEquiv : ∀ x y → x ≺⟨ Ω ↓ ℍ ⟩ y ≃ (Iso.fun i) x ≺⟨ ℍₚ ↓ (ℍ , ∣ℍ∣≤∣A∣) ⟩ (Iso.fun i) y
     ordEquiv _ _ = idEquiv _
+```
+
+```agda
+  <ℍ→≲A : ∀ α → α <ₒ ℍ → ⟨ α ⟩ ≲ A
+  <ℍ→≲A α ((p , Hp) , eq) = ∥∥₁-map (λ { ((β , β≤) , Ha) → {!   !} }) (unresize Hp)
+    where
+    f : ⟨ ℍ ↓ (p , Hp) ⟩ → A
+    f ((q , Hq) , Hx) = {! Hq  !}
 ```
