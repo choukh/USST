@@ -41,13 +41,13 @@ module Cubical where
 
 正如 $x : A$ 是一个判断那样, " $A$ 是一个类型" 也是一个判断, 记作 `A : Type`. 其中 `Type` 就叫做**类型宇宙 (type universe)**. 它是一个层级系统, 其层级序数叫做宇宙层级 `Level`. 但要注意 `Level` 本身不在类型宇宙之中, 它独享一个单独的宇宙, 叫做层级宇宙 `LevelUniv`, 即有 `Level : LevelUniv`. (这些不同的宇宙又叫做 sort, 非形式地, 可以认为 `Type₀ : Type₁ : Type₂ : ... : Sort` 和 `LevelUniv : Sort`)
 
-最低的宇宙层级是 `𝓊₀ : Level`, 位于最低层级的类型宇宙记作 `Type 𝓊₀`, 简记作 `Type₀` 或 `Type`. 下一个宇宙是 `Type (𝓊₀ ⁺)`, 简记作 `Type 𝓊₁`, 或 `Type₁`, 以此类推. 此外, 宇宙层级还有一个二元运算 `_⊔_`, 它的作用是取两个宇宙层级中较高的那一个, 例如 `𝓊₀ ⊔ 𝓊₁` 等于 `𝓊₁`. 较低层级的类型可以被 `Lift` 提升到较高层级.
+最低的宇宙层级是 `𝓊₀ : Level`, 位于最低层级的类型宇宙记作 `Type 𝓊₀`, 简记作 `Type₀` 或 `Type`. 下一个宇宙是 `Type (𝓊₀ ⁺)`, 简记作 `Type 𝓊₁`, 或 `Type₁`, 以此类推. 此外, 宇宙层级还有一个二元运算 `_⊔_`, 它的作用是取两个宇宙层级中较高的那一个, 例如 `𝓊₀ ⊔ 𝓊₁` 等于 `𝓊₁`. 较低层级的类型可以被 `Lift` 提升到较高层级. `lift` 用于把项提升到 `Lift` 后的类型, `lower` 用于从 `Lift` 后的类型的项中解构出原类型的项, `liftExt` 说 `lower` 是单射.
 
 以上都是类型论中的原始概念, 我们从 `Cubical.Core.Primitives` 模块中通过以下代码导入了它们.
 
 ```agda
 open import Cubical.Foundations.Prelude public
-  using (Type; Level; Lift)
+  using (Type; Level; Lift; lift; lower; liftExt)
   renaming (ℓ-zero to 𝓊₀; ℓ-suc to _⁺; ℓ-max to _⊔_)
 
 𝓊₁ = 𝓊₀ ⁺

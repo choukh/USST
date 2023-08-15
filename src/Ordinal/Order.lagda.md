@@ -331,6 +331,37 @@ module _ ⦃ _ : PR ⦄ (A : Type 𝓊) (β : Ord 𝓋) (f : A ≃ ⟨ β ⟩) w
   ResizeOrdEquiv = f , mkIsOrderEquiv λ _ _ → unresize , isEquivUnresize
 ```
 
+## 序数宇宙提升
+
+序数宇宙提升的方法也类似, 而且更为简单, 直接用 `Lift` 即可.
+
+```agda
+module _ {𝓋 : Level} (α : Ord 𝓊) where
+
+  LiftOrd : Ord (𝓊 ⊔ 𝓋)
+  LiftOrd = tieup emb
+    where
+    open OrdStr (str α)
+    _<_ : Lift ⟨ α ⟩ → Lift ⟨ α ⟩ → Type (𝓊 ⊔ 𝓋)
+    lift x < lift y = Lift {j = 𝓋} (x ≺ y)
+    emb : EmbedOrd (𝓊 ⊔ 𝓋) 𝓊
+    EmbedOrd.carrier       emb = Lift {j = 𝓋} ⟨ α ⟩
+    EmbedOrd._≺_           emb = _<_
+    EmbedOrd.relation-prop emb _ _ = isOfHLevelLift 1 (≺-prop _ _)
+    EmbedOrd.target        emb = α
+    EmbedOrd.embed         emb = lower
+    EmbedOrd.inj           emb = liftExt
+    EmbedOrd.pres≺         emb _ _ = lower
+    EmbedOrd.formsInitSeg  emb b (lift a′) b≺fa′ = lift b , lift b≺fa′ , refl
+```
+
+提升后的序数与原序数等价.
+
+```agda
+  LiftOrdEquiv : LiftOrd ≃ₒ α
+  LiftOrdEquiv = ≃ₒ-sym $ LiftEquiv , mkIsOrderEquiv λ x y → lift , LiftEquiv .snd
+```
+
 ## 非严格序
 
 序数之间的非严格序 `_≤_` 定义为它们之间的嵌入的全体.

@@ -29,6 +29,11 @@ Card 𝓊 = ∥ hSet 𝓊 ∥₂
 ```
 
 ```agda
+isSetCard : isSet (Card 𝓊)
+isSetCard = squash₂
+```
+
+```agda
 cardRec : (hSet 𝓊 → hProp (𝓊 ⁺)) → Card 𝓊 → hProp (𝓊 ⁺)
 cardRec P = ∥∥₂-rec {B = hProp _} isSetHProp P
 ```
@@ -36,9 +41,9 @@ cardRec P = ∥∥₂-rec {B = hProp _} isSetHProp P
 ```agda
 cardEqIso∥Eq∥ : {a b : hSet 𝓊} → Iso (∣ a ∣ ≡ ∣ b ∣) ∥ a ≡ b ∥₁
 Iso.fun (cardEqIso∥Eq∥ {𝓊} {b}) p = subst (λ κ → cardRec (λ a → ∥ a ≡ b ∥ₚ) κ .fst) (sym p) ∣ refl ∣₁
-Iso.inv       cardEqIso∥Eq∥ = ∥∥₁-rec (squash₂ _ _) (cong ∣_∣)
+Iso.inv       cardEqIso∥Eq∥ = ∥∥₁-rec (isSetCard _ _) (cong ∣_∣)
 Iso.rightInv  cardEqIso∥Eq∥ _ = squash₁ _ _
-Iso.leftInv   cardEqIso∥Eq∥ _ = squash₂ _ _ _ _
+Iso.leftInv   cardEqIso∥Eq∥ _ = isSetCard _ _ _ _
 ```
 
 ```agda
@@ -54,9 +59,9 @@ cardEqToEquip eq = ∥∥₁-map (λ x → subst (λ - → _ ≃ ⟨ - ⟩) x (i
 ```agda
 cardEqIsoEquip : {a b : hSet 𝓊} → Iso (∣ a ∣ ≡ ∣ b ∣) (⟨ a ⟩ ≈ ⟨ b ⟩)
 Iso.fun       cardEqIsoEquip = cardEqToEquip
-Iso.inv       cardEqIsoEquip = ∥∥₁-rec (squash₂ _ _) equivToCardEq
+Iso.inv       cardEqIsoEquip = ∥∥₁-rec (isSetCard _ _) equivToCardEq
 Iso.rightInv  cardEqIsoEquip _ = squash₁ _ _
-Iso.leftInv   cardEqIsoEquip _ = squash₂ _ _ _ _
+Iso.leftInv   cardEqIsoEquip _ = isSetCard _ _ _ _
 ```
 
 ```agda
@@ -237,8 +242,5 @@ module ImpredicativeHartogs ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (Aset : isSet A
 
 ```agda
   <ℍ→≲A : ∀ α → α <ₒ ℍ → ⟨ α ⟩ ≲ A
-  <ℍ→≲A α ((p , Hp) , eq) = ∥∥₁-map (λ { ((β , β≤) , Ha) → {!   !} }) (unresize Hp)
-    where
-    f : ⟨ ℍ ↓ (p , Hp) ⟩ → A
-    f ((q , Hq) , Hx) = {! Hq  !}
+  <ℍ→≲A α ((p , Hp) , eq) = ≲-trans {!   !} (<ℍₚ→≲A (LiftOrd α) {!   !})
 ```
