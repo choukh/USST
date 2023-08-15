@@ -208,8 +208,8 @@ module ImpredicativeHartogs ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (Aset : isSet A
   ℍ : Ord (𝓊 ⁺)
   ℍ = ResizeOrd carrier ℍₚ carrierEquiv
 
-  ℍ≃ℍₚ : ℍ ≃ₒ ℍₚ
-  ℍ≃ℍₚ = ResizeOrdEquiv _ _ carrierEquiv
+  ℍ≃ₒℍₚ : ℍ ≃ₒ ℍₚ
+  ℍ≃ₒℍₚ = ResizeOrdEquiv _ _ carrierEquiv
 ```
 
 ```agda
@@ -220,7 +220,7 @@ module ImpredicativeHartogs ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (Aset : isSet A
 ```agda
   ¬ℍ↪ : ¬ ⟨ ℍ ⟩ ↪ A
   ¬ℍ↪ Inj@(f , f-inj) = ¬α≃ₒα↓a ℍₚ (ℍ , ∣ℍ∣≤∣A∣) $
-    ℍₚ                  ≃ₒ˘⟨ ℍ≃ℍₚ ⟩
+    ℍₚ                  ≃ₒ˘⟨ ℍ≃ₒℍₚ ⟩
     ℍ                   ≃ₒ⟨ α≃Ω↓α ⟩
     Ω ↓ ℍ               ≃ₒ⟨ isoToEquiv i , mkIsOrderEquiv ordEquiv ⟩
     ℍₚ ↓ (ℍ , ∣ℍ∣≤∣A∣)  ≃ₒ∎
@@ -242,8 +242,7 @@ module ImpredicativeHartogs ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (Aset : isSet A
 
 ```agda
   <ℍ→≲A : ∀ α → α <ₒ ℍ → ⟨ α ⟩ ≲ A
-  <ℍ→≲A α ((p , Hp) , eq) = ≈-≲-trans ∣ LiftOrdEquiv α .fst ∣₁ $ <ℍₚ→≲A (LiftOrd α) H
-    where
+  <ℍ→≲A α α<ₒℍ = ≈-≲-trans ∣ LiftOrdEquiv α .fst ∣₁ $ <ℍₚ→≲A (LiftOrd α) H where
     H : LiftOrd α <ₒ ℍₚ
-    H = {!   !}
+    H = <-cong≃ₒ (LiftOrdEquiv α) ℍ≃ₒℍₚ α<ₒℍ
 ```

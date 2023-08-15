@@ -275,7 +275,7 @@ Ord 𝓊 = TypeWithStr 𝓊 OrdStr
 我们今后都用 α β γ 等符号表示序数.
 
 ```agda
-variable α β γ : Ord 𝓊
+variable α β γ δ : Ord 𝓊
 ```
 
 ### 底集
