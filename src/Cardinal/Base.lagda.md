@@ -29,6 +29,31 @@ Card 𝓊 = ∥ hSet 𝓊 ∥₂
 ```
 
 ```agda
+cardRec : (hSet 𝓊 → hProp (𝓊 ⁺)) → Card 𝓊 → hProp (𝓊 ⁺)
+cardRec P = ∥∥₂-rec {B = hProp _} isSetHProp P
+```
+
+```agda
+cardEqIso∥Eq∥ : {a b : hSet 𝓊} → Iso (∣ a ∣₂ ≡ ∣ b ∣₂) ∥ a ≡ b ∥₁
+Iso.fun (cardEqIso∥Eq∥ {𝓊} {b}) p = subst (λ κ → cardRec (λ a → ∥ a ≡ b ∥₁ , squash₁) κ .fst) (sym p) ∣ refl ∣₁
+Iso.inv       cardEqIso∥Eq∥ = ∥∥₁-rec (squash₂ _ _) (cong ∣_∣₂)
+Iso.rightInv  cardEqIso∥Eq∥ _ = squash₁ _ _
+Iso.leftInv   cardEqIso∥Eq∥ _ = squash₂ _ _ _ _
+```
+
+```agda
+equivToCardEq : {a b : hSet 𝓊} → ⟨ a ⟩ ≃ ⟨ b ⟩ → ∣ a ∣₂ ≡ ∣ b ∣₂
+equivToCardEq eqv = cong ∣_∣₂ $ Σ≡Prop (λ _ → isPropΠ2 λ _ _ → isPropIsProp) (ua eqv)
+```
+
+```agda
+cardEqTo∥Equiv∥ : {a b : hSet 𝓊} → ∣ a ∣₂ ≡ ∣ b ∣₂ → ∥ ⟨ a ⟩ ≃ ⟨ b ⟩ ∥₁
+cardEqTo∥Equiv∥ eq = ∥∥₁-map (λ x → subst (λ - → _ ≃ ⟨ - ⟩) x (idEquiv _)) (Iso.fun cardEqIso∥Eq∥ eq)
+```
+
+## 基数的序
+
+```agda
 _≤ₕ_ : Card 𝓊 → Card 𝓋 → hProp (𝓊 ⊔ 𝓋)
 _≤ₕ_ = ∥∥₂-rec2 isSetHProp λ (A , _) (B , _) → ∥ A ↪ B ∥₁ , squash₁
 ```

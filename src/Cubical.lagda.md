@@ -337,6 +337,14 @@ _⁻¹ : {A : Type 𝓊} {B : Type 𝓋} → A ≃ B → B → A
 e ⁻¹ = fst (invEquiv e)
 ```
 
+## 泛等原理
+
+在 Cubical 中泛等公理 `ua` 是一个定理, 我们今后称之为泛等原理. 它说两个类型如果等价, 那么相等, 即对任意 `A` 和 `B` 有 `A ≃ B → A ≡ B`. 我们几乎不需要直接使用 `ua`, 更多地是用它的推论, 已经在上面分散地给出.
+
+```agda
+open import Cubical.Foundations.Univalence public using (ua)
+```
+
 以下是用 Agda 反射机制定义的宏, 搭配同伦等价使用, 用于更快地证明一些数学结构的**泛等原理 (univalence principle)**. 我们不需要关心这些工具的实现细节, 只需要知道什么是结构的泛等原理, 以及如何使用这套工具得到它. 具体可以看 `𝒮ᴰ-Record` 定义下面的例子, 以及本系列讲义的后续文章.
 
 ```agda
