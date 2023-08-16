@@ -173,7 +173,7 @@ module PredicativeHartogs {A : Type 𝓊} (Aset : isSet A) where
     Σwo : Σ wo ∶ WellOrdered (R p) , （ p , wo ） ≃ₒ LiftOrd β
     Σwo = transport (cong fst (funExt⁻ eq p)) (wo , eα)
     eβ : （ p , wo ） ≃ₒ LiftOrd β
-    eβ = subst (λ wo → （ p , wo ） ≃ₒ LiftOrd β) (isPropWellOrdered _ _ _) $ snd $ Σwo
+    eβ = subst (λ wo → （ p , wo ） ≃ₒ LiftOrd β) (isPropWellOrdered _ _ _) $ Σwo .snd
     e : α ≃ₒ β
     e = α           ≃ₒ⟨ LiftOrdEquiv ⟩
         LiftOrd α   ≃ₒ˘⟨ eα ⟩
