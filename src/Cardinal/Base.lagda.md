@@ -147,14 +147,35 @@ module PredicativeHartogs {A : Type 𝓊} (Aset : isSet A) where
 ```
 
 ```agda
+  ρ : ⟨ ℍ ⟩ → ℙ (ℙ A) → Ord (𝓊 ⁺)
+  ρ (α , α≤) p = ⟦ p ⟧ , {!   !}
+    where
+    Rel = Σ (x , _) ∶ ⟦ p ⟧ , Σ (y , _) ∶ ⟦ p ⟧ , x ⊂ y
+    ordStr : OrdStr ⟦ p ⟧
+    ordStr = {!    !}
+```
+
+```agda
   ℍ→ℙ³ : ⟨ ℍ ⟩ → ℙ (ℙ (ℙ A))
-  ℍ→ℙ³ (β , _) X = Lift ∥ Iso Sub ⟨ β ⟩ ∥₁ , isOfHLevelLift 1 squash₁
-    where Sub = Σ (x , _) ∶ ⟦ X ⟧ , Σ (y , _) ∶ ⟦ X ⟧ , x ⊂ y
+  ℍ→ℙ³ a@(α , _) p = ρ a p ≃ₒ LiftOrd α , isPropOrdEquiv _ _
 ```
 
 ```agda
   ℍ→ℙ³-inj : injective ℍ→ℙ³
-  ℍ→ℙ³-inj = {!   !}
+  ℍ→ℙ³-inj a@{α , α≤} {β , β≤} eq = Σ≡Prop (λ _ → ≤-prop _ _) (≃ₒ→≡ e)
+    where
+    p : ℙ (ℙ A)
+    p = {!   !}
+    e₁ : ρ a p ≃ₒ LiftOrd α
+    e₁ = {!   !}
+    e₂ : ρ a p ≃ₒ LiftOrd β
+    e₂ = transport (cong fst (funExt⁻ eq p)) e₁
+    e : α ≃ₒ β
+    e = α         ≃ₒ⟨ LiftOrdEquiv ⟩
+        LiftOrd α ≃ₒ˘⟨ e₁ ⟩
+        ρ a p     ≃ₒ⟨ e₂ ⟩
+        LiftOrd β ≃ₒ˘⟨ LiftOrdEquiv ⟩
+        β         ≃ₒ∎
 ```
 
 ## 非直谓哈特格斯数
@@ -242,7 +263,7 @@ module ImpredicativeHartogs ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (Aset : isSet A
 
 ```agda
   <ℍ→≲A : ∀ α → α <ₒ ℍ → ⟨ α ⟩ ≲ A
-  <ℍ→≲A α α<ₒℍ = ≈-≲-trans ∣ LiftOrdEquiv α .fst ∣₁ $ <ℍₚ→≲A (LiftOrd α) H where
+  <ℍ→≲A α α<ₒℍ = ≈-≲-trans ∣ LiftOrdEquiv .fst ∣₁ $ <ℍₚ→≲A (LiftOrd α) H where
     H : LiftOrd α <ₒ ℍₚ
-    H = <-cong≃ₒ (LiftOrdEquiv α) ℍ≃ₒℍₚ α<ₒℍ
+    H = <-cong≃ₒ LiftOrdEquiv ℍ≃ₒℍₚ α<ₒℍ
 ```

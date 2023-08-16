@@ -358,8 +358,8 @@ module _ (α : Ord 𝓊) {𝓋 : Level} where
 序数与提升后的序数等价.
 
 ```agda
-  LiftOrdEquiv : α ≃ₒ LiftOrd
-  LiftOrdEquiv = LiftEquiv , mkIsOrderEquiv λ x y → lift , LiftEquiv .snd
+LiftOrdEquiv : α ≃ₒ LiftOrd α {𝓊}
+LiftOrdEquiv = LiftEquiv , mkIsOrderEquiv λ x y → lift , LiftEquiv .snd
 ```
 
 ## 非严格序
