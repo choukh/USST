@@ -173,7 +173,7 @@ module PredicativeHartogs {A : Type 𝓊} (Aset : isSet A) where
       β           ≃ₒ∎
       where
       P : ℙ (ℙ A)
-      P p = ∥ Lift $ Σ a ∶ ⟨ α ⟩ , (∀ x → ⟨ p x ⟩ ↔ (Σ a′ ∶ ⟨ α ⟩ , a′ ≺⟨ α ⟩ a × x ≡ f a′)) ∥ₚ
+      P p = ∥ Lift $ Σ a′ ∶ ⟨ α ⟩ , (∀ b → ⟨ p b ⟩ ↔ (Σ a ∶ ⟨ α ⟩ , a ≺⟨ α ⟩ a′ × f a ≡ b)) ∥ₚ
       wo : WellOrdered (Sub P)
       wo = {!   !}
       eα : （ P , wo ） ≃ₒ LiftOrd α
