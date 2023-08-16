@@ -414,8 +414,8 @@ NonEmptyDec _ ¬dec = ¬dec $ no λ a → ¬dec $ yes a
 选择公理是说对于任意集合 `A` 和 `B` 以及它们之间的命题关系 `R`, 如果对任意 `x : A` 都存在一个 `y : B` 使得 `R x y` 成立, 那么存在一个函数 `f : A → B` 使得对任意 `x : A` 有 `R x (f x)` 成立.
 
 ```agda
-AC : (𝓊 𝓋 ℓ′′ : Level) → Type _
-AC 𝓊 𝓋 ℓ′′ = (A : Type 𝓊) (B : Type 𝓋) (R : A → B → Type ℓ′′) →
+AC : (𝓊 𝓋 𝓌 : Level) → Type _
+AC 𝓊 𝓋 𝓌 = (A : Type 𝓊) (B : Type 𝓋) (R : A → B → Type 𝓌) →
   isSet A → isSet B → (∀ x y → isProp (R x y)) →
   (∀ x → ∃ y ∶ B , R x y) → ∃ f ∶ (A → B) , ∀ x → R x (f x)
 ```
@@ -423,8 +423,8 @@ AC 𝓊 𝓋 ℓ′′ = (A : Type 𝓊) (B : Type 𝓋) (R : A → B → Type �
 选择公理也是一个命题, 因为其表述是一个嵌套Π类型, 其目标是Σ类型的命题截断.
 
 ```agda
-isPropAC : (𝓊 𝓋 ℓ′′ : Level) → isProp (AC 𝓊 𝓋 ℓ′′)
-isPropAC 𝓊 𝓋 ℓ′′ = isPropΠ6 λ _ _ _ _ _ _ → isPropΠ λ _ → squash₁
+isPropAC : (𝓊 𝓋 𝓌 : Level) → isProp (AC 𝓊 𝓋 𝓌)
+isPropAC 𝓊 𝓋 𝓌 = isPropΠ6 λ _ _ _ _ _ _ → isPropΠ λ _ → squash₁
 ```
 
 ### 连续统假设

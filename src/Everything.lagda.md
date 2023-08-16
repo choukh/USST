@@ -55,7 +55,7 @@ import Ordinal.OrdInOrd
 [(7) 基数]()
 
 ```agda
-import Cardinal.Base
+--import Cardinal.Base
 ```
 
 ## 参考文献
