@@ -147,39 +147,41 @@ module PredicativeHartogs {A : Type 𝓊} (Aset : isSet A) where
 ```
 
 ```agda
-  R : (p : ℙ (ℙ A)) → ⟦ p ⟧ → ⟦ p ⟧ → Type (𝓊 ⁺)
-  R _ (x , _) (y , _) = Lift (x ⊂ y)
+  Sub : (P : ℙ (ℙ A)) → ⟦ P ⟧ → ⟦ P ⟧ → Type (𝓊 ⁺)
+  Sub _ (x , _) (y , _) = Lift (x ⊂ y)
 
-  （_,_） : (p : ℙ (ℙ A)) (wo : WellOrdered (R p)) → Ord (𝓊 ⁺)
-  （ p , wo ） = ⟦ p ⟧ , mkOrdStr (R p) wo
+  （_,_） : (P : ℙ (ℙ A)) (wo : WellOrdered (Sub P)) → Ord (𝓊 ⁺)
+  （ P , wo ） = ⟦ P ⟧ , mkOrdStr (Sub P) wo
 ```
 
 ```agda
   ℍ→ℙ³ : ⟨ ℍ ⟩ → ℙ (ℙ (ℙ A))
-  ℍ→ℙ³ a@(α , _) p = (Σ wo ∶ WellOrdered (R p) , （ p , wo ） ≃ₒ LiftOrd α) ,
+  ℍ→ℙ³ a@(α , _) P = (Σ wo ∶ WellOrdered (Sub P) , （ P , wo ） ≃ₒ LiftOrd α) ,
     isPropΣ (isPropWellOrdered _) λ _ → isPropOrdEquiv _ _
 ```
 
 ```agda
   ℍ→ℙ³-inj : injective ℍ→ℙ³
-  ℍ→ℙ³-inj a@{α , α≤} {β , β≤} eq = Σ≡Prop (λ _ → ≤-prop _ _) (≃ₒ→≡ e)
+  ℍ→ℙ³-inj a@{α , α≤} {β , β≤} eq = Σ≡Prop (λ _ → ≤-prop _ _) (∥∥₁-rec (isSetOrd _ _) e α≤)
     where
-    p : ℙ (ℙ A)
-    p = {!   !}
-    wo : WellOrdered (R p)
-    wo = {!   !}
-    eα : （ p , wo ） ≃ₒ LiftOrd α
-    eα = {!   !}
-    Σwo : Σ wo ∶ WellOrdered (R p) , （ p , wo ） ≃ₒ LiftOrd β
-    Σwo = transport (cong fst (funExt⁻ eq p)) (wo , eα)
-    eβ : （ p , wo ） ≃ₒ LiftOrd β
-    eβ = subst (λ wo → （ p , wo ） ≃ₒ LiftOrd β) (isPropWellOrdered _ _ _) $ Σwo .snd
-    e : α ≃ₒ β
-    e = α           ≃ₒ⟨ LiftOrdEquiv ⟩
-        LiftOrd α   ≃ₒ˘⟨ eα ⟩
-        （ p , wo ）  ≃ₒ⟨ eβ ⟩
-        LiftOrd β   ≃ₒ˘⟨ LiftOrdEquiv ⟩
-        β           ≃ₒ∎
+    e : ⟨ α ⟩ ↪ A → α ≡ β
+    e (f , f-inj) = ≃ₒ→≡ $
+      α           ≃ₒ⟨ LiftOrdEquiv ⟩
+      LiftOrd α   ≃ₒ˘⟨ eα ⟩
+      （ P , wo ）  ≃ₒ⟨ eβ ⟩
+      LiftOrd β   ≃ₒ˘⟨ LiftOrdEquiv ⟩
+      β           ≃ₒ∎
+      where
+      P : ℙ (ℙ A)
+      P p = ∥ Lift $ Σ a ∶ ⟨ α ⟩ , (∀ x → ⟨ p x ⟩ ↔ (Σ a′ ∶ ⟨ α ⟩ , a′ ≺⟨ α ⟩ a × x ≡ f a′)) ∥ₚ
+      wo : WellOrdered (Sub P)
+      wo = {!   !}
+      eα : （ P , wo ） ≃ₒ LiftOrd α
+      eα = {!   !}
+      Σwo : Σ wo ∶ WellOrdered (Sub P) , （ P , wo ） ≃ₒ LiftOrd β
+      Σwo = transport (cong fst (funExt⁻ eq P)) (wo , eα)
+      eβ : （ P , wo ） ≃ₒ LiftOrd β
+      eβ = subst (λ wo → （ P , wo ） ≃ₒ LiftOrd β) (isPropWellOrdered _ _ _) $ Σwo .snd
 ```
 
 ## 非直谓哈特格斯数
@@ -193,7 +195,7 @@ module ImpredicativeHartogs ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (Aset : isSet A
 
 ```agda
   ℍ-injected : ℙ[ 𝓊 ][ 2 ]⁺ A → hProp 𝓊
-  ℍ-injected y = Resize $ (∃ x ∶ ⟨ ℍₚ ⟩ , Resizeℙ³ (ℍ→ℙ³ x) ≡ y) , squash₁
+  ℍ-injected y = Resize $ ∥ Σ x ∶ ⟨ ℍₚ ⟩ , Resizeℙ³ (ℍ→ℙ³ x) ≡ y ∥ₚ
 
   isPropℍInjected : {x : ℙ[ 𝓊 ][ 2 ]⁺ A} → isProp ⟨ ℍ-injected x ⟩
   isPropℍInjected = ℍ-injected _ .snd
