@@ -57,3 +57,9 @@ import Ordinal.OrdInOrd
 ```agda
 import Cardinal.Base
 ```
+
+## 参考文献
+1. [The HoTT Book](https://homotopytypetheory.org/book/)
+2. [martinescardo/TypeTopology](https://github.com/martinescardo/TypeTopology)
+3. [Set-Theoretic and Type-Theoretic Ordinals Coincide](https://arxiv.org/abs/2301.10696)
+4. [The Generalised Continuum Hypothesis Implies the Axiom of Choice in Coq](https://www.ps.uni-saarland.de/Publications/documents/KirstRech_2021_The-Generalised.pdf)

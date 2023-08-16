@@ -128,15 +128,15 @@ module PredicativeHartogs {A : Type 𝓊} (Aset : isSet A) where
 ```
 
 ```agda
-  ℍ : Ord (𝓊 ⁺)
-  ℍ = tieup hartogs
+  ℵ : Ord (𝓊 ⁺)
+  ℵ = tieup hartogs
 ```
 
 ```agda
-  <ℍ→≲A : ∀ α → α <ₒ ℍ → ⟨ α ⟩ ≲ A
-  <ℍ→≲A α ((β , β≤) , eq) = ∥∥₁-map (↪-trans H) β≤
+  <ℵ→≲A : ∀ α → α <ₒ ℵ → ⟨ α ⟩ ≲ A
+  <ℵ→≲A α ((β , β≤) , eq) = ∥∥₁-map (↪-trans H) β≤
     where
-    f : ⟨ ℍ ↓ (β , β≤) ⟩ → ⟨ β ⟩
+    f : ⟨ ℵ ↓ (β , β≤) ⟩ → ⟨ β ⟩
     f (_ , b , _) = b
     f-inj : injective f
     f-inj {(γ , γ≤) , a , β↓a≡γ} {(δ , δ≤) , b , β↓b≡δ} a≡b =
@@ -155,14 +155,14 @@ module PredicativeHartogs {A : Type 𝓊} (Aset : isSet A) where
 ```
 
 ```agda
-  ℍ→ℙ³ : ⟨ ℍ ⟩ → ℙ (ℙ (ℙ A))
-  ℍ→ℙ³ a@(α , _) P = (Σ wo ∶ WellOrdered (Sub P) , （ P , wo ） ≃ₒ LiftOrd α) ,
+  ℵ→ℙ³ : ⟨ ℵ ⟩ → ℙ (ℙ (ℙ A))
+  ℵ→ℙ³ a@(α , _) P = (Σ wo ∶ WellOrdered (Sub P) , （ P , wo ） ≃ₒ LiftOrd α) ,
     isPropΣ (isPropWellOrdered _) λ _ → isPropOrdEquiv _ _
 ```
 
 ```agda
-  ℍ→ℙ³-inj : injective ℍ→ℙ³
-  ℍ→ℙ³-inj a@{α , α≤} {β , β≤} eq = Σ≡Prop (λ _ → ≤-prop _ _) (∥∥₁-rec (isSetOrd _ _) e α≤)
+  ℵ→ℙ³-inj : injective ℵ→ℙ³
+  ℵ→ℙ³-inj a@{α , α≤} {β , β≤} eq = Σ≡Prop (λ _ → ≤-prop _ _) (∥∥₁-rec (isSetOrd _ _) e α≤)
     where
     e : ⟨ α ⟩ ↪ A → α ≡ β
     e (f , f-inj) = ≃ₒ→≡ $
@@ -190,38 +190,38 @@ module PredicativeHartogs {A : Type 𝓊} (Aset : isSet A) where
 
 ```agda
 module ImpredicativeHartogs ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (Aset : isSet A) where
-  open PredicativeHartogs Aset renaming (ℍ to ℍₚ; <ℍ→≲A to <ℍₚ→≲A)
+  open PredicativeHartogs Aset renaming (ℵ to ℵₚ; <ℵ→≲A to <ℵₚ→≲A)
 ```
 
 ```agda
-  ℍ-injected : ℙ[ 𝓊 ][ 2 ]⁺ A → hProp 𝓊
-  ℍ-injected y = Resize $ ∥ Σ x ∶ ⟨ ℍₚ ⟩ , Resizeℙ³ (ℍ→ℙ³ x) ≡ y ∥ₚ
+  ℵ-injected : ℙ[ 𝓊 ][ 2 ]⁺ A → hProp 𝓊
+  ℵ-injected y = Resize $ ∥ Σ x ∶ ⟨ ℵₚ ⟩ , Resizeℙ³ (ℵ→ℙ³ x) ≡ y ∥ₚ
 
-  isPropℍInjected : {x : ℙ[ 𝓊 ][ 2 ]⁺ A} → isProp ⟨ ℍ-injected x ⟩
-  isPropℍInjected = ℍ-injected _ .snd
+  isPropℵInjected : {x : ℙ[ 𝓊 ][ 2 ]⁺ A} → isProp ⟨ ℵ-injected x ⟩
+  isPropℵInjected = ℵ-injected _ .snd
 ```
 
 ```agda
   carrier : Type (𝓊 ⁺)
-  carrier = Σ (ℙ[ 𝓊 ][ 2 ]⁺ A) (⟨_⟩ ∘ ℍ-injected)
+  carrier = Σ (ℙ[ 𝓊 ][ 2 ]⁺ A) (⟨_⟩ ∘ ℵ-injected)
 ```
 
 ```agda
   isSetCarrier : isSet carrier
-  isSetCarrier = isSetΣ (isSetΠ λ _ → isSetHProp) λ x → isProp→isSet isPropℍInjected
+  isSetCarrier = isSetΣ (isSetΠ λ _ → isSetHProp) λ x → isProp→isSet isPropℵInjected
 ```
 
 ```agda
-  carrierMap : ⟨ ℍₚ ⟩ → carrier
-  carrierMap x = Resizeℙ³ (ℍ→ℙ³ x) , resize ∣ x , refl ∣₁
+  carrierMap : ⟨ ℵₚ ⟩ → carrier
+  carrierMap x = Resizeℙ³ (ℵ→ℙ³ x) , resize ∣ x , refl ∣₁
 
-  carrierEquiv : carrier ≃ ⟨ ℍₚ ⟩
+  carrierEquiv : carrier ≃ ⟨ ℵₚ ⟩
   carrierEquiv = invEquiv $ carrierMap , inj→sur→isEquiv isSetCarrier inj sur
     where
     inj : injective carrierMap
-    inj = ℍ→ℙ³-inj ∘ Resizeℙ³-inj ∘ cong fst
+    inj = ℵ→ℙ³-inj ∘ Resizeℙ³-inj ∘ cong fst
     sur : surjective carrierMap
-    sur (y , H) = ∥∥₁-map (λ (x , fx≡y) → x , Σ≡Prop (λ _ → isPropℍInjected) fx≡y) (unresize H)
+    sur (y , H) = ∥∥₁-map (λ (x , fx≡y) → x , Σ≡Prop (λ _ → isPropℵInjected) fx≡y) (unresize H)
 ```
 
 回想我们有序数降级: 任意 `β : Ord 𝓋` 可以降级到 `Ord 𝓊` 上, 只要找到一个 `A : Type 𝓊` 满足 `A ≃ ⟨ β ⟩`.
@@ -232,44 +232,44 @@ module ImpredicativeHartogs ⦃ _ : PR ⦄ {A : Type (𝓊 ⁺)} (Aset : isSet A
 ```
 
 ```agda
-  ℍ : Ord (𝓊 ⁺)
-  ℍ = ResizeOrd carrier ℍₚ carrierEquiv
+  ℵ : Ord (𝓊 ⁺)
+  ℵ = ResizeOrd carrier ℵₚ carrierEquiv
 
-  ℍ≃ₒℍₚ : ℍ ≃ₒ ℍₚ
-  ℍ≃ₒℍₚ = ResizeOrdEquiv _ _ carrierEquiv
+  ℵ≃ₒℵₚ : ℵ ≃ₒ ℵₚ
+  ℵ≃ₒℵₚ = ResizeOrdEquiv _ _ carrierEquiv
 ```
 
 ```agda
-  ℍ↪ℙ³ : ⟨ ℍ ⟩ ↪ ℙ[ 𝓊 ][ 2 ]⁺ A
-  ℍ↪ℙ³ = fst , Σ≡Prop (λ _ → isPropℍInjected)
+  ℵ↪ℙ³ : ⟨ ℵ ⟩ ↪ ℙ[ 𝓊 ][ 2 ]⁺ A
+  ℵ↪ℙ³ = fst , Σ≡Prop (λ _ → isPropℵInjected)
 ```
 
 ```agda
-  ¬ℍ↪ : ¬ ⟨ ℍ ⟩ ↪ A
-  ¬ℍ↪ Inj@(f , f-inj) = ¬α≃ₒα↓a ℍₚ (ℍ , ∣ℍ∣≤∣A∣) $
-    ℍₚ                  ≃ₒ˘⟨ ℍ≃ₒℍₚ ⟩
-    ℍ                   ≃ₒ⟨ α≃Ω↓α ⟩
-    Ω ↓ ℍ               ≃ₒ⟨ isoToEquiv i , mkIsOrderEquiv ordEquiv ⟩
-    ℍₚ ↓ (ℍ , ∣ℍ∣≤∣A∣)  ≃ₒ∎
+  ¬ℵ↪ : ¬ ⟨ ℵ ⟩ ↪ A
+  ¬ℵ↪ Inj@(f , f-inj) = ¬α≃ₒα↓a ℵₚ (ℵ , ∣ℵ∣≤∣A∣) $
+    ℵₚ                  ≃ₒ˘⟨ ℵ≃ₒℵₚ ⟩
+    ℵ                   ≃ₒ⟨ α≃Ω↓α ⟩
+    Ω ↓ ℵ               ≃ₒ⟨ isoToEquiv i , mkIsOrderEquiv ordEquiv ⟩
+    ℵₚ ↓ (ℵ , ∣ℵ∣≤∣A∣)  ≃ₒ∎
     where
-    ∣ℍ∣≤∣A∣ : ∣⟨ ℍ ⟩∣ ≤ ∣ A , Aset ∣
-    ∣ℍ∣≤∣A∣ = ∣ Inj ∣₁
-    i : Iso ⟨ Ω ↓ ℍ ⟩ ⟨ ℍₚ ↓ (ℍ , ∣ℍ∣≤∣A∣) ⟩
-    Iso.fun i (α , α≺ℍ) = (α , H₁) , H₂ where
+    ∣ℵ∣≤∣A∣ : ∣⟨ ℵ ⟩∣ ≤ ∣ A , Aset ∣
+    ∣ℵ∣≤∣A∣ = ∣ Inj ∣₁
+    i : Iso ⟨ Ω ↓ ℵ ⟩ ⟨ ℵₚ ↓ (ℵ , ∣ℵ∣≤∣A∣) ⟩
+    Iso.fun i (α , α≺ℵ) = (α , H₁) , H₂ where
       H₁ : ∣⟨ α ⟩∣ ≤ ∣ A , Aset ∣
-      H₁ = ≤-trans ∣⟨ α ⟩∣ ∣⟨ ℍ ⟩∣ ∣ A , Aset ∣ (<ₒ→≤ α≺ℍ) ∣ℍ∣≤∣A∣
-      H₂ : (α , H₁) ≺⟨ ℍₚ ⟩ (ℍ , ∣ℍ∣≤∣A∣)
-      H₂ = unresize {𝓋 = 𝓊 ⁺ ⁺} (resize {P = _ , <ₒ-prop _ _} α≺ℍ)
-    Iso.inv i ((α , _) , α≺ℍ) = α , unresize {𝓋 = 𝓊 ⁺ ⁺} (resize {P = _ , <ₒ-prop _ _} α≺ℍ)
+      H₁ = ≤-trans ∣⟨ α ⟩∣ ∣⟨ ℵ ⟩∣ ∣ A , Aset ∣ (<ₒ→≤ α≺ℵ) ∣ℵ∣≤∣A∣
+      H₂ : (α , H₁) ≺⟨ ℵₚ ⟩ (ℵ , ∣ℵ∣≤∣A∣)
+      H₂ = unresize {𝓋 = 𝓊 ⁺ ⁺} (resize {P = _ , <ₒ-prop _ _} α≺ℵ)
+    Iso.inv i ((α , _) , α≺ℵ) = α , unresize {𝓋 = 𝓊 ⁺ ⁺} (resize {P = _ , <ₒ-prop _ _} α≺ℵ)
     Iso.rightInv i _ = Σ≡Prop (λ _ → <ₒ-prop _ _) (Σ≡Prop (λ _ → ≤-prop _ _) refl)
     Iso.leftInv i _ = Σ≡Prop (λ _ → <ₒ-prop _ _) refl
-    ordEquiv : ∀ x y → x ≺⟨ Ω ↓ ℍ ⟩ y ≃ (Iso.fun i) x ≺⟨ ℍₚ ↓ (ℍ , ∣ℍ∣≤∣A∣) ⟩ (Iso.fun i) y
+    ordEquiv : ∀ x y → x ≺⟨ Ω ↓ ℵ ⟩ y ≃ (Iso.fun i) x ≺⟨ ℵₚ ↓ (ℵ , ∣ℵ∣≤∣A∣) ⟩ (Iso.fun i) y
     ordEquiv _ _ = idEquiv _
 ```
 
 ```agda
-  <ℍ→≲A : ∀ α → α <ₒ ℍ → ⟨ α ⟩ ≲ A
-  <ℍ→≲A α α<ₒℍ = ≈-≲-trans ∣ LiftOrdEquiv .fst ∣₁ $ <ℍₚ→≲A (LiftOrd α) H where
-    H : LiftOrd α <ₒ ℍₚ
-    H = <-cong≃ₒ LiftOrdEquiv ℍ≃ₒℍₚ α<ₒℍ
+  <ℵ→≲A : ∀ α → α <ₒ ℵ → ⟨ α ⟩ ≲ A
+  <ℵ→≲A α α<ₒℵ = ≈-≲-trans ∣ LiftOrdEquiv .fst ∣₁ $ <ℵₚ→≲A (LiftOrd α) H where
+    H : LiftOrd α <ₒ ℵₚ
+    H = <-cong≃ₒ LiftOrdEquiv ℵ≃ₒℵₚ α<ₒℵ
 ```
