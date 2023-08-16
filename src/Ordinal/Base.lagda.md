@@ -220,16 +220,17 @@ module BinaryRelation {A : Type 𝓊} (_≺_ : A → A → Type 𝓋) where
 由于良序性里面的每个条件都是命题, 所以良序性也是一个命题.
 
 ```agda
-  isPropWellOrdered : isProp WellOrdered
-  isPropWellOrdered = isOfHLevelRetractFromIso 1 WellOrderedIsoΣ $ aux
-    where
-    unquoteDecl WellOrderedIsoΣ = declareRecordIsoΣ WellOrderedIsoΣ (quote WellOrdered)
-    aux : ∀ x y → x ≡ y
-    aux x _ = ΣPathP (isPropPropositional _ _
-            , ΣPathP (isPropTransitive ≺-prop _ _
-            , ΣPathP (isPropExtensional underlying-set _ _
-            , isPropWellFounded _ _)))
-      where open WellOrdered (Iso.inv WellOrderedIsoΣ x)
+  opaque
+    isPropWellOrdered : isProp WellOrdered
+    isPropWellOrdered = isOfHLevelRetractFromIso 1 WellOrderedIsoΣ $ aux
+      where
+      unquoteDecl WellOrderedIsoΣ = declareRecordIsoΣ WellOrderedIsoΣ (quote WellOrdered)
+      aux : ∀ x y → x ≡ y
+      aux x _ = ΣPathP (isPropPropositional _ _
+              , ΣPathP (isPropTransitive ≺-prop _ _
+              , ΣPathP (isPropExtensional underlying-set _ _
+              , isPropWellFounded _ _)))
+        where open WellOrdered (Iso.inv WellOrderedIsoΣ x)
 ```
 
 ## 序数的定义

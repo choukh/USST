@@ -177,12 +177,13 @@ IsOrdEquiv→IsOrdEmbed {β} f ordEquiv = mkIsOrdEmbed
 **证明** 由于"是序数等价"是命题, 只需证该等价的底层函数唯一. 又序数等价也是序数嵌入, 由序数嵌入的唯一性得证. ∎
 
 ```agda
-isPropOrdEquiv : (α : Ord 𝓊) (β : Ord 𝓊′) → isProp (α ≃ₒ β)
-isPropOrdEquiv α β (f , f-ordEquiv) (g , g-ordEquiv) = Σ≡Prop
-  (λ _ → isPropIsOrdEquiv _ _ _)
-  (equivEq $ ordEmbed-unique (f ⁺¹) (g ⁺¹)
-    (IsOrdEquiv→IsOrdEmbed f f-ordEquiv)
-    (IsOrdEquiv→IsOrdEmbed g g-ordEquiv))
+opaque
+  isPropOrdEquiv : (α : Ord 𝓊) (β : Ord 𝓊′) → isProp (α ≃ₒ β)
+  isPropOrdEquiv α β (f , f-ordEquiv) (g , g-ordEquiv) = Σ≡Prop
+    (λ _ → isPropIsOrdEquiv _ _ _)
+    (equivEq $ ordEmbed-unique (f ⁺¹) (g ⁺¹)
+      (IsOrdEquiv→IsOrdEmbed f f-ordEquiv)
+      (IsOrdEquiv→IsOrdEmbed g g-ordEquiv))
 ```
 
 **推论** 序数宇宙是集合.  

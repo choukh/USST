@@ -12,6 +12,7 @@ zhihu-url: https://zhuanlan.zhihu.com/p/649742992
 
 ```agda
 {-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --lossy-unification #-}
 
 module Preliminary where
 open import Cubical public
@@ -167,7 +168,7 @@ inj→sur→isEquiv Bset inj sur = isEmbedding×isSurjection→isEquiv $
 
 ```agda
 open import Cubical.Foundations.Powerset public
-  using (ℙ; _∈_; _⊆_; isSetℙ)
+  using (ℙ; _∈_; _⊆_; ⊆-isProp; isSetℙ)
 ```
 
 不属于符号 `_∉_` 定义为 `_∈_` 的否定, 即 `x ∉ A = ¬ x ∈ A`.
@@ -182,6 +183,13 @@ x ∉ A = ¬ x ∈ A
 ```agda
 _⊂_ : ℙ X → ℙ X → Type _
 A ⊂ B = A ⊆ B × (∃ x ∶ _ , x ∈ B × x ∉ A)
+```
+
+`A ⊂ B` 是命题.
+
+```agda
+⊂-prop : {A B : ℙ X} → isProp (A ⊂ B)
+⊂-prop = isProp× (⊆-isProp _ _) squash₁
 ```
 
 我们用 `⟦ A ⟧` 表示幂集 `A` 所对应的Σ类型.

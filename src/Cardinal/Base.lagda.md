@@ -147,17 +147,17 @@ module PredicativeHartogs {A : Type 𝓊} (Aset : isSet A) where
 ```
 
 ```agda
-  ρ : ⟨ ℍ ⟩ → ℙ (ℙ A) → Ord (𝓊 ⁺)
-  ρ (α , α≤) p = ⟦ p ⟧ , {!   !}
-    where
-    Rel = Σ (x , _) ∶ ⟦ p ⟧ , Σ (y , _) ∶ ⟦ p ⟧ , x ⊂ y
-    ordStr : OrdStr ⟦ p ⟧
-    ordStr = {!    !}
+  R : (p : ℙ (ℙ A)) → ⟦ p ⟧ → ⟦ p ⟧ → Type (𝓊 ⁺)
+  R _ (x , _) (y , _) = Lift (x ⊂ y)
+
+  （_,_） : (p : ℙ (ℙ A)) (wo : WellOrdered (R p)) → Ord (𝓊 ⁺)
+  （ p , wo ） = ⟦ p ⟧ , mkOrdStr (R p) wo
 ```
 
 ```agda
   ℍ→ℙ³ : ⟨ ℍ ⟩ → ℙ (ℙ (ℙ A))
-  ℍ→ℙ³ a@(α , _) p = ρ a p ≃ₒ LiftOrd α , isPropOrdEquiv _ _
+  ℍ→ℙ³ a@(α , _) p = (Σ wo ∶ WellOrdered (R p) , （ p , wo ） ≃ₒ LiftOrd α) ,
+    isPropΣ (isPropWellOrdered _) λ _ → isPropOrdEquiv _ _
 ```
 
 ```agda
@@ -166,16 +166,20 @@ module PredicativeHartogs {A : Type 𝓊} (Aset : isSet A) where
     where
     p : ℙ (ℙ A)
     p = {!   !}
-    e₁ : ρ a p ≃ₒ LiftOrd α
-    e₁ = {!   !}
-    e₂ : ρ a p ≃ₒ LiftOrd β
-    e₂ = transport (cong fst (funExt⁻ eq p)) e₁
+    wo : WellOrdered (R p)
+    wo = {!   !}
+    eα : （ p , wo ） ≃ₒ LiftOrd α
+    eα = {!   !}
+    Σwo : Σ wo ∶ WellOrdered (R p) , （ p , wo ） ≃ₒ LiftOrd β
+    Σwo = transport (cong fst (funExt⁻ eq p)) (wo , eα)
+    eβ : （ p , wo ） ≃ₒ LiftOrd β
+    eβ = subst (λ wo → （ p , wo ） ≃ₒ LiftOrd β) (isPropWellOrdered _ _ _) $ snd $ Σwo
     e : α ≃ₒ β
-    e = α         ≃ₒ⟨ LiftOrdEquiv ⟩
-        LiftOrd α ≃ₒ˘⟨ e₁ ⟩
-        ρ a p     ≃ₒ⟨ e₂ ⟩
-        LiftOrd β ≃ₒ˘⟨ LiftOrdEquiv ⟩
-        β         ≃ₒ∎
+    e = α           ≃ₒ⟨ LiftOrdEquiv ⟩
+        LiftOrd α   ≃ₒ˘⟨ eα ⟩
+        （ p , wo ）  ≃ₒ⟨ eβ ⟩
+        LiftOrd β   ≃ₒ˘⟨ LiftOrdEquiv ⟩
+        β           ≃ₒ∎
 ```
 
 ## 非直谓哈特格斯数
