@@ -113,8 +113,11 @@ _≤_ : Card 𝓊 → Card 𝓋 → Type (𝓊 ⊔ 𝓋)
 ```agda
 module Hartogs ⦃ _ : PR ⦄ {A : Type 𝓊} (Aset : isSet A) where
 
+  Carrier : (𝓋 : Level) → Type (𝓋 ⁺)
+  Carrier 𝓋 = Σ α ∶ Ord 𝓋 , ⟨ Resize {𝓋 = 𝓋} (∣⟨ α ⟩∣ ≤ₕ ∣ A , Aset ∣) ⟩
+
   hartogs : EmbedOrd (𝓋 ⁺) (𝓋 ⁺)
-  EmbedOrd.carrier       (hartogs {𝓋}) = Σ α ∶ Ord 𝓋 , ⟨ Resize {𝓋 = 𝓋} (∣⟨ α ⟩∣ ≤ₕ ∣ A , Aset ∣) ⟩
+  EmbedOrd.carrier       (hartogs {𝓋}) = Carrier 𝓋
   EmbedOrd._≺_           hartogs (α , _) (β , _) = α <ₒ β
   EmbedOrd.relation-prop hartogs _ _ = <ₒ-prop _ _
   EmbedOrd.target        hartogs = Ω
@@ -131,10 +134,13 @@ module Hartogs ⦃ _ : PR ⦄ {A : Type 𝓊} (Aset : isSet A) where
 
 ```agda
   module _ (𝓋 : Level) where
-    ℌ : Ord (𝓋 ⁺)
+    ℌ⁻ : Ord (𝓋 ⁺)
+    ℌ⁻ = tieup hartogs
+
+    ℌ : Ord (𝓋 ⁺ ⁺)
     ℌ = tieup hartogs
 
-    ℌ⁺ : Ord (𝓋 ⁺ ⁺)
+    ℌ⁺ : Ord (𝓋 ⁺ ⁺ ⁺)
     ℌ⁺ = tieup hartogs
 ```
 
@@ -157,7 +163,10 @@ module Hartogs ⦃ _ : PR ⦄ {A : Type 𝓊} (Aset : isSet A) where
           LiftOrd β ≃ₒ˘⟨ LiftOrdEquiv ⟩
           β         ≃ₒ∎
         sur : surjective f
-        sur (α , α≤) = ∣ (ResizeOrd {!   !} α {!   !} , {!   !}) , {!   !} ∣₁
+        sur (γ , γ≤) = ∣ (ξ , {!   !}) , {!   !} ∣₁
+          where
+          ξ : Ord (𝓋 ⁺)
+          ξ = ResizeOrd {!   !} γ {!   !}
       e : ⟨ ℌ ⟩ ≃ ⟨ ℌ⁺ ⟩
       e = f , f-equiv
       ordEquiv : ∀ x y → x ≺⟨ ℌ ⟩ y ≃ (e ⁺¹) x ≺⟨ ℌ⁺ ⟩ (e ⁺¹) y
