@@ -140,7 +140,7 @@ module Hartogs ⦃ _ : PR ⦄ {A : Type 𝓊} (Aset : isSet A) where
 
 ```agda
     ℌ≃ₒℌ⁺ : ℌ ≃ₒ ℌ⁺
-    ℌ≃ₒℌ⁺ = (f , f-equiv) , mkIsOrderEquiv {!   !}
+    ℌ≃ₒℌ⁺ = e , mkIsOrderEquiv ordEquiv
       where
       f : ⟨ ℌ ⟩ → ⟨ ℌ⁺ ⟩
       f (α , α≤) = (LiftOrd α) , resize∥∥-map g α≤
@@ -157,7 +157,11 @@ module Hartogs ⦃ _ : PR ⦄ {A : Type 𝓊} (Aset : isSet A) where
           LiftOrd β ≃ₒ˘⟨ LiftOrdEquiv ⟩
           β         ≃ₒ∎
         sur : surjective f
-        sur x = ∣ {!   !} , {!   !} ∣₁
+        sur (α , α≤) = ∣ (ResizeOrd {!   !} α {!   !} , {!   !}) , {!   !} ∣₁
+      e : ⟨ ℌ ⟩ ≃ ⟨ ℌ⁺ ⟩
+      e = f , f-equiv
+      ordEquiv : ∀ x y → x ≺⟨ ℌ ⟩ y ≃ (e ⁺¹) x ≺⟨ ℌ⁺ ⟩ (e ⁺¹) y
+      ordEquiv _ _ = {!   !}
 ```
 
 ```agda
