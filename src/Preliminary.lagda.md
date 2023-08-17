@@ -160,172 +160,6 @@ inj→sur→isEquiv Bset inj sur = isEmbedding×isSurjection→isEquiv $
   injective→isEmbedding Bset inj , sur
 ```
 
-## 幂集
-
-给定任意类型 `X : Type 𝓊`, 我们把 `X` 到命题宇宙 `hProp 𝓊` 的函数叫做 `X` 的幂集, 记作 `ℙ X`, 它的项也叫 `X` 的子集.
-
-给定项 `x : X` 和子集 `A : ℙ X`, 属于关系 `x ∈ A` 定义为 `⟨ A x ⟩`. `A` 是取值到 `hProp 𝓊` 的函数, 这保证了属于关系是取值到命题的. 此外, 可以证明幂集确实是一个集合: `isSetℙ`.
-
-```agda
-open import Cubical.Foundations.Powerset public
-  using (ℙ; _∈_; _⊆_; ⊆-isProp; isSetℙ)
-```
-
-不属于符号 `_∉_` 定义为 `_∈_` 的否定, 即 `x ∉ A = ¬ x ∈ A`.
-
-```agda
-_∉_ : X → ℙ X → Type _
-x ∉ A = ¬ x ∈ A
-```
-
-包含关系 `A ⊆ B` 的定义为 `∀ x → x ∈ A → x ∈ B`, 真包含 `A ⊂ B` 定义为 `A ⊆ B` 且存在 `x ∈ B` 但 `x ∉ A`.
-
-```agda
-_⊂_ : ℙ X → ℙ X → Type _
-A ⊂ B = A ⊆ B × (∃ x ∶ _ , x ∈ B × x ∉ A)
-```
-
-`A ⊂ B` 是命题.
-
-```agda
-⊂-prop : {A B : ℙ X} → isProp (A ⊂ B)
-⊂-prop = isProp× (⊆-isProp _ _) squash₁
-```
-
-我们用 `⟦ A ⟧` 表示幂集 `A` 所对应的Σ类型.
-
-```agda
-⟦_⟧ : {X : Type 𝓊} → ℙ X → Type 𝓊
-⟦ A ⟧ = Σ _ (_∈ A)
-```
-
-## 命题宇宙降级
-
-我们需要局部假设一个公理, 即**命题宇宙降级 (propositional resizing, 简称PR)**. PR的宣告实际上等于是取消了命题宇宙的分层, 使得它只有一层, 所有命题都位于那一层.
-
-如果取消所有类型的分层, 那么将导致罗素悖论, 而只取消命题宇宙的分层则不会. 我们只会进入所谓**非直谓 (impredicative)** 的数学世界, 而经典数学都是这样的.
-
-代码工程上, 我们使用了 record 类型, 它可以视作一种带了很多语法糖的Σ类型. 我们定义的 `PropositionalResizing` 包括了一个 `Resize` 函数, 以实现给定的两个命题宇宙的相互转换, 并且它需要满足 `resize` 和 `unresize` 性质, 即转换前后的两个命题逻辑等价.
-
-```agda
-record PropositionalResizing (𝓊 𝓋 : Level) : Type (𝓊 ⁺ ⊔ 𝓋 ⁺) where
-  field
-    Resize : hProp 𝓊 → hProp 𝓋
-    resize : {P : hProp 𝓊} → ⟨ P ⟩ → ⟨ Resize P ⟩
-    unresize : {P : hProp 𝓊} → ⟨ Resize P ⟩ → ⟨ P ⟩
-```
-
-对于命题来说, 逻辑等价意味着同伦等价, 也就是说 `resize` 和 `unresize` 都是同伦等价.
-
-```agda
-  module _ {P : hProp 𝓊} where
-    ResizeEquiv : ⟨ P ⟩ ≃ ⟨ Resize P ⟩
-    ResizeEquiv = isoToEquiv $ iso resize unresize (λ _ → (Resize P) .snd _ _) λ _ → P .snd _ _
-
-    isEquivResize : isEquiv (resize {P = P})
-    isEquivResize = ResizeEquiv .snd
-
-    isEquivUnresize : isEquiv (unresize {P = P})
-    isEquivUnresize = invEquiv ResizeEquiv .snd
-```
-
-以下代码是 Agda 的一些小技巧, 不熟悉 Agda 可以不用管. 只需知道我们只要在模块声明中以 `⦃ _ : PR ⦄` 的形式声明参数, 那么就等于假设了 PR, 就可以在该模块中尽情地使用上面的三个函数, 而不用显式说明具体是哪两个命题宇宙之间的转换.
-
-```agda
-PR = ∀ {𝓊 𝓋} → PropositionalResizing 𝓊 𝓋
-open PropositionalResizing ⦃...⦄ public
-```
-
-## 降级幂集
-
-在非直谓的设定下, 我们可以使用另一种幂集的定义 `ℙ[_]`, 我们称之为降级幂集, 它更接近传统集合论中的幂集. `ℙ[_]` 与 `ℙ` 的区别在于, `ℙ` 的迭代会不断提高宇宙层级, 而 `ℙ[_]` 的迭代全都发生在一开始固定下来的层级.
-
-```agda
-ℙ[_] : (𝓋 : Level) → Type 𝓊 → Type (𝓊 ⊔ 𝓋 ⁺)
-ℙ[ 𝓋 ] X = X → hProp 𝓋
-```
-
-由于 `ℙ[_]` 的迭代不提升宇宙层级, 我们有以下良定义的迭代函数. 注意参数n是带了一次后继的, 也就是说 `ℙ[ 𝓋 ][ 0 ]⁺` 实际上是1重 `ℙ[ 𝓋 ] X`.
-
-```agda
-ℙ[_][_]⁺ : (𝓋 : Level) → ℕ → Type 𝓊 → Type (𝓊 ⊔ 𝓋 ⁺)
-ℙ[ 𝓋 ][ zero ]⁺  X = ℙ[ 𝓋 ] X
-ℙ[ 𝓋 ][ suc n ]⁺ X = ℙ[ 𝓋 ][ n ]⁺ X → hProp 𝓋
-```
-
-现在, 局部假设 `PR`, 我们来处理两种幂集的联系.
-
-```agda
-module _ ⦃ _ : PR ⦄ where
-```
-
-如果有 `X → Y` 的函数, 那么 `X` 的降级幂集 `A` 可以转化为 `Y` 的降级幂集, 只需对任意 `y : Y` 取 `∀ x → f x ≡ y → ⟨ A x ⟩`.
-
-注意这两个降级幂集的等级与 `X` 和 `Y` 的等级这四个等级之间都可以没有必然联系, 或者说在非直谓设定下它们其实都是同一级, 但形式上我们不得不采用一般化的形式.
-
-```agda
-  Morphℙ : (X → Y) → ℙ[ 𝓊 ] X → ℙ[ 𝓋 ] Y
-  Morphℙ f A y = Resize $ (∀ x → f x ≡ y → ⟨ A x ⟩) , isPropΠ2 λ _ _ → str (A _)
-```
-
-迭代该函数, 就可以将n迭代幂集转化为n迭代降级幂集. 注意由于 `ℙ` 没有良定义的n迭代形式, 我们只能对每个n写一条定理. 实际上我们最多只需要用到3重迭代幂集, 所以完全够用.
-
-```agda
-  Resizeℙ : ℙ X → ℙ[ 𝓊 ] X
-  Resizeℙ = Morphℙ (idfun _)
-
-  Resizeℙ² : ℙ (ℙ X) → ℙ[ 𝓊 ][ 1 ]⁺ X
-  Resizeℙ² = Morphℙ Resizeℙ
-
-  Resizeℙ³ : ℙ (ℙ (ℙ X)) → ℙ[ 𝓊 ][ 2 ]⁺ X
-  Resizeℙ³ = Morphℙ (Morphℙ Resizeℙ)
-```
-
-**引理** 给定单射 `f : X → Y`, 那么 `Morphℙ f` 也是单射.  
-**证明** 假设 `p q : ℙ[ 𝓊 ] X` 满足 `eq : Morphℙ f p ≡ Morphℙ f q`, 要证 `p ≡ q`. 由于幂集是一个函数, 由函数外延性只需证对任意 `x` 有 `p x ≡ q x`. 此时等号两边是命题, 由命题外延性只需证 `⟨ p x ⟩ ↔ ⟨ q x ⟩`.
-
-```agda
-  Morphℙ-inj : (f : X → Y) → injective f → injective (Morphℙ {𝓊 = 𝓊} {𝓋} f)
-  Morphℙ-inj f f-inj {p} {q} eq = funExt λ x → hPropExt $
-```
-
-左边到右边, 假设有 `⟨ p x ⟩`, 要证 `⟨ q x ⟩`. 由 `f` 的单射性有 `∀ y → f y ≡ f x → ⟨ p y ⟩`, 此即 `⟨ Morphℙ f p (f x) ⟩`.
-
-用 `eq` 改写它得 `⟨ Morphℙ f q (f x) ⟩`, 即 `∀ y → f y ≡ f x → ⟨ q y ⟩`. 输入 `x` 和 `refl` 即得 `⟨ q x ⟩`.
-
-```agda
-      →: (λ px → let
-          H₁ : ⟨ Morphℙ f p (f x) ⟩
-          H₁ = resize λ y fy≡fx → subst (λ - → ⟨ p - ⟩) (sym $ f-inj fy≡fx) px
-          H₂ : ⟨ Morphℙ f q (f x) ⟩
-          H₂ = subst (λ - → ⟨ - (f x) ⟩) eq H₁
-        in unresize H₂ x refl)
-```
-
-同理可证右边到左边. ∎
-
-```agda
-      ←: (λ px → let
-          H₁ : ⟨ Morphℙ f q (f x) ⟩
-          H₁ = resize λ y fy≡fx → subst (λ - → ⟨ q - ⟩) (sym $ f-inj fy≡fx) px
-          H₂ : ⟨ Morphℙ f p (f x) ⟩
-          H₂ = subst (λ - → ⟨ - (f x) ⟩) (sym eq) H₁
-        in unresize H₂ x refl)
-```
-
-由以上引理, 幂集到降级幂集的转化都是单射.
-
-```agda
-  Resizeℙ-inj : injective (Resizeℙ {X = X} {𝓊})
-  Resizeℙ-inj = Morphℙ-inj (idfun _) (idfun _)
-
-  Resizeℙ²-inj : injective (Resizeℙ² {X = X} {𝓊})
-  Resizeℙ²-inj = Morphℙ-inj Resizeℙ Resizeℙ-inj
-
-  Resizeℙ³-inj : injective (Resizeℙ³ {X = X} {𝓊})
-  Resizeℙ³-inj = Morphℙ-inj Resizeℙ² Resizeℙ²-inj
-```
-
 ## 势
 
 我们说类型 `A` 与 `B` **等势 (equipotent)**, 记作 `A ≈ B`, 当且仅当有 `∥ A ≃ B ∥₁`. 命题截断表示我们并不关系具体是哪个等价, 只要有等价就行.
@@ -373,9 +207,85 @@ A ⋨ B = A ≲ B × B ≴ A
 ≈-≲-trans = ∥∥₁-map2 λ A≃B B≲C → ↪-trans (≃→↪ A≃B) B≲C
 ```
 
-## 非构造性公理
+## 幂集
 
-本文研究的非构造性公理包括排中律, 选择公理, 连续统假设和广义连续统假设.
+给定任意类型 `X : Type 𝓊`, 我们把 `X` 到命题宇宙 `hProp 𝓊` 的函数叫做 `X` 的幂集, 记作 `ℙ X`, 它的项也叫 `X` 的子集.
+
+给定项 `x : X` 和子集 `A : ℙ X`, 属于关系 `x ∈ A` 定义为 `⟨ A x ⟩`. `A` 是取值到 `hProp 𝓊` 的函数, 这保证了属于关系是取值到命题的. 此外, 可以证明幂集确实是一个集合: `isSetℙ`.
+
+```agda
+open import Cubical.Foundations.Powerset public
+  using (ℙ; _∈_; _⊆_; ⊆-isProp; isSetℙ)
+```
+
+不属于符号 `_∉_` 定义为 `_∈_` 的否定, 即 `x ∉ A = ¬ x ∈ A`.
+
+```agda
+_∉_ : X → ℙ X → Type _
+x ∉ A = ¬ x ∈ A
+```
+
+包含关系 `A ⊆ B` 的定义为 `∀ x → x ∈ A → x ∈ B`, 真包含 `A ⊂ B` 定义为 `A ⊆ B` 且存在 `x ∈ B` 但 `x ∉ A`.
+
+```agda
+_⊂_ : ℙ X → ℙ X → Type _
+A ⊂ B = A ⊆ B × (∃ x ∶ _ , x ∈ B × x ∉ A)
+```
+
+`A ⊂ B` 是命题.
+
+```agda
+⊂-prop : {A B : ℙ X} → isProp (A ⊂ B)
+⊂-prop = isProp× (⊆-isProp _ _) squash₁
+```
+
+我们用 `⟦ A ⟧` 表示幂集 `A` 所对应的Σ类型.
+
+```agda
+⟦_⟧ : {X : Type 𝓊} → ℙ X → Type 𝓊
+⟦ A ⟧ = Σ _ (_∈ A)
+```
+
+## 公理
+
+本文研究的公理包括降级公理, 排中律, 选择公理, 连续统假设和广义连续统假设.
+
+### 降级公理
+
+降级公理, 也叫**命题宇宙降级 (propositional resizing)**, 简称PR. PR的宣告实际上等于是取消了命题宇宙的分层, 使得命题宇宙只有一层, 所有命题都位于那一层.
+
+如果取消所有类型的分层, 那么将导致罗素悖论, 而只取消命题宇宙的分层则不会. 我们只会进入所谓**非直谓 (impredicative)** 的数学世界, 而经典数学都是这样的.
+
+代码工程上, 我们使用了 record 类型, 它可以视作一种带了很多语法糖的Σ类型. 我们定义的 `PropositionalResizing` 包括了一个 `Resize` 函数, 以实现给定的两个命题宇宙的相互转换, 并且它需要满足 `resize` 和 `unresize` 性质, 即转换前后的两个命题逻辑等价.
+
+```agda
+record PropositionalResizing (𝓊 𝓋 : Level) : Type (𝓊 ⁺ ⊔ 𝓋 ⁺) where
+  field
+    Resize : hProp 𝓊 → hProp 𝓋
+    resize : {P : hProp 𝓊} → ⟨ P ⟩ → ⟨ Resize P ⟩
+    unresize : {P : hProp 𝓊} → ⟨ Resize P ⟩ → ⟨ P ⟩
+```
+
+对于命题来说, 逻辑等价意味着同伦等价, 也就是说 `resize` 和 `unresize` 都是同伦等价.
+
+```agda
+  module _ {P : hProp 𝓊} where
+    ResizeEquiv : ⟨ P ⟩ ≃ ⟨ Resize P ⟩
+    ResizeEquiv = isoToEquiv $ iso resize unresize (λ _ → (Resize P) .snd _ _) λ _ → P .snd _ _
+
+    isEquivResize : isEquiv (resize {P = P})
+    isEquivResize = ResizeEquiv .snd
+
+    isEquivUnresize : isEquiv (unresize {P = P})
+    isEquivUnresize = invEquiv ResizeEquiv .snd
+```
+
+以下代码是 Agda 的一些小技巧, 不熟悉 Agda 可以不用管. 只需知道我们只要在模块声明中以 `⦃ _ : PR ⦄` 的形式声明参数, 那么就等于假设了 PR, 就可以在该模块中尽情地使用上面的三个函数, 而不用显式说明具体是哪两个命题宇宙之间的转换.
+
+```agda
+PR = ∀ {𝓊 𝓋} → PropositionalResizing 𝓊 𝓋
+open PropositionalResizing ⦃...⦄ public
+```
 
 ### 排中律
 
