@@ -210,7 +210,7 @@ open import Cubical.Data.Nat public using (isSetℕ)
 open import Cubical.Foundations.HLevels public
   using ( isPropΠ; isPropΠ2; isPropΠ3; isPropΠ4; isPropΠ5; isPropΠ6; isProp→
         ; isProp×; isProp×2; isProp×3; isProp×4; isProp×5; isPropΣ
-        ; isSetΠ; isSetΠ2; isSetΠ3; isSetΣ; isOfHLevelLift)
+        ; isSetΠ; isSetΠ2; isSetΠ3; isSet→; isSetΣ; isOfHLevelLift)
 ```
 
 命题宇宙 `hProp 𝓊` 定义为 `Type 𝓊` 配备上结构 `isProp`, 即 `hProp 𝓊 = Σ (Type 𝓊) isProp`. 出乎意料的是, 命题宇宙 `hProp 𝓊` 也是一个集合. 在传统基础中所有命题不可能组成集合, 因为太大了. 但泛等基础中说的集合不关乎大小, 大小已经由宇宙层级处理了.

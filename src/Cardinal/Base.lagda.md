@@ -1,9 +1,9 @@
 ---
-title: 泛等结构集合论 (7) 基数
+title: 泛等结构集合论 (7) 直觉主义阿列夫层级
 zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 ---
 
-# 泛等结构集合论 (7) 基数
+# 泛等结构集合论 (7) 直觉主义阿列夫层级
 
 > 交流Q群: 893531731  
 > 本文源码: [Cardinal.Base.lagda.md](https://github.com/choukh/USST/blob/main/src/Cardinal/Base.lagda.md)  
@@ -93,8 +93,9 @@ _≤_ : Card 𝓊 → Card 𝓋 → Type (𝓊 ⊔ 𝓋)
 ```
 
 ```agda
-≤-trans : (κ μ ν : Card 𝓊) → κ ≤ μ → μ ≤ ν → κ ≤ ν
-≤-trans = ∥∥₂-elim3 (λ _ _ _ → isSetΠ2 λ _ _ → ≤-set _ _) λ _ _ _ → ∥∥₁-map2 ↪-trans
+≤-trans : (κ : Card 𝓊) (μ : Card 𝓋) (ν : Card 𝓌) → κ ≤ μ → μ ≤ ν → κ ≤ ν
+≤-trans = ∥∥₂-elim (λ _ → isSetΠ2 λ _ _ → isSet→ $ isSet→ $ ≤-set _ _)
+  λ _ → ∥∥₂-elim2 (λ _ _ → isSet→ $ isSet→ $ ≤-set _ _) λ _ _ → ∥∥₁-map2 ↪-trans
 ```
 
 ```agda
@@ -120,7 +121,7 @@ module Hartogs ⦃ _ : PR ⦄ {A : Type 𝓊} (Aset : isSet A) where
   EmbedOrd.embed         hartogs = fst
   EmbedOrd.inj           hartogs = Σ≡Prop λ α → isPropResize
   EmbedOrd.pres≺         hartogs _ _ = idfun _
-  EmbedOrd.formsInitSeg  hartogs β (α′ , le) β<ₒα′ = (β , resize (∥∥₁-map H $ unresize le)) , β<ₒα′ , refl
+  EmbedOrd.formsInitSeg  hartogs β (α′ , le) β<ₒα′ = (β , resize∥∥-map H le) , β<ₒα′ , refl
     where
     H : ⟨ α′ ⟩ ↪ A → Σ (⟨ β ⟩ → A) injective
     H (f , f-inj) = f ∘ g , g-inj ∘ f-inj where
@@ -138,15 +139,51 @@ module Hartogs ⦃ _ : PR ⦄ {A : Type 𝓊} (Aset : isSet A) where
 ```
 
 ```agda
+    ℌ≃ₒℌ⁺ : ℌ ≃ₒ ℌ⁺
+    ℌ≃ₒℌ⁺ = (f , f-equiv) , mkIsOrderEquiv {!   !}
+      where
+      f : ⟨ ℌ ⟩ → ⟨ ℌ⁺ ⟩
+      f (α , α≤) = (LiftOrd α) , resize∥∥-map g α≤
+        where
+        g : ⟨ α ⟩ ↪ A → ⟨ LiftOrd α ⟩ ↪ A
+        g (h , h-inj) = h ∘ lower , liftExt ∘ h-inj
+      f-equiv : isEquiv f
+      f-equiv = inj→sur→isEquiv ordSet inj sur
+        where
+        inj : injective f
+        inj {α , _} {β , _} eq = Σ≡Prop (λ _ → isPropResize) $ ≃ₒ→≡ $
+          α         ≃ₒ⟨ LiftOrdEquiv ⟩
+          LiftOrd α ≃ₒ⟨ ≡→≃ₒ $ cong fst eq ⟩
+          LiftOrd β ≃ₒ˘⟨ LiftOrdEquiv ⟩
+          β         ≃ₒ∎
+        sur : surjective f
+        sur x = ∣ {!   !} , {!   !} ∣₁
+```
+
+```agda
     ¬ℌ↪ : ¬ ⟨ ℌ ⟩ ↪ A
-    ¬ℌ↪ Inj@(f , f-inj) = ¬α≃ₒα↓a ℌ⁺ (ℌ , resize ∣ℌ∣≤∣A∣) $
-      ℌ⁺                        ≃ₒ˘⟨ {!   !} ⟩
-      ℌ                         ≃ₒ⟨ α≃Ω↓α ⟩
-      Ω ↓ ℌ                     ≃ₒ⟨ {!   !} ⟩
-      ℌ⁺ ↓ (ℌ , resize ∣ℌ∣≤∣A∣) ≃ₒ∎
+    ¬ℌ↪ Inj@(f , f-inj) = ¬α≃ₒα↓a ℌ⁺ h $
+      ℌ⁺     ≃ₒ˘⟨ ℌ≃ₒℌ⁺ ⟩
+      ℌ      ≃ₒ⟨ α≃Ω↓α ⟩
+      Ω ↓ ℌ  ≃ₒ⟨ isoToEquiv i , mkIsOrderEquiv ordEquiv ⟩
+      ℌ⁺ ↓ h ≃ₒ∎
       where
       ∣ℌ∣≤∣A∣ : ∣⟨ ℌ ⟩∣ ≤ ∣ A , Aset ∣
       ∣ℌ∣≤∣A∣ = ∣ Inj ∣₁
+      h : ⟨ ℌ⁺ ⟩
+      h = ℌ , resize ∣ℌ∣≤∣A∣
+      i : Iso ⟨ Ω ↓ ℌ ⟩ ⟨ ℌ⁺ ↓ h ⟩
+      Iso.fun i (α , α≺ℌ) = (α , resize H₁) , H₂
+        where
+        H₁ : ∣⟨ α ⟩∣ ≤ ∣ A , Aset ∣
+        H₁ = ≤-trans ∣⟨ α ⟩∣ ∣⟨ ℌ ⟩∣ ∣ A , Aset ∣ (<ₒ→≤ α≺ℌ) ∣ℌ∣≤∣A∣
+        H₂ : (α , resize H₁) ≺⟨ ℌ⁺ ⟩ h
+        H₂ = unresize {𝓋 = 𝓋 ⁺} (resize {P = _ , <ₒ-prop _ _} α≺ℌ)
+      Iso.inv i ((α , _) , α≺ℌ) = α , unresize {𝓋 = 𝓋 ⁺} (resize {P = _ , <ₒ-prop _ _} α≺ℌ)
+      Iso.rightInv i _ = Σ≡Prop (λ _ → <ₒ-prop _ _) (Σ≡Prop (λ _ → isPropResize) refl)
+      Iso.leftInv i _ = Σ≡Prop (λ _ → <ₒ-prop _ _) refl
+      ordEquiv : ∀ x y → x ≺⟨ Ω ↓ ℌ ⟩ y ≃ (Iso.fun i) x ≺⟨ ℌ⁺ ↓ h ⟩ (Iso.fun i) y
+      ordEquiv _ _ = idEquiv _
 ```
 
 ```agda

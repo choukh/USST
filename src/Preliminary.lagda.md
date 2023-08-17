@@ -278,7 +278,11 @@ record PropositionalResizing (𝓊 𝓋 : Level) : Type (𝓊 ⁺ ⊔ 𝓋 ⁺) 
 
     isEquivUnresize : isEquiv (unresize {P = P})
     isEquivUnresize = invEquiv ResizeEquiv .snd
+```
 
+降级命题是命题.
+
+```agda
     isPropResize : isProp ⟨ Resize P ⟩
     isPropResize _ _ = equivFunInjective (invEquiv ResizeEquiv) (str P _ _)
 ```
@@ -288,6 +292,14 @@ record PropositionalResizing (𝓊 𝓋 : Level) : Type (𝓊 ⁺ ⊔ 𝓋 ⁺) 
 ```agda
 PR = ∀ {𝓊 𝓋} → PropositionalResizing 𝓊 𝓋
 open PropositionalResizing ⦃...⦄ public
+```
+
+两个降级命题间蕴含关系的证明可以通过它们底层类型间的映射来证明.
+
+```agda
+module _ ⦃ _ : PR ⦄ where
+  resize∥∥-map : (A → B) → (⟨ Resize {𝓋 = 𝓊} ∥ A ∥ₚ ⟩ → ⟨ Resize {𝓋 = 𝓋} ∥ B ∥ₚ ⟩)
+  resize∥∥-map f p = resize $ ∥∥₁-map f $ unresize p
 ```
 
 ### 排中律
