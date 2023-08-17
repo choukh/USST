@@ -278,6 +278,9 @@ record PropositionalResizing (𝓊 𝓋 : Level) : Type (𝓊 ⁺ ⊔ 𝓋 ⁺) 
 
     isEquivUnresize : isEquiv (unresize {P = P})
     isEquivUnresize = invEquiv ResizeEquiv .snd
+
+    isPropResize : isProp ⟨ Resize P ⟩
+    isPropResize _ _ = equivFunInjective (invEquiv ResizeEquiv) (str P _ _)
 ```
 
 以下代码是 Agda 的一些小技巧, 不熟悉 Agda 可以不用管. 只需知道我们只要在模块声明中以 `⦃ _ : PR ⦄` 的形式声明参数, 那么就等于假设了 PR, 就可以在该模块中尽情地使用上面的三个函数, 而不用显式说明具体是哪两个命题宇宙之间的转换.

@@ -118,9 +118,14 @@ module Hartogs ⦃ _ : PR ⦄ {A : Type 𝓊} (Aset : isSet A) where
   EmbedOrd.relation-prop hartogs _ _ = <ₒ-prop _ _
   EmbedOrd.target        hartogs = Ω
   EmbedOrd.embed         hartogs = fst
-  EmbedOrd.inj           hartogs = Σ≡Prop λ α → {!   !}
+  EmbedOrd.inj           hartogs = Σ≡Prop λ α → isPropResize
   EmbedOrd.pres≺         hartogs _ _ = idfun _
-  EmbedOrd.formsInitSeg  hartogs = {!   !}
+  EmbedOrd.formsInitSeg  hartogs β (α′ , le) β<ₒα′ = (β , resize (∥∥₁-map H $ unresize le)) , β<ₒα′ , refl
+    where
+    H : ⟨ α′ ⟩ ↪ A → Σ (⟨ β ⟩ → A) injective
+    H (f , f-inj) = f ∘ g , g-inj ∘ f-inj where
+      g = <→≤ β<ₒα′ .fst
+      g-inj = IsOrdEmbed.inj $ <→≤ β<ₒα′ .snd
 ```
 
 ```agda
@@ -152,7 +157,7 @@ module Hartogs ⦃ _ : PR ⦄ {A : Type 𝓊} (Aset : isSet A) where
       f (_ , b , _) = b
       f-inj : injective f
       f-inj {(γ , γ≤) , a , β↓a≡γ} {(δ , δ≤) , b , β↓b≡δ} a≡b =
-        Σ≡Prop (λ _ → <ₒ-prop _ _) (Σ≡Prop (λ _ → {!   !}) γ≡δ) where
+        Σ≡Prop (λ _ → <ₒ-prop _ _) (Σ≡Prop (λ _ → isPropResize) γ≡δ) where
         γ≡δ = sym β↓a≡γ ∙ cong (β ↓_) a≡b ∙ β↓b≡δ
       H : ⟨ α ⟩ ↪ ⟨ β ⟩
       H = subst (λ α → ⟨ α ⟩ ↪ ⟨ β ⟩) eq (f , f-inj)
