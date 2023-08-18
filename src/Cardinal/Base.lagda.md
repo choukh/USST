@@ -143,7 +143,7 @@ module Hartogs ⦃ _ : PR ⦄ {A : Type 𝓊} (Aset : isSet A) where
       where open Map f
     2const : (F G : ⟨ α ⟩ ↪ A) → map F ≡ map G
     2const F@(f , f-inj) G@(g , g-inj) =
-      Σ≡Prop (λ _ → ≤-prop _ _) $ equivToCardEq $ isoToEquiv i
+      Σ≡Prop (λ _ → ≤-prop _ _) $ equivToCardEq $ h , h-equiv
       where
       open Map
       h : B F → B G
@@ -157,7 +157,8 @@ module Hartogs ⦃ _ : PR ⦄ {A : Type 𝓊} (Aset : isSet A) where
         ... | (u , fu≡v) | _ | eq = Σ≡Prop (λ _ → isPropResize) (sym fx≡y ∙ cong f x≡u ∙ fu≡v)
           where x≡u = g-inj $ cong fst eq
         sur : surjective h
-        sur = {!   !}
+        sur (y , p) with unresize p
+        ... | (x , gx≡y) = ∣_∣₁ $ (g x , resize (x , {!   !})) , {!   !}
       i : Iso (B F) (B G)
       Iso.fun i (y , p) = let (x , _) = fiber f y ∋ unresize p in g x , resize (x , refl)
       Iso.inv i (y , p) = let (x , _) = fiber g y ∋ unresize p in f x , resize (x , refl)
