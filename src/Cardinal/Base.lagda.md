@@ -115,6 +115,8 @@ module Hartogs ⦃ _ : PR ⦄ {A : Type 𝓊} (Aset : isSet A) where
 
   Carrier : (𝓋 : Level) → Type (𝓋 ⁺)
   Carrier 𝓋 = Σ α ∶ Ord 𝓋 , ⟨ Resize {𝓋 = 𝓋} (∣⟨ α ⟩∣ ≤ₕ ∣ A , Aset ∣) ⟩
+  -- ∣ (Σ (Card 𝓊) λ κ → κ ≤ μ) , sethood ∣₂
+  -- ∣ (Σ (Card 𝓋) λ κ → κ ≤ μ) , sethood ∣₂
 
   hartogs : EmbedOrd (𝓋 ⁺) (𝓋 ⁺)
   EmbedOrd.carrier       (hartogs {𝓋}) = Carrier 𝓋
@@ -167,6 +169,8 @@ module Hartogs ⦃ _ : PR ⦄ {A : Type 𝓊} (Aset : isSet A) where
           where
           ξ : Ord (𝓋 ⁺)
           ξ = ResizeOrd {!   !} γ {!   !}
+      g : ⟨ ℌ⁺ ⟩ → ⟨ ℌ ⟩
+      g (α , α≤) = {!   !} , {!   !}
       e : ⟨ ℌ ⟩ ≃ ⟨ ℌ⁺ ⟩
       e = f , f-equiv
       ordEquiv : ∀ x y → x ≺⟨ ℌ ⟩ y ≃ (e ⁺¹) x ≺⟨ ℌ⁺ ⟩ (e ⁺¹) y
@@ -180,6 +184,7 @@ module Hartogs ⦃ _ : PR ⦄ {A : Type 𝓊} (Aset : isSet A) where
       ℌ      ≃ₒ⟨ α≃Ω↓α ⟩
       Ω ↓ ℌ  ≃ₒ⟨ isoToEquiv i , mkIsOrderEquiv ordEquiv ⟩
       ℌ⁺ ↓ h ≃ₒ∎
+      -- ℌ = ℌ⁺ ↓ h < ℌ⁺ ≤ ℌ
       where
       ∣ℌ∣≤∣A∣ : ∣⟨ ℌ ⟩∣ ≤ ∣ A , Aset ∣
       ∣ℌ∣≤∣A∣ = ∣ Inj ∣₁
