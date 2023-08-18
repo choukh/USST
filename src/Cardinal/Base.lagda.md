@@ -127,7 +127,7 @@ module Hartogs ⦃ _ : PR ⦄ {A : Type 𝓊} (Aset : isSet A) where
     hasPropFb _ (a , p) (b , q) = Σ≡Prop (λ _ → Aset _ _) (f-inj $ p ∙ sym q)
 
     B : Type 𝓊
-    B = Σ y ∶ A , ⟨ Resize {𝓋 = 𝓊} $ fiber f y , hasPropFb _ ⟩
+    B = Σ y ∶ A , ⟨ Resize {𝓋 = 𝓊} $ fiber f y , hasPropFb y ⟩
 
     Bset : isSet B
     Bset = isSetΣ Aset λ _ → isProp→isSet isPropResize
@@ -136,16 +136,28 @@ module Hartogs ⦃ _ : PR ⦄ {A : Type 𝓊} (Aset : isSet A) where
     B≤A = ∣ fst , Σ≡Prop (λ _ → isPropResize) ∣₁
 
   carrierMap : ordCarrier 𝓋 → cardCarrier
-  carrierMap = uncurry λ α → elim→Set (λ _ → isSetCardCarrier) map {!  hasPropFibers !}
+  carrierMap = uncurry λ α → elim→Set (λ _ → isSetCardCarrier) map 2const
     where
     map : ⟨ α ⟩ ↪ A → cardCarrier
     map f = ∣ B , Bset ∣ , B≤A
       where open Map f
-    2const : (f g : ⟨ α ⟩ ↪ A) → map f ≡ map g
-    2const f g = Σ≡Prop (λ _ → ≤-prop _ _) $ equivToCardEq $ isoToEquiv i
+    2const : (F G : ⟨ α ⟩ ↪ A) → map F ≡ map G
+    2const F@(f , f-inj) G@(g , g-inj) =
+      Σ≡Prop (λ _ → ≤-prop _ _) $ equivToCardEq $ isoToEquiv i
       where
       open Map
-      i : Iso (B f) (B g)
-      i = {!   !}
-        --((λ { (y , p) → g {! p  !} , resize ({! g  !} , {!   !}) }) , {!   !})
+      h : B F → B G
+      h (y , p) = let (x , fx≡y) = fiber f y ∋ unresize p in g x , resize (x , refl)
+      h-equiv : isEquiv h
+      h-equiv = inj→sur→isEquiv (Bset G)
+        (λ eq → Σ≡Prop (λ _ → isPropResize) {!   !})
+        (λ b → ∣ ({!   !} , {!   !}) ∣₁)
+      i : Iso (B F) (B G)
+      Iso.fun i (y , p) = let (x , fx≡y) = fiber f y ∋ unresize p in g x , resize (x , refl)
+      Iso.inv i (y , p) = let (x , fx≡y) = fiber g y ∋ unresize p in f x , resize (x , refl)
+      Iso.rightInv i (y , p) = Σ≡Prop (λ _ → isPropResize) {!   !}
+        where
+        H : fiber g y
+        H = unresize p
+      Iso.leftInv i = {!   !}
 ```
