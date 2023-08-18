@@ -113,58 +113,6 @@ _≤_ : Card 𝓊 → Card 𝓋 → Type (𝓊 ⊔ 𝓋)
 ```agda
 module Hartogs ⦃ _ : PR ⦄ {A : Type 𝓊} (Aset : isSet A) where
 
-  ordCarrier : (𝓋 : Level) → Type (𝓊 ⊔ 𝓋 ⁺)
-  ordCarrier 𝓋 = Σ α ∶ Ord 𝓋 , ⟨ α ⟩ ≲ A
-
-  cardCarrier : Type (𝓊 ⁺)
-  cardCarrier = Σ κ ∶ Card 𝓊 , κ ≤ ∣ A , Aset ∣
-
-  isSetCardCarrier : isSet cardCarrier
-  isSetCardCarrier = isSetΣ isSetCard λ _ → ≤-set _ _
-
-  module Map {α : Ord 𝓋} ((f , f-inj) : ⟨ α ⟩ ↪ A) where
-    hasPropFb : hasPropFibers f
-    hasPropFb _ (a , p) (b , q) = Σ≡Prop (λ _ → Aset _ _) (f-inj $ p ∙ sym q)
-
-    B : Type 𝓊
-    B = Σ y ∶ A , ⟨ Resize {𝓋 = 𝓊} $ fiber f y , hasPropFb y ⟩
-
-    Bset : isSet B
-    Bset = isSetΣ Aset λ _ → isProp→isSet isPropResize
-
-    B≤A : ∣ B , Bset ∣ ≤ ∣ A , Aset ∣
-    B≤A = ∣ fst , Σ≡Prop (λ _ → isPropResize) ∣₁
-
-  carrierMap : ordCarrier 𝓋 → cardCarrier
-  carrierMap = uncurry λ α → elim→Set (λ _ → isSetCardCarrier) map 2const
-    where
-    map : ⟨ α ⟩ ↪ A → cardCarrier
-    map f = ∣ B , Bset ∣ , B≤A
-      where open Map f
-    2const : (F G : ⟨ α ⟩ ↪ A) → map F ≡ map G
-    2const F@(f , f-inj) G@(g , g-inj) =
-      Σ≡Prop (λ _ → ≤-prop _ _) $ equivToCardEq $ h , h-equiv
-      where
-      open Map
-      h : B F → B G
-      h (y , p) = let (x , _) = fiber f y ∋ unresize p in g x , resize (x , refl)
-      h-equiv : isEquiv h
-      h-equiv = inj→sur→isEquiv (Bset G) inj sur
-        where
-        inj : injective h
-        inj {y , p} {v , q} eq    with unresize p | unresize q | eq
-        ... | (x , fx≡y) | _ | eq with unresize q | unresize p | eq
-        ... | (u , fu≡v) | _ | eq = Σ≡Prop (λ _ → isPropResize) (sym fx≡y ∙ cong f x≡u ∙ fu≡v)
-          where x≡u = g-inj $ cong fst eq
-        sur : surjective h
-        sur (y , p) with unresize p
-        ... | (x , gx≡y) = ∣_∣₁ $ (g x , resize (x , {!   !})) , {!   !}
-      i : Iso (B F) (B G)
-      Iso.fun i (y , p) = let (x , _) = fiber f y ∋ unresize p in g x , resize (x , refl)
-      Iso.inv i (y , p) = let (x , _) = fiber g y ∋ unresize p in f x , resize (x , refl)
-      Iso.rightInv i (y , p) = Σ≡Prop (λ _ → isPropResize) {!   !}
-        where
-        H : fiber g y
-        H = unresize p
-      Iso.leftInv i = {!   !}
+  carrier : (𝓋 : Level) → Type (𝓊 ⊔ 𝓋 ⁺)
+  carrier 𝓋 = Σ α ∶ Ord 𝓋 , ⟨ α ⟩ ≲ A
 ```
