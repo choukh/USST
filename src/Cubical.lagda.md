@@ -238,7 +238,7 @@ open import Cubical.Foundations.Structure public
 
 ```agda
 open import Cubical.HITs.PropositionalTruncation public
-  using (∥_∥₁; ∣_∣₁; squash₁)
+  using (∥_∥₁; ∣_∣₁; squash₁; elim→Set)
 ```
 
 我们有引理 `∥∥₁-rec`, 它说如果目标 `P` 是命题, 那么我们可以通过证明 `A → P` 来证明 `∥ A ∥₁ → P`.  

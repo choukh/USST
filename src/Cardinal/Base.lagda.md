@@ -111,109 +111,41 @@ _≤_ : Card 𝓊 → Card 𝓋 → Type (𝓊 ⊔ 𝓋)
 ## 哈特格斯数
 
 ```agda
+module HartogsCarrier {A : Type 𝓊} (Aset : isSet A) where
+
+  ordCarrier : (𝓋 : Level) → Type (𝓊 ⊔ 𝓋 ⁺)
+  ordCarrier 𝓋 = Σ α ∶ Ord 𝓋 , ⟨ α ⟩ ≲ A
+
+  cardCarrier : Type (𝓊 ⁺)
+  cardCarrier = Σ κ ∶ Card 𝓊 , κ ≤ ∣ A , Aset ∣
+
+  isSetCardCarrier : isSet cardCarrier
+  isSetCardCarrier = isSetΣ isSetCard (λ _ → ≤-set _ _)
+```
+
+```agda
 module Hartogs ⦃ _ : PR ⦄ {A : Type 𝓊} (Aset : isSet A) where
+  open HartogsCarrier Aset
 
-  Carrier : (𝓋 : Level) → Type (𝓋 ⁺)
-  Carrier 𝓋 = Σ α ∶ Ord 𝓋 , ⟨ Resize {𝓋 = 𝓋} (∣⟨ α ⟩∣ ≤ₕ ∣ A , Aset ∣) ⟩
-  -- ∣ (Σ (Card 𝓊) λ κ → κ ≤ μ) , sethood ∣₂
-  -- ∣ (Σ (Card 𝓋) λ κ → κ ≤ μ) , sethood ∣₂
-
-  hartogs : EmbedOrd (𝓋 ⁺) (𝓋 ⁺)
-  EmbedOrd.carrier       (hartogs {𝓋}) = Carrier 𝓋
-  EmbedOrd._≺_           hartogs (α , _) (β , _) = α <ₒ β
-  EmbedOrd.relation-prop hartogs _ _ = <ₒ-prop _ _
-  EmbedOrd.target        hartogs = Ω
-  EmbedOrd.embed         hartogs = fst
-  EmbedOrd.inj           hartogs = Σ≡Prop λ α → isPropResize
-  EmbedOrd.pres≺         hartogs _ _ = idfun _
-  EmbedOrd.formsInitSeg  hartogs β (α′ , le) β<ₒα′ = (β , resize∥∥-map H le) , β<ₒα′ , refl
+  carrierMap : ordCarrier (𝓊 ⁺) → cardCarrier
+  carrierMap = uncurry λ α → elim→Set (λ _ → isSetCardCarrier) map 2const
     where
-    H : ⟨ α′ ⟩ ↪ A → Σ (⟨ β ⟩ → A) injective
-    H (f , f-inj) = f ∘ g , g-inj ∘ f-inj where
-      g = <→≤ β<ₒα′ .fst
-      g-inj = IsOrdEmbed.inj $ <→≤ β<ₒα′ .snd
-```
-
-```agda
-  module _ (𝓋 : Level) where
-    ℌ⁻ : Ord (𝓋 ⁺)
-    ℌ⁻ = tieup hartogs
-
-    ℌ : Ord (𝓋 ⁺ ⁺)
-    ℌ = tieup hartogs
-
-    ℌ⁺ : Ord (𝓋 ⁺ ⁺ ⁺)
-    ℌ⁺ = tieup hartogs
-```
-
-```agda
-    ℌ≃ₒℌ⁺ : ℌ ≃ₒ ℌ⁺
-    ℌ≃ₒℌ⁺ = e , mkIsOrderEquiv ordEquiv
-      where
-      f : ⟨ ℌ ⟩ → ⟨ ℌ⁺ ⟩
-      f (α , α≤) = (LiftOrd α) , resize∥∥-map g α≤
+    module _ {α : Ord (𝓊 ⁺)} where
+      map : ⟨ α ⟩ ↪ A → cardCarrier
+      map (f , f-inj) = ∣ B , Bset ∣ , B≤A
         where
-        g : ⟨ α ⟩ ↪ A → ⟨ LiftOrd α ⟩ ↪ A
-        g (h , h-inj) = h ∘ lower , liftExt ∘ h-inj
-      f-equiv : isEquiv f
-      f-equiv = inj→sur→isEquiv ordSet inj sur
-        where
-        inj : injective f
-        inj {α , _} {β , _} eq = Σ≡Prop (λ _ → isPropResize) $ ≃ₒ→≡ $
-          α         ≃ₒ⟨ LiftOrdEquiv ⟩
-          LiftOrd α ≃ₒ⟨ ≡→≃ₒ $ cong fst eq ⟩
-          LiftOrd β ≃ₒ˘⟨ LiftOrdEquiv ⟩
-          β         ≃ₒ∎
-        sur : surjective f
-        sur (γ , γ≤) = ∣ (ξ , {!   !}) , {!   !} ∣₁
+        B : Type 𝓊
+        B = Σ y ∶ A , ⟨ Resize {𝓋 = 𝓊} $ C y , Cprop ⟩
           where
-          ξ : Ord (𝓋 ⁺)
-          ξ = ResizeOrd {!   !} γ {!   !}
-      g : ⟨ ℌ⁺ ⟩ → ⟨ ℌ ⟩
-      g (α , α≤) = {!   !} , {!   !}
-      e : ⟨ ℌ ⟩ ≃ ⟨ ℌ⁺ ⟩
-      e = f , f-equiv
-      ordEquiv : ∀ x y → x ≺⟨ ℌ ⟩ y ≃ (e ⁺¹) x ≺⟨ ℌ⁺ ⟩ (e ⁺¹) y
-      ordEquiv _ _ = {!   !}
-```
-
-```agda
-    ¬ℌ↪ : ¬ ⟨ ℌ ⟩ ↪ A
-    ¬ℌ↪ Inj@(f , f-inj) = ¬α≃ₒα↓a ℌ⁺ h $
-      ℌ⁺     ≃ₒ˘⟨ ℌ≃ₒℌ⁺ ⟩
-      ℌ      ≃ₒ⟨ α≃Ω↓α ⟩
-      Ω ↓ ℌ  ≃ₒ⟨ isoToEquiv i , mkIsOrderEquiv ordEquiv ⟩
-      ℌ⁺ ↓ h ≃ₒ∎
-      -- ℌ = ℌ⁺ ↓ h < ℌ⁺ ≤ ℌ
-      where
-      ∣ℌ∣≤∣A∣ : ∣⟨ ℌ ⟩∣ ≤ ∣ A , Aset ∣
-      ∣ℌ∣≤∣A∣ = ∣ Inj ∣₁
-      h : ⟨ ℌ⁺ ⟩
-      h = ℌ , resize ∣ℌ∣≤∣A∣
-      i : Iso ⟨ Ω ↓ ℌ ⟩ ⟨ ℌ⁺ ↓ h ⟩
-      Iso.fun i (α , α≺ℌ) = (α , resize H₁) , H₂
-        where
-        H₁ : ∣⟨ α ⟩∣ ≤ ∣ A , Aset ∣
-        H₁ = ≤-trans ∣⟨ α ⟩∣ ∣⟨ ℌ ⟩∣ ∣ A , Aset ∣ (<ₒ→≤ α≺ℌ) ∣ℌ∣≤∣A∣
-        H₂ : (α , resize H₁) ≺⟨ ℌ⁺ ⟩ h
-        H₂ = unresize {𝓋 = 𝓋 ⁺} (resize {P = _ , <ₒ-prop _ _} α≺ℌ)
-      Iso.inv i ((α , _) , α≺ℌ) = α , unresize {𝓋 = 𝓋 ⁺} (resize {P = _ , <ₒ-prop _ _} α≺ℌ)
-      Iso.rightInv i _ = Σ≡Prop (λ _ → <ₒ-prop _ _) (Σ≡Prop (λ _ → isPropResize) refl)
-      Iso.leftInv i _ = Σ≡Prop (λ _ → <ₒ-prop _ _) refl
-      ordEquiv : ∀ x y → x ≺⟨ Ω ↓ ℌ ⟩ y ≃ (Iso.fun i) x ≺⟨ ℌ⁺ ↓ h ⟩ (Iso.fun i) y
-      ordEquiv _ _ = idEquiv _
-```
-
-```agda
-    <ℌ→≲A : ∀ α → α <ₒ ℌ → ⟨ α ⟩ ≲ A
-    <ℌ→≲A α ((β , β≤) , eq) = ∥∥₁-map (↪-trans H) (unresize β≤)
-      where
-      f : ⟨ ℌ ↓ (β , β≤) ⟩ → ⟨ β ⟩
-      f (_ , b , _) = b
-      f-inj : injective f
-      f-inj {(γ , γ≤) , a , β↓a≡γ} {(δ , δ≤) , b , β↓b≡δ} a≡b =
-        Σ≡Prop (λ _ → <ₒ-prop _ _) (Σ≡Prop (λ _ → isPropResize) γ≡δ) where
-        γ≡δ = sym β↓a≡γ ∙ cong (β ↓_) a≡b ∙ β↓b≡δ
-      H : ⟨ α ⟩ ↪ ⟨ β ⟩
-      H = subst (λ α → ⟨ α ⟩ ↪ ⟨ β ⟩) eq (f , f-inj)
+          C : A → Type (𝓊 ⁺)
+          C y = Σ x ∶ ⟨ α ⟩ , f x ≡ y
+          Cprop : ∀ {y} → isProp (C y)
+          Cprop (a , p) (b , q) = Σ≡Prop (λ _ → Aset _ _) (f-inj $ p ∙ sym q)
+        Bset : isSet B
+        Bset = isSetΣ Aset λ _ → isProp→isSet isPropResize
+        B≤A : ∣ B , Bset ∣ ≤ ∣ A , Aset ∣
+        B≤A = ∣ fst , Σ≡Prop (λ _ → isPropResize) ∣₁
+      2const : (f g : ⟨ α ⟩ ↪ A) → map f ≡ map g
+      2const (f , f-inj) (g , g-inj) = Σ≡Prop (λ _ → ≤-prop _ _) $
+        equivToCardEq ({!   !} , {!   !})
 ```
