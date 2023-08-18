@@ -147,14 +147,20 @@ module Hartogs ⦃ _ : PR ⦄ {A : Type 𝓊} (Aset : isSet A) where
       where
       open Map
       h : B F → B G
-      h (y , p) = let (x , fx≡y) = fiber f y ∋ unresize p in g x , resize (x , refl)
+      h (y , p) = let (x , _) = fiber f y ∋ unresize p in g x , resize (x , refl)
       h-equiv : isEquiv h
-      h-equiv = inj→sur→isEquiv (Bset G)
-        (λ eq → Σ≡Prop (λ _ → isPropResize) {!   !})
-        (λ b → ∣ ({!   !} , {!   !}) ∣₁)
+      h-equiv = inj→sur→isEquiv (Bset G) inj sur
+        where
+        inj : injective h
+        inj {y , p} {v , q} eq    with unresize p | unresize q | eq
+        ... | (x , fx≡y) | _ | eq with unresize q | unresize p | eq
+        ... | (u , fu≡v) | _ | eq = Σ≡Prop (λ _ → isPropResize) (sym fx≡y ∙ cong f x≡u ∙ fu≡v)
+          where x≡u = g-inj $ cong fst eq
+        sur : surjective h
+        sur = {!   !}
       i : Iso (B F) (B G)
-      Iso.fun i (y , p) = let (x , fx≡y) = fiber f y ∋ unresize p in g x , resize (x , refl)
-      Iso.inv i (y , p) = let (x , fx≡y) = fiber g y ∋ unresize p in f x , resize (x , refl)
+      Iso.fun i (y , p) = let (x , _) = fiber f y ∋ unresize p in g x , resize (x , refl)
+      Iso.inv i (y , p) = let (x , _) = fiber g y ∋ unresize p in f x , resize (x , refl)
       Iso.rightInv i (y , p) = Σ≡Prop (λ _ → isPropResize) {!   !}
         where
         H : fiber g y
