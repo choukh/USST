@@ -1,9 +1,9 @@
 ---
-title: 泛等结构集合论 (7) 直觉主义阿列夫层级
+title: 泛等结构集合论 (7) 基数
 zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 ---
 
-# 泛等结构集合论 (7) 直觉主义阿列夫层级
+# 泛等结构集合论 (7) 基数
 
 > 交流Q群: 893531731  
 > 本文源码: [Cardinal.Base.lagda.md](https://github.com/choukh/USST/blob/main/src/Cardinal/Base.lagda.md)  
