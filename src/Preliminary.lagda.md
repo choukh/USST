@@ -109,6 +109,13 @@ equivFunInjective : (f : A ≃ B) → injective (f ⁺¹)
 equivFunInjective f = isEmbedding→Inj (isEquiv→isEmbedding (snd f)) _ _
 ```
 
+库中还有比单射更强的一种概念是说 `B` 的每一点的纤维都是命题, 它蕴含同伦嵌入.
+
+```agda
+open import Cubical.Foundations.Equiv public using (fiber)
+open import Cubical.Functions.Embedding public using (hasPropFibers; hasPropFibers→isEmbedding)
+```
+
 我们将 `A` 到 `B` 的单射的全体记作 `A ↪ B`. 注意这里用的是Σ类型, 并没有做命题截断, 有时候延迟截断会更方便处理.
 
 ```agda
@@ -135,18 +142,23 @@ A ↪ B = Σ (A → B) injective
 
 ## 满射
 
-满射 `surjective` 的定义与传统的一致. `isEmbedding×isSurjection→isEquiv` 说明一个函数是同伦嵌入且满射, 那么它是同伦等价.
+对于满射我们直接使用库中的定义, 只是改了一下名字使得命名风格统一.
 
 ```agda
-open import Cubical.Functions.Surjection public
-  renaming (isSurjection to surjective) using (isEmbedding×isSurjection→isEquiv)
+open import Cubical.Functions.Surjection public renaming (isSurjection to surjective)
+```
+
+传统说法是说对任意 `y` 都**存在** `x` 使得 `f x ≡ y`. 库中的定义是说任意 `y` 的纤维 `fiber f y` 的命题截断可证. 这两种定义是判断相等的.
+
+`isEmbedding×isSurjection→isEquiv` 说明一个函数是同伦嵌入且满射, 那么它是同伦等价.
+
+```agda
+open import Cubical.Functions.Surjection public using (isEmbedding×isSurjection→isEquiv)
 ```
 
 可以证明, 如果一个单射是射到集合的, 那么它是同伦嵌入.
 
 ```agda
-open import Cubical.Functions.Embedding using (hasPropFibers→isEmbedding)
-
 injective→isEmbedding : {f : A → B} → isSet B → injective f → isEmbedding f
 injective→isEmbedding Bset f-inj = hasPropFibers→isEmbedding
   λ { b (x , fx≡b) (y , fy≡b) → Σ≡Prop (λ _ → Bset _ _) (f-inj $ fx≡b ∙ sym fy≡b) }

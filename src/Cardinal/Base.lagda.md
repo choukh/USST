@@ -111,7 +111,7 @@ _≤_ : Card 𝓊 → Card 𝓋 → Type (𝓊 ⊔ 𝓋)
 ## 哈特格斯数
 
 ```agda
-module HartogsCarrier {A : Type 𝓊} (Aset : isSet A) where
+module Hartogs ⦃ _ : PR ⦄ {A : Type 𝓊} (Aset : isSet A) where
 
   ordCarrier : (𝓋 : Level) → Type (𝓊 ⊔ 𝓋 ⁺)
   ordCarrier 𝓋 = Σ α ∶ Ord 𝓋 , ⟨ α ⟩ ≲ A
@@ -120,32 +120,32 @@ module HartogsCarrier {A : Type 𝓊} (Aset : isSet A) where
   cardCarrier = Σ κ ∶ Card 𝓊 , κ ≤ ∣ A , Aset ∣
 
   isSetCardCarrier : isSet cardCarrier
-  isSetCardCarrier = isSetΣ isSetCard (λ _ → ≤-set _ _)
-```
+  isSetCardCarrier = isSetΣ isSetCard λ _ → ≤-set _ _
 
-```agda
-module Hartogs ⦃ _ : PR ⦄ {A : Type 𝓊} (Aset : isSet A) where
-  open HartogsCarrier Aset
+  module Map {α : Ord 𝓋} ((f , f-inj) : ⟨ α ⟩ ↪ A) where
+    hasPropFb : hasPropFibers f
+    hasPropFb _ (a , p) (b , q) = Σ≡Prop (λ _ → Aset _ _) (f-inj $ p ∙ sym q)
 
-  carrierMap : ordCarrier (𝓊 ⁺) → cardCarrier
-  carrierMap = uncurry λ α → elim→Set (λ _ → isSetCardCarrier) map 2const
+    B : Type 𝓊
+    B = Σ y ∶ A , ⟨ Resize {𝓋 = 𝓊} $ fiber f y , hasPropFb _ ⟩
+
+    Bset : isSet B
+    Bset = isSetΣ Aset λ _ → isProp→isSet isPropResize
+
+    B≤A : ∣ B , Bset ∣ ≤ ∣ A , Aset ∣
+    B≤A = ∣ fst , Σ≡Prop (λ _ → isPropResize) ∣₁
+
+  carrierMap : ordCarrier 𝓋 → cardCarrier
+  carrierMap = uncurry λ α → elim→Set (λ _ → isSetCardCarrier) map {!  hasPropFibers !}
     where
-    module _ {α : Ord (𝓊 ⁺)} where
-      map : ⟨ α ⟩ ↪ A → cardCarrier
-      map (f , f-inj) = ∣ B , Bset ∣ , B≤A
-        where
-        B : Type 𝓊
-        B = Σ y ∶ A , ⟨ Resize {𝓋 = 𝓊} $ C y , Cprop ⟩
-          where
-          C : A → Type (𝓊 ⁺)
-          C y = Σ x ∶ ⟨ α ⟩ , f x ≡ y
-          Cprop : ∀ {y} → isProp (C y)
-          Cprop (a , p) (b , q) = Σ≡Prop (λ _ → Aset _ _) (f-inj $ p ∙ sym q)
-        Bset : isSet B
-        Bset = isSetΣ Aset λ _ → isProp→isSet isPropResize
-        B≤A : ∣ B , Bset ∣ ≤ ∣ A , Aset ∣
-        B≤A = ∣ fst , Σ≡Prop (λ _ → isPropResize) ∣₁
-      2const : (f g : ⟨ α ⟩ ↪ A) → map f ≡ map g
-      2const (f , f-inj) (g , g-inj) = Σ≡Prop (λ _ → ≤-prop _ _) $
-        equivToCardEq ({!   !} , {!   !})
+    map : ⟨ α ⟩ ↪ A → cardCarrier
+    map f = ∣ B , Bset ∣ , B≤A
+      where open Map f
+    2const : (f g : ⟨ α ⟩ ↪ A) → map f ≡ map g
+    2const f g = Σ≡Prop (λ _ → ≤-prop _ _) $ equivToCardEq $ isoToEquiv i
+      where
+      open Map
+      i : Iso (B f) (B g)
+      i = {!   !}
+        --((λ { (y , p) → g {! p  !} , resize ({! g  !} , {!   !}) }) , {!   !})
 ```
