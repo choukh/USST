@@ -1,9 +1,9 @@
 ---
-title: 泛等结构集合论 (7) 基数
+title: 泛等结构集合论 (7) 直觉主义阿列夫层级
 zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 ---
 
-# 泛等结构集合论 (7) 基数
+# 泛等结构集合论 (7) 直觉主义阿列夫层级
 
 > 交流Q群: 893531731  
 > 本文源码: [Cardinal.Base.lagda.md](https://github.com/choukh/USST/blob/main/src/Cardinal/Base.lagda.md)  
@@ -111,7 +111,7 @@ _≤_ : Card 𝓊 → Card 𝓋 → Type (𝓊 ⊔ 𝓋)
 ## 哈特格斯数
 
 ```agda
-module Hartogs (A : Type 𝓊) where
+module Hartogs {A : Type 𝓊} (Aset : isSet A) where
 
   Carrier : Type (𝓊 ⁺)
   Carrier = Σ α ∶ Ord 𝓊 , ⟨ α ⟩ ≲ A
@@ -139,7 +139,24 @@ module Hartogs (A : Type 𝓊) where
 
 ```agda
   ¬ℌ↪ : ⦃ _ : PR ⦄ → ¬ ⟨ ℌ ⟩ ↪ A
-  ¬ℌ↪ = {!   !}
+  ¬ℌ↪ F@(f , f-inj) = {!   !}
+    where
+    B : Type 𝓊
+    B = Σ y ∶ A , ⟨ Resize {𝓋 = 𝓊} $ P y ⟩
+      where
+      P : A → hProp (𝓊 ⁺)
+      P y = fiber f y , hasPropFb y
+        where
+        hasPropFb : hasPropFibers f
+        hasPropFb _ (a , p) (b , q) = Σ≡Prop (λ _ → Aset _ _) (f-inj $ p ∙ sym q)
+    i : Iso ⟨ ℌ ⟩ B
+    Iso.fun i x = f x , resize (x , refl)
+    Iso.inv i (y , H) = unresize H .fst
+    Iso.rightInv i (y , H) = Σ≡Prop (λ _ → isPropResize) (unresize H .snd)
+    Iso.leftInv i a = Σ≡Prop (λ _ → squash₁) $ cong fst H where
+      H : fst (unresize (resize _)) ≡ a
+      H = subst (λ - → fst - ≡ _) (sym unresize-resize) refl
+    
 ```
 
 ```agda
