@@ -14,7 +14,37 @@ zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
 {-# OPTIONS --lossy-unification --hidden-argument-puns #-}
 
 module Cardinal.Base where
+```
+
+## 前言
+
+我们在之前几讲介绍了泛等基础对序数的处理. 简而言之, 因为泛等基础中同构的良序结构是相等的, 所以我们直接把良序结构视作序数.
+
+本讲我们介绍泛等基础如何处理集合论中的另一个重要概念: 基数. 简单来说, 每个集合 `a : hSet 𝓊` 本身几乎可以视作它自己的基数. 因为同构 (也就是能建立双射) 的集合在泛等基础中是相等的. 这正是 `hSet` 上的泛等原理所说的:
+
+`(a ≃ b) ≃ (a ≡ b)`
+
+或者换成更传统的符号, 我们有
+
+$$(a ↔ b) ↔ (a = b)$$
+
+传统上我们用的是加上了取基数符号的版本:
+
+$$(a ↔ b) ↔ (∣ a ∣ = ∣ b ∣)$$
+
+只不过我们这里不需要取了. 这就是为什么说每个集合本身几乎可以视作它自己的基数.
+
+这里说"几乎"是因为, 我们希望基数的相等 `∣ a ∣ ≡ ∣ b ∣` 是一个命题, 但集合本身的相等 `a ≡ b` 不是命题, 因为集合宇宙本身不是集合, 而是一个群胚.
+
+使得基数的相等是命题就是泛等基础中对集合 `a` 取 `∣ a ∣` 的唯一目的.
+
+可能有点出乎意料地, 集合截断的构造子 `∣_∣₂` 就是我们需要的 `∣_∣`, 具体原因会在后面解释, 这里直接先对它做重命名处理.
+
+```agda
 open import Preliminary renaming (∣_∣₂ to ∣_∣)
+```
+
+```agda
 open import Ordinal hiding (≤-refl; ≤-trans)
   renaming ( _≤_ to _≤ₒ_; ≤-prop to ≤ₒ-prop
            ; _<_ to _<ₒ_; <-prop to <ₒ-prop)
@@ -186,14 +216,14 @@ module Hartogs (A : Type 𝓊) (Aset : isSet A) where
 ```
 
 ```agda
+ℵ : (n : ℕ) → Card (𝓊ₙ n)
+ℵ zero = ∣ ℕ , isSetℕ ∣
+ℵ (suc n) = ∥∥₂-map (λ a → ⟨ Hartogs.ℌ ⟨ a ⟩ (str a) ⟩ , ordSet) (ℵ n)
+```
+
+```agda
 module Omega (ordStrℕ : OrdStr ℕ) where
   ω : (n : ℕ) → Ord (𝓊ₙ n)
   ω zero = ℕ , ordStrℕ
   ω (suc n) = Hartogs.ℌ ⟨ ω n ⟩ ordSet
-```
-
-```agda
-ℵ : (n : ℕ) → Card (𝓊ₙ n)
-ℵ zero = ∣ ℕ , isSetℕ ∣
-ℵ (suc n) = ∥∥₂-map (λ a → ⟨ Hartogs.ℌ ⟨ a ⟩ (str a) ⟩ , ordSet) (ℵ n)
 ```
