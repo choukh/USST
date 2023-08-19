@@ -139,7 +139,11 @@ module Hartogs {A : Type 𝓊} (Aset : isSet A) where
 
 ```agda
   ¬ℌ↪ : ⦃ _ : PR ⦄ → ¬ ⟨ ℌ ⟩ ↪ A
-  ¬ℌ↪ F@(f , f-inj) = {!   !}
+  ¬ℌ↪ F@(f , f-inj) = ¬α≃ₒα↓a ℌ h $
+    ℌ       ≃ₒ˘⟨ ℌ⁻≃ₒℌ ⟩
+    ℌ⁻      ≃ₒ⟨ α≃Ω↓α ⟩
+    Ω ↓ ℌ⁻  ≃ₒ⟨ {!   !} ⟩
+    ℌ ↓ h   ≃ₒ∎
     where
     B : Type 𝓊
     B = Σ y ∶ A , ⟨ Resize {𝓋 = 𝓊} $ P y ⟩
@@ -149,13 +153,21 @@ module Hartogs {A : Type 𝓊} (Aset : isSet A) where
         where
         hasPropFb : hasPropFibers f
         hasPropFb _ (a , p) (b , q) = Σ≡Prop (λ _ → Aset _ _) (f-inj $ p ∙ sym q)
-    i : Iso ⟨ ℌ ⟩ B
-    Iso.fun i x = f x , resize (x , refl)
-    Iso.inv i (y , H) = unresize H .fst
-    Iso.rightInv i (y , H) = Σ≡Prop (λ _ → isPropResize) (unresize H .snd)
-    Iso.leftInv i a = Σ≡Prop (λ _ → squash₁) $ cong fst H where
+    i : Iso B ⟨ ℌ ⟩
+    Iso.fun i (y , H) = unresize H .fst
+    Iso.inv i x = f x , resize (x , refl)
+    Iso.leftInv i (y , H) = Σ≡Prop (λ _ → isPropResize) (unresize H .snd)
+    Iso.rightInv i a = Σ≡Prop (λ _ → squash₁) $ cong fst H where
       H : fst (unresize (resize _)) ≡ a
       H = subst (λ - → fst - ≡ _) (sym $ retIsEq isEquivResize _) refl
+    ℌ⁻ : Ord 𝓊
+    ℌ⁻ = ResizeOrd B ℌ $ isoToEquiv i
+    ℌ⁻≃ₒℌ : ℌ⁻ ≃ₒ ℌ
+    ℌ⁻≃ₒℌ = ResizeOrdEquiv B ℌ (isoToEquiv i)
+    ℌ⁻≲A : ⟨ ℌ⁻ ⟩ ≲ A
+    ℌ⁻≲A = ≈-≲-trans ∣ ℌ⁻≃ₒℌ .fst ∣₁ ∣ F ∣₁
+    h : ⟨ ℌ ⟩
+    h = ℌ⁻ , ℌ⁻≲A
 ```
 
 ```agda
