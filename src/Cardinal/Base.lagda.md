@@ -111,20 +111,20 @@ _≤_ : Card 𝓊 → Card 𝓋 → Type (𝓊 ⊔ 𝓋)
 ## 哈特格斯数
 
 ```agda
-module Hartogs ⦃ _ : PR ⦄ {A : Type 𝓊} (Aset : isSet A) where
+module Hartogs (A : Type 𝓊) where
 
-  Carrier : (𝓋 : Level) → Type (𝓋 ⁺)
-  Carrier 𝓋 = Σ α ∶ Ord 𝓋 , ⟨ Resize {𝓋 = 𝓋} (∣⟨ α ⟩∣ ≤ₕ ∣ A , Aset ∣) ⟩
+  Carrier : Type (𝓊 ⁺)
+  Carrier = Σ α ∶ Ord 𝓊 , ⟨ α ⟩ ≲ A
 
-  hartogs : EmbedOrd (𝓋 ⁺) (𝓋 ⁺)
-  EmbedOrd.carrier       (hartogs {𝓋}) = Carrier 𝓋
+  hartogs : EmbedOrd (𝓊 ⁺) (𝓊 ⁺)
+  EmbedOrd.carrier       hartogs = Carrier
   EmbedOrd._≺_           hartogs (α , _) (β , _) = α <ₒ β
   EmbedOrd.relation-prop hartogs _ _ = <ₒ-prop _ _
   EmbedOrd.target        hartogs = Ω
   EmbedOrd.embed         hartogs = fst
-  EmbedOrd.inj           hartogs = Σ≡Prop λ α → isPropResize
+  EmbedOrd.inj           hartogs = Σ≡Prop λ α → squash₁
   EmbedOrd.pres≺         hartogs _ _ = idfun _
-  EmbedOrd.formsInitSeg  hartogs β (α′ , le) β<ₒα′ = (β , resize∥∥-map H le) , β<ₒα′ , refl
+  EmbedOrd.formsInitSeg  hartogs β (α′ , le) β<ₒα′ = (β , ∥∥₁-map H le) , β<ₒα′ , refl
     where
     H : ⟨ α′ ⟩ ↪ A → Σ (⟨ β ⟩ → A) injective
     H (f , f-inj) = f ∘ g , g-inj ∘ f-inj where
@@ -133,51 +133,25 @@ module Hartogs ⦃ _ : PR ⦄ {A : Type 𝓊} (Aset : isSet A) where
 ```
 
 ```agda
-  module _ (𝓋 : Level) where
-    ℌ : Ord (𝓋 ⁺)
-    ℌ = tieup hartogs
-
-    ℌ⁺ : Ord (𝓋 ⁺ ⁺)
-    ℌ⁺ = tieup hartogs
+  ℌ : Ord (𝓊 ⁺)
+  ℌ = tieup hartogs
 ```
 
 ```agda
-    ¬ℌ↪ : ¬ ⟨ ℌ ⟩ ↪ A
-    ¬ℌ↪ Inj@(f , f-inj) = ¬α≃ₒα↓a ℌ⁺ h $
-      ℌ⁺     ≃ₒ˘⟨ {!   !} ⟩
-      ℌ      ≃ₒ⟨ α≃Ω↓α ⟩
-      Ω ↓ ℌ  ≃ₒ⟨ isoToEquiv i , mkIsOrderEquiv ordEquiv ⟩
-      ℌ⁺ ↓ h ≃ₒ∎
-      -- ℌ = ℌ⁺ ↓ h < ℌ⁺ ≤ ℌ
-      where
-      ∣ℌ∣≤∣A∣ : ∣⟨ ℌ ⟩∣ ≤ ∣ A , Aset ∣
-      ∣ℌ∣≤∣A∣ = ∣ Inj ∣₁
-      h : ⟨ ℌ⁺ ⟩
-      h = ℌ , resize ∣ℌ∣≤∣A∣
-      i : Iso ⟨ Ω ↓ ℌ ⟩ ⟨ ℌ⁺ ↓ h ⟩
-      Iso.fun i (α , α≺ℌ) = (α , resize H₁) , H₂
-        where
-        H₁ : ∣⟨ α ⟩∣ ≤ ∣ A , Aset ∣
-        H₁ = ≤-trans ∣⟨ α ⟩∣ ∣⟨ ℌ ⟩∣ ∣ A , Aset ∣ (<ₒ→≤ α≺ℌ) ∣ℌ∣≤∣A∣
-        H₂ : (α , resize H₁) ≺⟨ ℌ⁺ ⟩ h
-        H₂ = unresize {𝓋 = 𝓋 ⁺} (resize {P = _ , <ₒ-prop _ _} α≺ℌ)
-      Iso.inv i ((α , _) , α≺ℌ) = α , unresize {𝓋 = 𝓋 ⁺} (resize {P = _ , <ₒ-prop _ _} α≺ℌ)
-      Iso.rightInv i _ = Σ≡Prop (λ _ → <ₒ-prop _ _) (Σ≡Prop (λ _ → isPropResize) refl)
-      Iso.leftInv i _ = Σ≡Prop (λ _ → <ₒ-prop _ _) refl
-      ordEquiv : ∀ x y → x ≺⟨ Ω ↓ ℌ ⟩ y ≃ (Iso.fun i) x ≺⟨ ℌ⁺ ↓ h ⟩ (Iso.fun i) y
-      ordEquiv _ _ = idEquiv _
+  ¬ℌ↪ : ⦃ _ : PR ⦄ → ¬ ⟨ ℌ ⟩ ↪ A
+  ¬ℌ↪ = {!   !}
 ```
 
 ```agda
-    <ℌ→≲A : ∀ α → α <ₒ ℌ → ⟨ α ⟩ ≲ A
-    <ℌ→≲A α ((β , β≤) , eq) = ∥∥₁-map (↪-trans H) (unresize β≤)
-      where
-      f : ⟨ ℌ ↓ (β , β≤) ⟩ → ⟨ β ⟩
-      f (_ , b , _) = b
-      f-inj : injective f
-      f-inj {(γ , γ≤) , a , β↓a≡γ} {(δ , δ≤) , b , β↓b≡δ} a≡b =
-        Σ≡Prop (λ _ → <ₒ-prop _ _) (Σ≡Prop (λ _ → isPropResize) γ≡δ) where
-        γ≡δ = sym β↓a≡γ ∙ cong (β ↓_) a≡b ∙ β↓b≡δ
-      H : ⟨ α ⟩ ↪ ⟨ β ⟩
-      H = subst (λ α → ⟨ α ⟩ ↪ ⟨ β ⟩) eq (f , f-inj)
+  <ℌ→≲A : ∀ α → α <ₒ ℌ → ⟨ α ⟩ ≲ A
+  <ℌ→≲A α ((β , β≤) , eq) = ∥∥₁-map (↪-trans H) β≤
+    where
+    f : ⟨ ℌ ↓ (β , β≤) ⟩ → ⟨ β ⟩
+    f (_ , b , _) = b
+    f-inj : injective f
+    f-inj {(γ , γ≤) , a , β↓a≡γ} {(δ , δ≤) , b , β↓b≡δ} a≡b =
+      Σ≡Prop (λ _ → <ₒ-prop _ _) (Σ≡Prop (λ _ → squash₁) γ≡δ) where
+      γ≡δ = sym β↓a≡γ ∙ cong (β ↓_) a≡b ∙ β↓b≡δ
+    H : ⟨ α ⟩ ↪ ⟨ β ⟩
+    H = subst (λ α → ⟨ α ⟩ ↪ ⟨ β ⟩) eq (f , f-inj)
 ```
