@@ -113,28 +113,23 @@ _≤_ : Card 𝓊 → Card 𝓋 → Type (𝓊 ⊔ 𝓋)
 ```agda
 module Hartogs {A : Type 𝓊} (Aset : isSet A) where
 
-  Carrier : Type (𝓊 ⁺)
-  Carrier = Σ α ∶ Ord 𝓊 , ⟨ α ⟩ ≲ A
-
-  hartogs : EmbedOrd (𝓊 ⁺) (𝓊 ⁺)
-  EmbedOrd.carrier       hartogs = Carrier
-  EmbedOrd._≺_           hartogs (α , _) (β , _) = α <ₒ β
-  EmbedOrd.relation-prop hartogs _ _ = <ₒ-prop _ _
-  EmbedOrd.target        hartogs = Ω
-  EmbedOrd.embed         hartogs = fst
-  EmbedOrd.inj           hartogs = Σ≡Prop λ α → squash₁
-  EmbedOrd.pres≺         hartogs _ _ = idfun _
-  EmbedOrd.formsInitSeg  hartogs β (α′ , le) β<ₒα′ = (β , ∥∥₁-map H le) , β<ₒα′ , refl
-    where
-    H : ⟨ α′ ⟩ ↪ A → Σ (⟨ β ⟩ → A) injective
-    H (f , f-inj) = f ∘ g , g-inj ∘ f-inj where
-      g = <→≤ β<ₒα′ .fst
-      g-inj = IsOrdEmbed.inj $ <→≤ β<ₒα′ .snd
-```
-
-```agda
   ℌ : Ord (𝓊 ⁺)
-  ℌ = tieup hartogs
+  ℌ = tieup h
+    where
+    h : EmbedOrd (𝓊 ⁺) (𝓊 ⁺)
+    EmbedOrd.carrier       h = Σ α ∶ Ord 𝓊 , ⟨ α ⟩ ≲ A
+    EmbedOrd._≺_           h (α , _) (β , _) = α <ₒ β
+    EmbedOrd.relation-prop h _ _ = <ₒ-prop _ _
+    EmbedOrd.target        h = Ω
+    EmbedOrd.embed         h = fst
+    EmbedOrd.inj           h = Σ≡Prop λ α → squash₁
+    EmbedOrd.pres≺         h _ _ = idfun _
+    EmbedOrd.formsInitSeg  h β (α′ , le) β<ₒα′ = (β , ∥∥₁-map H le) , β<ₒα′ , refl
+      where
+      H : ⟨ α′ ⟩ ↪ A → Σ (⟨ β ⟩ → A) injective
+      H (f , f-inj) = f ∘ g , g-inj ∘ f-inj where
+        g = <→≤ β<ₒα′ .fst
+        g-inj = IsOrdEmbed.inj $ <→≤ β<ₒα′ .snd
 ```
 
 ```agda
@@ -169,9 +164,13 @@ module Hartogs {A : Type 𝓊} (Aset : isSet A) where
     h : ⟨ ℌ ⟩
     h = ℌ⁻ , ℌ⁻≲A
     j : Iso ⟨ Ω ↓ ℌ⁻ ⟩ ⟨ ℌ ↓ h ⟩
-    j = {!   !}
+    Iso.fun j (α , α≺ℌ) = (α , α≲A) , α≺ℌ
+      where α≲A = ≲-trans (<ₒ→≤ α≺ℌ) ℌ⁻≲A
+    Iso.inv j ((α , _) , α≺ℌ) = α , α≺ℌ
+    Iso.rightInv j _ = Σ≡Prop (λ _ _ → <ₒ-prop _ _ _) (Σ≡Prop (λ _ → squash₁) refl)
+    Iso.leftInv j _ = Σ≡Prop (λ _ _ → <ₒ-prop _ _ _) refl
     ordEquiv : ∀ x y → x ≺⟨ Ω ↓ ℌ⁻ ⟩ y ≃ (Iso.fun j) x ≺⟨ ℌ ↓ h ⟩ (Iso.fun j) y
-    ordEquiv _ _ = {!   !} --idEquiv _
+    ordEquiv _ _ = idEquiv _
 ```
 
 ```agda
