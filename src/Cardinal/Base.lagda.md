@@ -62,7 +62,7 @@ Card : (𝓊 : Level) → Type (𝓊 ⁺)
 Card 𝓊 = ∥ hSet 𝓊 ∥₂
 ```
 
-如所期望的那样, 基数宇宙是一个集合, 证据由集合截断的构造子给出.
+如所期望的那样, 基数宇宙是一个集合, 证据由集合截断的构造子 `squash₂` 给出.
 
 ```agda
 isSetCard : isSet (Card 𝓊)
