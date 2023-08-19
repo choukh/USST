@@ -155,8 +155,7 @@ module Hartogs {A : Type 𝓊} (Aset : isSet A) where
     Iso.rightInv i (y , H) = Σ≡Prop (λ _ → isPropResize) (unresize H .snd)
     Iso.leftInv i a = Σ≡Prop (λ _ → squash₁) $ cong fst H where
       H : fst (unresize (resize _)) ≡ a
-      H = subst (λ - → fst - ≡ _) (sym unresize-resize) refl
-    
+      H = subst (λ - → fst - ≡ _) (sym $ retIsEq isEquivResize _) refl
 ```
 
 ```agda

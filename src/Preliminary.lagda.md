@@ -310,11 +310,6 @@ module _ ⦃ _ : PR ⦄ where
   resize∥∥-map f p = resize $ ∥∥₁-map f $ unresize p
 ```
 
-```agda
-  unresize-resize : {P : hProp 𝓊} {H : ⟨ P ⟩} → unresize (resize {𝓋 = 𝓋} {P} H) ≡ H
-  unresize-resize = retIsEq isEquivResize _
-```
-
 ## 降级幂集
 
 在非直谓的设定下, 我们可以使用另一种幂集的定义 `ℙ[_]`, 我们称之为降级幂集, 它更接近传统集合论中的幂集. `ℙ[_]` 与 `ℙ` 的区别在于, `ℙ` 的迭代会不断提高宇宙层级, 而 `ℙ[_]` 的迭代全都发生在一开始固定下来的层级.
