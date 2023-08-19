@@ -176,3 +176,19 @@ module Hartogs {A : Type 𝓊} (Aset : isSet A) where
     α↪β : ⟨ α ⟩ ↪ ⟨ β ⟩
     α↪β = subst (λ α → ⟨ α ⟩ ↪ ⟨ β ⟩) eq (f , f-inj)
 ```
+
+## 阿列夫层级
+
+```agda
+ω : Ord 𝓊₀
+ω = ℕ , mkOrdStr ℕ._<_ {!   !}
+  where open import Cubical.Data.Nat.Order as ℕ
+
+ℓ : ℕ → Level
+ℓ zero = 𝓊₀
+ℓ (suc n) = (ℓ n) ⁺
+
+ωₙ : (n : ℕ) → Ord (ℓ n)
+ωₙ zero = ω
+ωₙ (suc n) = Hartogs.ℌ (ordSet {α = ωₙ n})
+```
