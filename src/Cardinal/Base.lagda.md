@@ -101,7 +101,7 @@ _≤_ : Card 𝓊 → Card 𝓋 → Type (𝓊 ⊔ 𝓋)
 ## 哈特格斯数
 
 ```agda
-module Hartogs {A : Type 𝓊} (Aset : isSet A) where
+module Hartogs (A : Type 𝓊) (Aset : isSet A) where
 
   ℌ : Ord (𝓊 ⁺)
   ℌ = tieup h
@@ -180,15 +180,20 @@ module Hartogs {A : Type 𝓊} (Aset : isSet A) where
 ## 阿列夫层级
 
 ```agda
-ω : Ord 𝓊₀
-ω = ℕ , mkOrdStr ℕ._<_ {!   !}
-  where open import Cubical.Data.Nat.Order as ℕ
+𝓊ₙ : ℕ → Level
+𝓊ₙ zero = 𝓊₀
+𝓊ₙ (suc n) = (𝓊ₙ n) ⁺
+```
 
-ℓ : ℕ → Level
-ℓ zero = 𝓊₀
-ℓ (suc n) = (ℓ n) ⁺
+```agda
+module Omega (ordStrℕ : OrdStr ℕ) where
+  ω : (n : ℕ) → Ord (𝓊ₙ n)
+  ω zero = ℕ , ordStrℕ
+  ω (suc n) = Hartogs.ℌ ⟨ ω n ⟩ ordSet
+```
 
-ωₙ : (n : ℕ) → Ord (ℓ n)
-ωₙ zero = ω
-ωₙ (suc n) = Hartogs.ℌ (ordSet {α = ωₙ n})
+```agda
+ℵ : (n : ℕ) → Card (𝓊ₙ n)
+ℵ zero = ∣ ℕ , isSetℕ ∣
+ℵ (suc n) = ∥∥₂-map (λ a → ⟨ Hartogs.ℌ ⟨ a ⟩ (str a) ⟩ , ordSet) (ℵ n)
 ```
