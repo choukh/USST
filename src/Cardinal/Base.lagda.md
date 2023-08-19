@@ -142,7 +142,7 @@ module Hartogs {A : Type 𝓊} (Aset : isSet A) where
   ¬ℌ↪ F@(f , f-inj) = ¬α≃ₒα↓a ℌ h $
     ℌ       ≃ₒ˘⟨ ℌ⁻≃ₒℌ ⟩
     ℌ⁻      ≃ₒ⟨ α≃Ω↓α ⟩
-    Ω ↓ ℌ⁻  ≃ₒ⟨ {!   !} ⟩
+    Ω ↓ ℌ⁻  ≃ₒ⟨ isoToEquiv j , mkIsOrderEquiv ordEquiv ⟩
     ℌ ↓ h   ≃ₒ∎
     where
     B : Type 𝓊
@@ -168,6 +168,10 @@ module Hartogs {A : Type 𝓊} (Aset : isSet A) where
     ℌ⁻≲A = ≈-≲-trans ∣ ℌ⁻≃ₒℌ .fst ∣₁ ∣ F ∣₁
     h : ⟨ ℌ ⟩
     h = ℌ⁻ , ℌ⁻≲A
+    j : Iso ⟨ Ω ↓ ℌ⁻ ⟩ ⟨ ℌ ↓ h ⟩
+    j = {!   !}
+    ordEquiv : ∀ x y → x ≺⟨ Ω ↓ ℌ⁻ ⟩ y ≃ (Iso.fun j) x ≺⟨ ℌ ↓ h ⟩ (Iso.fun j) y
+    ordEquiv _ _ = {!   !} --idEquiv _
 ```
 
 ```agda
