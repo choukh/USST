@@ -69,6 +69,13 @@ isSetCard : isSet (Card 𝓊)
 isSetCard = squash₂
 ```
 
+基数的项由集合截断的构造子 `∣_∣` 给出, 它与传统上取基数的符号那么像应该是一个巧合.
+
+```agda
+_ : hSet 𝓊 → Card 𝓊
+_ = ∣_∣
+```
+
 ```agda
 cardRec : (hSet 𝓊 → hProp (𝓊 ⁺)) → Card 𝓊 → hProp (𝓊 ⁺)
 cardRec P = ∥∥₂-rec {B = hProp _} isSetHProp P
