@@ -107,15 +107,25 @@ Iso.rightInv  cardEqIso∥Eq∥ _ = squash₁ _ _
 Iso.leftInv   cardEqIso∥Eq∥ _ = isSetCard _ _ _ _
 ```
 
+**引理** 如果两个集合同伦等价那么它们的基数相等.  
+**证明** 我们证更强的结论: 如果两个集合同伦等价那么它们相等. 用泛等原理即证. ∎
+
 ```agda
 equivToCardEq : {a b : hSet 𝓊} → ⟨ a ⟩ ≃ ⟨ b ⟩ → ∣ a ∣ ≡ ∣ b ∣
 equivToCardEq eqv = cong ∣_∣ $ Σ≡Prop (λ _ → isPropΠ2 λ _ _ → isPropIsProp) (ua eqv)
 ```
 
+**引理** 如果两个集合的基数相等那么它们等势.  
+**证明** 由定理 `cardEqIso∥Eq∥`, 基数相等意味着集合相等的命题截断成立.
+我们的目标"两个集合等势"也是命题截断, 由命题截断间的映射 `∥∥₁-map`, 只需证集合相等蕴含集合等价, 改写即证. ∎
+
 ```agda
 cardEqToEquip : {a b : hSet 𝓊} → ∣ a ∣ ≡ ∣ b ∣ → ⟨ a ⟩ ≈ ⟨ b ⟩
 cardEqToEquip eq = ∥∥₁-map (λ x → subst (λ - → _ ≃ ⟨ - ⟩) x (idEquiv _)) (Iso.fun cardEqIso∥Eq∥ eq)
 ```
+
+**定理** 基数相等与集合等势同构.  
+**证明** 两个方向的映射由上面两个引理给出, 左右互逆的证明与 `cardEqIso∥Eq∥` 同理. ∎
 
 ```agda
 cardEqIsoEquip : {a b : hSet 𝓊} → Iso (∣ a ∣ ≡ ∣ b ∣) (⟨ a ⟩ ≈ ⟨ b ⟩)
@@ -124,6 +134,9 @@ Iso.inv       cardEqIsoEquip = ∥∥₁-rec (isSetCard _ _) equivToCardEq
 Iso.rightInv  cardEqIsoEquip _ = squash₁ _ _
 Iso.leftInv   cardEqIsoEquip _ = isSetCard _ _ _ _
 ```
+
+**推论** 基数相等与集合等势等价.  
+**证明** 由同构蕴含等价即证. ∎
 
 ```agda
 cardEq≃Equip : {a b : hSet 𝓊} → (∣ a ∣ ≡ ∣ b ∣) ≃ (⟨ a ⟩ ≈ ⟨ b ⟩)
