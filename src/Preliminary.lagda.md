@@ -258,6 +258,25 @@ A ⊂ B = A ⊆ B × (∃ x ∶ _ , x ∈ B × x ∉ A)
 ⟦ A ⟧ = Σ _ (_∈ A)
 ```
 
+### 迭代幂集
+
+```agda
+ℓ : Level → ℕ → Level
+ℓ 𝓊 zero = 𝓊
+ℓ 𝓊 (suc n) = ℓ 𝓊 n ⁺
+
+𝓊ₙ : ℕ → Level
+𝓊ₙ = ℓ 𝓊₀
+```
+
+注意参数n是带了一次后继的, 也就是说 `ℙ[ 0 ]⁺ A` 实际上是1重 `ℙ A`.
+
+```agda
+ℙ[_]⁺ : (n : ℕ) → Type 𝓊 → Type (ℓ 𝓊 n ⁺)
+ℙ[ zero ]⁺ A = ℙ A
+ℙ[ suc n ]⁺ A = ℙ (ℙ[ n ]⁺ A)
+```
+
 ## 降级公理
 
 降级公理, 也叫**命题宇宙降级 (propositional resizing)**, 简称PR. PR的宣告实际上等于是取消了命题宇宙的分层, 使得命题宇宙只有一层, 所有命题都位于那一层.
@@ -319,7 +338,7 @@ module _ ⦃ _ : PR ⦄ where
 ℙ[ 𝓋 ] X = X → hProp 𝓋
 ```
 
-由于 `ℙ[_]` 的迭代不提升宇宙层级, 我们有以下良定义的迭代函数. 注意参数n是带了一次后继的, 也就是说 `ℙ[ 𝓋 ][ 0 ]⁺` 实际上是1重 `ℙ[ 𝓋 ] X`.
+与迭代幂集 `ℙ[_]⁺` 类似地. 我们有固定宇宙的迭代降级幂集 `ℙ[_][_]⁺`.
 
 ```agda
 ℙ[_][_]⁺ : (𝓋 : Level) → ℕ → Type 𝓊 → Type (𝓊 ⊔ 𝓋 ⁺)
@@ -342,17 +361,12 @@ module _ ⦃ _ : PR ⦄ where
   Morphℙ f A y = Resize $ (∀ x → f x ≡ y → ⟨ A x ⟩) , isPropΠ2 λ _ _ → str (A _)
 ```
 
-迭代该函数, 就可以将n迭代幂集转化为n迭代降级幂集. 注意由于 `ℙ` 没有良定义的n迭代形式, 我们只能对每个n写一条定理. 实际上我们最多只需要用到3重迭代幂集, 所以完全够用.
+迭代该函数, 就可以将n迭代幂集转化为n迭代降级幂集.
 
 ```agda
-  Resizeℙ : ℙ X → ℙ[ 𝓊 ] X
-  Resizeℙ = Morphℙ (idfun _)
-
-  Resizeℙ² : ℙ (ℙ X) → ℙ[ 𝓊 ][ 1 ]⁺ X
-  Resizeℙ² = Morphℙ Resizeℙ
-
-  Resizeℙ³ : ℙ (ℙ (ℙ X)) → ℙ[ 𝓊 ][ 2 ]⁺ X
-  Resizeℙ³ = Morphℙ (Morphℙ Resizeℙ)
+  Resizeℙⁿ : (n : ℕ) → ℙ[ n ]⁺ X → ℙ[ 𝓊 ][ n ]⁺ X
+  Resizeℙⁿ zero = Morphℙ (idfun _)
+  Resizeℙⁿ (suc n) = Morphℙ (Resizeℙⁿ n)
 ```
 
 **引理** 给定单射 `f : X → Y`, 那么 `Morphℙ f` 也是单射.  
@@ -390,16 +404,10 @@ module _ ⦃ _ : PR ⦄ where
 由以上引理, 幂集到降级幂集的转化都是单射.
 
 ```agda
-  Resizeℙ-inj : injective (Resizeℙ {X = X} {𝓊})
-  Resizeℙ-inj = Morphℙ-inj (idfun _) (idfun _)
-
-  Resizeℙ²-inj : injective (Resizeℙ² {X = X} {𝓊})
-  Resizeℙ²-inj = Morphℙ-inj Resizeℙ Resizeℙ-inj
-
-  Resizeℙ³-inj : injective (Resizeℙ³ {X = X} {𝓊})
-  Resizeℙ³-inj = Morphℙ-inj Resizeℙ² Resizeℙ²-inj
+  Resizeℙⁿ-inj : (n : ℕ) → injective (Resizeℙⁿ {X = X} {𝓊} n)
+  Resizeℙⁿ-inj zero = Morphℙ-inj (idfun _) (idfun _)
+  Resizeℙⁿ-inj (suc n) = Morphℙ-inj (Resizeℙⁿ n) (Resizeℙⁿ-inj n)
 ```
-
 
 ## 非构造性公理
 

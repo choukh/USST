@@ -281,12 +281,6 @@ module Hartogs (A : Type 𝓊) (Aset : isSet A) where
 ## 阿列夫层级
 
 ```agda
-𝓊ₙ : ℕ → Level
-𝓊ₙ zero = 𝓊₀
-𝓊ₙ (suc n) = (𝓊ₙ n) ⁺
-```
-
-```agda
 ℵ : (n : ℕ) → Card (𝓊ₙ n)
 ℵ zero = ∣ ℕ , isSetℕ ∣
 ℵ (suc n) = ∥∥₂-map (λ a → ⟨ Hartogs.ℌ ⟨ a ⟩ (str a) ⟩ , ordSet) (ℵ n)
