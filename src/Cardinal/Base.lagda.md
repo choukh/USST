@@ -79,22 +79,25 @@ isSetCard = squash₂
 运用集合截断的 `∥∥₂-rec`, 可以将关于基数的命题归结为关于集合的命题.
 
 ```agda
-cardRec : (hSet 𝓊 → hProp (𝓊 ⁺)) → Card 𝓊 → hProp (𝓊 ⁺)
-cardRec P = ∥∥₂-rec {B = hProp _} isSetHProp P
+∣∣-rec : (hSet 𝓊 → hProp 𝓋) → Card 𝓊 → hProp 𝓋
+∣∣-rec P = ∥∥₂-rec isSetHProp P
+
+∣∣-rec2 : (hSet 𝓊 → hSet 𝓋 → hProp 𝓌) → Card 𝓊 → Card 𝓋 → hProp 𝓌
+∣∣-rec2 P = ∥∥₂-rec2 isSetHProp P
 ```
 
-基数的相等是命题, 但集合的相等不是, 所以一般上它们无法直接同构. 但只要对集合的相等做命题截断, 就能保证它们同构. 这一性质完全描述的基数的概念, 甚至比传统上的更强. 传统上只是说基数相等当且仅当集合等势. 但在泛等基础中, 等势就意味着相等, 只不过这个相等是带着命题截断的. 回想我们在[前置知识](https://zhuanlan.zhihu.com/p/649742992)中把等势定义为等价的命题截断.
+基数的相等是命题, 但集合的相等不是, 所以一般上它们无法直接同构. 但只要对集合的相等做命题截断, 就能保证它们同构. 这一性质完全刻画了基数的概念, 甚至比传统上的更强. 传统上只是说基数相等当且仅当集合等势. 但在泛等基础中, 等势就意味着相等, 只不过这个相等是带着命题截断的. 回想我们在[前置知识](https://zhuanlan.zhihu.com/p/649742992)中把等势定义为等价的命题截断, 所以只要在泛等原理的等价两边同时做命题截断就有这个结论.
 
 接下来的内容是以上非形式讨论的形式化.
 
-**定理** 基数相等与集合相等的命题截断同构.  
+**引理** 基数相等与集合相等的命题截断同构.  
 **证明**
 
 - 左边到右边: 右边是关于集合的命题, 它可以视作是由关于基数的命题归结而来. 于是我们可以用左边去改写该命题, 然后用自反性得证.
 
 ```agda
-cardEqIso∥Eq∥ : {a b : hSet 𝓊} → Iso (∣ a ∣ ≡ ∣ b ∣) ∥ a ≡ b ∥₁
-Iso.fun (cardEqIso∥Eq∥ {𝓊} {b}) p = subst (λ κ → cardRec (λ a → ∥ a ≡ b ∥ₚ) κ .fst) (sym p) ∣ refl ∣₁
+cardEqIso∥SetEq∥ : {a b : hSet 𝓊} → Iso (∣ a ∣ ≡ ∣ b ∣) ∥ a ≡ b ∥₁
+Iso.fun (cardEqIso∥SetEq∥ {𝓊} {b}) p = subst (λ κ → ∣∣-rec (λ a → ∥ a ≡ b ∥ₚ) κ .fst) (sym p) ∣ refl ∣₁
 ```
 
 - 右边到左边: 由于左边是命题, 用命题截断的 `∥∥₁-rec`, 只需证 `a ≡ b → ∣ a ∣ ≡ ∣ b ∣`, 两边同时取 `∣_∣` 即可.
@@ -102,52 +105,46 @@ Iso.fun (cardEqIso∥Eq∥ {𝓊} {b}) p = subst (λ κ → cardRec (λ a → �
 - 左逆: 要证的等式两边都是基数相等的证明, 用基数宇宙是集合的证据即证. ∎
 
 ```agda
-Iso.inv       cardEqIso∥Eq∥ = ∥∥₁-rec (isSetCard _ _) (cong ∣_∣)
-Iso.rightInv  cardEqIso∥Eq∥ _ = squash₁ _ _
-Iso.leftInv   cardEqIso∥Eq∥ _ = isSetCard _ _ _ _
+Iso.inv       cardEqIso∥SetEq∥ = ∥∥₁-rec (isSetCard _ _) (cong ∣_∣)
+Iso.rightInv  cardEqIso∥SetEq∥ _ = squash₁ _ _
+Iso.leftInv   cardEqIso∥SetEq∥ _ = isSetCard _ _ _ _
 ```
 
-**引理** 如果两个集合同伦等价那么它们的基数相等.  
-**证明** 我们证更强的结论: 如果两个集合同伦等价那么它们相等. 用泛等原理即证. ∎
+**引理** 对带有结构 `S : Type 𝓊 → Type 𝓋` 的类型 `TypeWithStr 𝓊 S`, 只要结构是命题性的 (`∀ x → isProp (S x)`), 那么对任意 `a b : TypeWithStr 𝓊 S` 有 `∥ a ≡ b ∥₁` 与 `⟨ a ⟩ ≈ ⟨ b ⟩` 同构.  
+**证明**
+
+- 左边到右边: 两边都是命题截断, 用 `∥∥₁-map` 对两边同时消去截断, 只需证结构相等蕴含底类型等价, 改写即证.
 
 ```agda
-equivToCardEq : {a b : hSet 𝓊} → ⟨ a ⟩ ≃ ⟨ b ⟩ → ∣ a ∣ ≡ ∣ b ∣
-equivToCardEq eqv = cong ∣_∣ $ Σ≡Prop (λ _ → isPropΠ2 λ _ _ → isPropIsProp) (ua eqv)
+∥eq∥IsoEquivp : {S : Type 𝓊 → Type 𝓋} {a b : TypeWithStr 𝓊 S} →
+  (∀ x → isProp (S x)) → Iso ∥ a ≡ b ∥₁ (⟨ a ⟩ ≈ ⟨ b ⟩)
+Iso.fun (∥eq∥IsoEquivp _) = ∥∥₁-map λ a≡b → subst (λ b → _ ≃ ⟨ b ⟩) a≡b (idEquiv _)
 ```
 
-**引理** 如果两个集合的基数相等那么它们等势.  
-**证明** 由定理 `cardEqIso∥Eq∥`, 基数相等意味着集合相等的命题截断成立.
-我们的目标"两个集合等势"也是命题截断, 由命题截断间的映射 `∥∥₁-map`, 只需证集合相等蕴含集合等价, 改写即证. ∎
+- 右边到左边: 同样对两边同时消去截断, 只需证底类型等价蕴含结构相等. 由前提, 结构是命题性的, 只需证底类型相等, 由 `ua` 即证.
+- 左右逆: 由于两边都是命题, 用 `squash₁` 即证. ∎
 
 ```agda
-cardEqToEquip : {a b : hSet 𝓊} → ∣ a ∣ ≡ ∣ b ∣ → ⟨ a ⟩ ≈ ⟨ b ⟩
-cardEqToEquip eq = ∥∥₁-map (λ x → subst (λ - → _ ≃ ⟨ - ⟩) x (idEquiv _)) (Iso.fun cardEqIso∥Eq∥ eq)
+Iso.inv       (∥eq∥IsoEquivp Sprop) = ∥∥₁-map λ a≃b → Σ≡Prop Sprop (ua a≃b)
+Iso.rightInv  (∥eq∥IsoEquivp _) _ = squash₁ _ _
+Iso.leftInv   (∥eq∥IsoEquivp _) _ = squash₁ _ _
 ```
 
-**定理** 基数相等与集合等势同构.  
-**证明** 两个方向的映射由上面两个引理给出, 左右互逆的证明与 `cardEqIso∥Eq∥` 同理. ∎
+**定理** 基数相等等价于集合等势.  
+**证明** 将上两个引理所说的同构转化为等价, 再用等价的复合连起来即可. ∎
 
 ```agda
-cardEqIsoEquip : {a b : hSet 𝓊} → Iso (∣ a ∣ ≡ ∣ b ∣) (⟨ a ⟩ ≈ ⟨ b ⟩)
-Iso.fun       cardEqIsoEquip = cardEqToEquip
-Iso.inv       cardEqIsoEquip = ∥∥₁-rec (isSetCard _ _) equivToCardEq
-Iso.rightInv  cardEqIsoEquip _ = squash₁ _ _
-Iso.leftInv   cardEqIsoEquip _ = isSetCard _ _ _ _
-```
-
-**推论** 基数相等与集合等势等价.  
-**证明** 由同构蕴含等价即证. ∎
-
-```agda
-cardEq≃Equip : {a b : hSet 𝓊} → (∣ a ∣ ≡ ∣ b ∣) ≃ (⟨ a ⟩ ≈ ⟨ b ⟩)
-cardEq≃Equip = isoToEquiv cardEqIsoEquip
+cardEq≃Equivp : {a b : hSet 𝓊} → (∣ a ∣ ≡ ∣ b ∣) ≃ (⟨ a ⟩ ≈ ⟨ b ⟩)
+cardEq≃Equivp = compEquiv
+  (isoToEquiv cardEqIso∥SetEq∥)
+  (isoToEquiv $ ∥eq∥IsoEquivp λ _ → isPropΠ2 λ _ _ → isPropIsProp)
 ```
 
 ## 基数的序
 
 ```agda
 _≤ₕ_ : Card 𝓊 → Card 𝓋 → hProp (𝓊 ⊔ 𝓋)
-_≤ₕ_ = ∥∥₂-rec2 isSetHProp λ (A , _) (B , _) → A ≲ B , squash₁
+_≤ₕ_ = ∣∣-rec2 λ (A , _) (B , _) → A ≲ B , squash₁
 ```
 
 ```agda
