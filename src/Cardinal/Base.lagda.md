@@ -62,6 +62,13 @@ Card : (𝓊 : Level) → Type (𝓊 ⁺)
 Card 𝓊 = ∥ hSet 𝓊 ∥₂
 ```
 
+基数的项由集合截断的构造子 `∣_∣` 给出, 它与传统上取基数的符号相似应该是一个巧合.
+
+```agda
+_ : hSet 𝓊 → Card 𝓊
+_ = ∣_∣
+```
+
 如所期望的那样, 基数宇宙是一个集合, 证据由集合截断的构造子 `squash₂` 给出.
 
 ```agda
@@ -69,21 +76,32 @@ isSetCard : isSet (Card 𝓊)
 isSetCard = squash₂
 ```
 
-基数的项由集合截断的构造子 `∣_∣` 给出, 它与传统上取基数的符号那么像应该是一个巧合.
-
-```agda
-_ : hSet 𝓊 → Card 𝓊
-_ = ∣_∣
-```
+运用集合截断的 `∥∥₂-rec`, 可以将关于基数的命题归结为关于集合的命题.
 
 ```agda
 cardRec : (hSet 𝓊 → hProp (𝓊 ⁺)) → Card 𝓊 → hProp (𝓊 ⁺)
 cardRec P = ∥∥₂-rec {B = hProp _} isSetHProp P
 ```
 
+基数的相等是命题, 但集合的相等不是, 所以一般上它们无法直接同构. 但只要对集合的相等做命题截断, 就能保证它们同构. 这一性质完全描述的基数的概念, 甚至比传统上的更强. 传统上只是说基数相等当且仅当集合等势. 但在泛等基础中, 等势就意味着相等, 只不过这个相等是带着命题截断的. 回想我们在[前置知识](https://zhuanlan.zhihu.com/p/649742992)中把等势定义为等价的命题截断.
+
+接下来的内容是以上非形式讨论的形式化.
+
+**定理** 基数相等与集合相等的命题截断同构.  
+**证明**
+
+- 左边到右边: 右边是关于集合的命题, 它可以视作是由关于基数的命题归结而来. 于是我们可以用左边去改写该命题, 然后用自反性得证.
+
 ```agda
 cardEqIso∥Eq∥ : {a b : hSet 𝓊} → Iso (∣ a ∣ ≡ ∣ b ∣) ∥ a ≡ b ∥₁
 Iso.fun (cardEqIso∥Eq∥ {𝓊} {b}) p = subst (λ κ → cardRec (λ a → ∥ a ≡ b ∥ₚ) κ .fst) (sym p) ∣ refl ∣₁
+```
+
+- 右边到左边: 由于左边是命题, 用命题截断的 `∥∥₁-rec`, 只需证 `a ≡ b → ∣ a ∣ ≡ ∣ b ∣`, 两边同时取 `∣_∣` 即可.
+- 右逆: 要证的等式两边都是命题截断的 `∥ a ≡ b ∥₁` 的证明, 用 `squash₁` 即证.
+- 左逆: 要证的等式两边都是基数相等的证明, 用基数宇宙是集合的证据即证. ∎
+
+```agda
 Iso.inv       cardEqIso∥Eq∥ = ∥∥₁-rec (isSetCard _ _) (cong ∣_∣)
 Iso.rightInv  cardEqIso∥Eq∥ _ = squash₁ _ _
 Iso.leftInv   cardEqIso∥Eq∥ _ = isSetCard _ _ _ _
