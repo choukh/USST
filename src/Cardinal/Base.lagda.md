@@ -268,9 +268,9 @@ module Hartogs (A : Type 𝓊) (Aset : isSet A) where
     where
 ```
 
-**注意** 这一思路依赖于 `A` 的等级比 `⟨ ℌ ⟩` 低一级. 如果它们同级, 我们不知道如何在不使用排中律的情况下使 `ℌ` 降级. 而拿到降级的 `ℌ⁻` 是构造矛盾的关键, 不降级的话似乎没有矛盾.
+**注意** 这一思路依赖于 `A` 的等级比 `⟨ ℌ ⟩` 低一级. 如果它们同级, 我们不知道如何在不使用排中律的情况下使 `ℌ` 降级. 而拿到降级的 `ℌ⁻` 是构造矛盾的关键, 不能降级的话似乎**没有矛盾**.
 
-**证明细节**
+**证明细节** 首先我们构造单射 `f` 的值域 `B : Type 𝓊`, 它由能构成 `f` 的纤维 `fiber f y` 的那些 `y : A` 组成. 注意纤维本身位于 `𝓊 ⁺`, 但由 `A` 的集合性以及 `f` 的单射性保证了纤维是命题, 所以可以用 `PR` 降级到 `𝓊`.
 
 ```agda
     B : Type 𝓊
@@ -281,6 +281,11 @@ module Hartogs (A : Type 𝓊) (Aset : isSet A) where
         where
         hasPropFb : hasPropFibers f
         hasPropFb _ (a , p) (b , q) = Σ≡Prop (λ _ → Aset _ _) (f-inj $ p ∙ sym q)
+```
+
+因为 `B` 是单射的值域, 它与 `⟨ ℌ ⟩` 有双射是显然的. 技术上只需注意处理一下对纤维降级导致的 `unresize (resize _)` 式, 它们由互逆可以化简掉.
+
+```agda
     i : Iso B ⟨ ℌ ⟩
     Iso.fun i (y , H) = unresize H .fst
     Iso.inv i x = f x , resize (x , refl)
@@ -288,14 +293,41 @@ module Hartogs (A : Type 𝓊) (Aset : isSet A) where
     Iso.rightInv i a = Σ≡Prop (λ _ → squash₁) $ cong fst H where
       H : fst (unresize (resize _)) ≡ a
       H = subst (λ - → fst - ≡ _) (sym $ retIsEq isEquivResize _) refl
+```
+
+回想我们有序数降级: 任意 `β : Ord 𝓋` 可以降级到 `Ord 𝓊` 上, 只要找到一个 `A : Type 𝓊` 满足 `A ≃ ⟨ β ⟩`.
+
+```agda
+    _ : (A : Type 𝓊) (β : Ord 𝓋) → A ≃ ⟨ β ⟩ → Ord 𝓊
+    _ = ResizeOrd
+```
+
+令其中的 `β = ℌ`, `A = B`, 就得到了降级哈特格斯数 `ℌ⁻ : Ord 𝓊`, 它与原 `ℌ : Ord (𝓊 ⁺)` 等价.
+
+```agda
     ℌ⁻ : Ord 𝓊
     ℌ⁻ = ResizeOrd B ℌ $ isoToEquiv i
     ℌ⁻≃ₒℌ : ℌ⁻ ≃ₒ ℌ
     ℌ⁻≃ₒℌ = ResizeOrdEquiv B ℌ (isoToEquiv i)
+```
+
+由势的传递性我们有 `⟨ ℌ⁻ ⟩ ≲ A`.
+
+```agda
     ℌ⁻≲A : ⟨ ℌ⁻ ⟩ ≲ A
     ℌ⁻≲A = ≈-≲-trans ∣ ℌ⁻≃ₒℌ .fst ∣₁ ∣ F ∣₁
+```
+
+于是 `ℌ⁻` 配备上 `⟨ ℌ⁻ ⟩ ≲ A` 的证据就构成了 `ℌ` 底集 `⟨ ℌ ⟩`, 也即 `carrier` 的一个项.
+
+```agda
     h : ⟨ ℌ ⟩
     h = ℌ⁻ , ℌ⁻≲A
+```
+
+最后我们要证明 `⟨ Ω ↓ ℌ⁻ ⟩` 等价于 `⟨ ℌ ↓ h ⟩`, 从而得到 `⟨ ℌ ⟩` 等价与 `⟨ ℌ ↓ h ⟩` 的矛盾.
+
+```agda
     j : Iso ⟨ Ω ↓ ℌ⁻ ⟩ ⟨ ℌ ↓ h ⟩
     Iso.fun j (α , α≺ℌ) = (α , α≲A) , α≺ℌ
       where α≲A = ≲-trans ∣ <→↪ α≺ℌ ∣₁ ℌ⁻≲A
