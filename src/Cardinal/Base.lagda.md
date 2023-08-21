@@ -206,7 +206,8 @@ module Hartogs (A : Type 𝓊) (Aset : isSet A) where
   carrier = Σ α ∶ Ord 𝓊 , ⟨ α ⟩ ≲ A
 ```
 
-接下来只要把 `carrier` 封装成序数 `ℌ` 就可以了. 我们采用嵌入序数的方式, 把 `carrier` 嵌入到 `Ω`, 以说明它可以构成序数.
+**定理** `carrier` 构成一个序数 (我们命名为 `ℌ`).  
+**证明** 我们采用嵌入序数的方式, 把 `carrier` 嵌入到 `Ω`, 以说明它可以构成序数.
 
 ```agda
   ℌ : Ord (𝓊 ⁺)
