@@ -1,6 +1,7 @@
 ---
 title: 泛等结构集合论 (7) 构造主义阿列夫层级
 zhihu-tags: Agda, 同伦类型论（HoTT）, 集合论
+zhihu-url: https://zhuanlan.zhihu.com/p/651332545
 ---
 
 # 泛等结构集合论 (7) 构造主义阿列夫层级
