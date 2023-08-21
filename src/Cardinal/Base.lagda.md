@@ -388,13 +388,20 @@ module Hartogs (A : Type 𝓊) (Aset : isSet A) where
 
 ## 阿列夫层级
 
+从 `ℕ` 开始, 取其基数 `∣ ℕ , isSetℕ ∣`, 对其迭代哈特格斯函数, 就可以构造阿列夫层级.
+
+由于构造主义下每取一次哈特格斯数都会提高一个宇宙层级, 而宇宙只有可数层, 所以只能表示出可数个阿列夫数.
+
 ```agda
 ℵ : (n : ℕ) → Card (𝓊ₙ n)
 ℵ zero = ∣ ℕ , isSetℕ ∣
 ℵ (suc n) = ∥∥₂-map (λ a → ⟨ Hartogs.ℌ ⟨ a ⟩ (str a) ⟩ , ordSet) (ℵ n)
 ```
 
+注意阿列夫层级是基数层级, 它与序数层级 `ωₙ` 的类型是不一样的.
+
 ```agda
+-- 我们懒得写出自然数有良序的证明了
 module Omega (ordStrℕ : OrdStr ℕ) where
   ω : (n : ℕ) → Ord (𝓊ₙ n)
   ω zero = ℕ , ordStrℕ
