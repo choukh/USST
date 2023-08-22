@@ -52,10 +52,10 @@ import Ordinal.Order
 import Ordinal.OrdInOrd
 ```
 
-[(7) 基数]()
+[(7) 基数](https://zhuanlan.zhihu.com/p/651332545)
 
 ```agda
---import Cardinal.Base
+import Cardinal.Base
 ```
 
 ## 参考文献
