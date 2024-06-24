@@ -1,6 +1,4 @@
-# GCH → AC in Cubical Agda
-
-A formalization of the proof that the generalized continuum hypothesis (GCH) implies the axiom of choice (AC) in Cubical Agda.
+# Univalent Structural Set Theory
 
 ## Requirements
 
